@@ -15,7 +15,6 @@
 /azienda.php/1.46/Sat Jan  9 16:12:10 2010//
 /cassa_comune.php/1.8/Wed Feb  3 16:26:19 2010//
 /cassa_eg.php/1.12/Mon Feb 15 13:50:21 2010//
-/cassa_gg_globale.php/1.40/Tue Apr 05 19:51:27 2011//
 /cassa_gg_singolo.php/1.62/Wed Jan 27 23:00:00 2010//
 /consegna_utente.php/1.17/Thu Jan 14 16:18:39 2010//
 /consegna_utente_chiusura.php/1.5/Sun Jan 10 03:25:00 2010//
@@ -62,3 +61,4 @@
 /statistiche_ordini.php/1.9/Sun Jan 10 02:10:27 2010//
 D/images////
 D/immagini////
+/cassa_gg_globale.php/1.40/Tue Apr  5 19:51:27 2011//
