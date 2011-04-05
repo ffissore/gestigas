@@ -1,0 +1,403 @@
+<?php
+/**
+ * Progetto e3g - Equogest/GestiGAS
+ *   Software gestionali per l'economia solidale
+ *   <http://www.progettoe3g.org>
+ *
+ * Copyright (C) 2003-2009
+ *   Andrea Piazza <http://www.andreapiazza.it>
+ *   Marco Munari  <http://www.marcomunari.it>
+ *
+ * @package Progetto e3g - Equogest/GestiGAS
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
+ * 
+ * Questo  programma e' software  libero; e' lecito redistribuirlo  o
+ * modificarlo secondo i termini  della Licenza Pubblica Generica GNU
+ * come  pubblicata dalla Free  Software  Foundation; o la versione 2
+ * della licenza o (a propria scelta) una versione successiva.
+ * 
+ * Questo programma e' distribuito nella  speranza che sia  utile, ma
+ * SENZA  ALCUNA GARANZIA;  senza  neppure la  garanzia implicita  di
+ * NEGOZIABILITA' o di APPLICABILITA' PER  UN PARTICOLARE  SCOPO.  Si
+ * veda la Licenza Pubblica Generica GNU per avere maggiori dettagli.
+ * 
+ * Questo  programma deve  essere  distribuito assieme  ad una  copia
+ * della Licenza Pubblica Generica GNU.
+*/
+
+
+// TODO Aggiungere commenti di separazione delle sezioni
+
+
+// ------------------------------------------------------------- Menu principale
+
+
+// --------------------------------------------------- Finestra "Ordine globale"
+
+
+DEFINE("_E3G_AGGIORNA_DB", "Aggiorna database...");
+DEFINE("_E3G_AGGIORNA_DB_COND", "Aggiorna database (tab. condivise)...");
+DEFINE("_E3G_CONF_AGGIORNA_DB", "Confermi l'operazione di aggiornamento del database ?");
+DEFINE("_E3G_CONF_AGGIORNA_DB_COND", "Confermi l'operazione di aggiornamento del database (tabelle condivise) ?");
+DEFINE("_E3G_ESPORTA_LISTINO", "Esporta Listino...");
+DEFINE("_E3G_CONSEGNA_TOTALE", "Consegna all'utente (TOTALE)");
+DEFINE("_E3G_CONSEGNA_PARZIALE", "Consegna all'utente (PARZIALE)");
+DEFINE("_E3G_ESTRAI_FORN", "Estrai Ordine Fornitore");
+DEFINE("_E3G_ANAG_UTE", "Anagrafica Utenti");
+DEFINE("_E3G_ANAG_CLI", "Anagrafica Clienti");
+DEFINE("_E3G_CATALOGO_PRODOTTI", "Listino articoli");
+DEFINE("_E3G_ORDINE_GLOBALE", "Ordine globale");
+DEFINE("_E3G_ANAG_FOR", "Anagrafica Fornitori");
+DEFINE("_E3G_CREA_ORD_FOR", "Crea Ordine Fornitore");
+DEFINE("_E3G_ESCI", "Esci");
+DEFINE("_E3G_AMMINISTRA", "Amministra");
+DEFINE("_E3G_ORDINE_CORRENTE", "Ordine Corrente");
+DEFINE("_E3G_CATEGORIA", "Categoria");
+DEFINE("_E3G_SOTTOCATEGORIA", "Sottocategoria");
+DEFINE("_E3G_FORNITORE", "Fornitore");
+DEFINE("_E3G_DESCRIZIONE", "Descrizione");
+DEFINE("_E3G_COD_ARTICOLO", "Codice Articolo");
+DEFINE("_E3G_CERCA", "Cerca");
+DEFINE("_E3G_ANNULLA_RICERCA", "Annulla Ricerca");
+DEFINE("_E3G_CERCA_CODICE", "Cerca Codice");
+DEFINE("_E3G_PREZZO_EURO", "Prezzo [euro]");
+DEFINE("_E3G_PREZZO_UM_EURO", "Prezzo/UM [euro]");
+DEFINE("_E3G_PZ_PER_CART", "Pz. per Cart.");
+DEFINE("_E3G_ORD_MIN", "Ord. min.");
+DEFINE("_E3G_CODICE_BARRE", "Codice Barre");
+DEFINE("_E3G_CODICE", "Codice");
+DEFINE("_E3G_PREZZO", "Prezzo");
+DEFINE("_E3G_IVA", "IVA");
+DEFINE("_E3G_CATEGORIA_MERCEOLOGICA", "Categoria merceol.");
+DEFINE("_E3G_PREZZO_VEN_EURO", "Prezzo vendita [euro]");
+DEFINE("_E3G_PREZZO_ACQ_EURO", "Prezzo acquisto [euro]");
+DEFINE("_E3G_BARCODE", "Barcode");
+DEFINE("_E3G_STATO", "Stato");
+DEFINE("_E3G_UNITA_MISURA", "Unita' di misura");
+DEFINE("_E3G_SCONTO1", "Sconto 1");
+DEFINE("_E3G_PROGETTO", "Progetto");
+DEFINE("_E3G_SCORTA_MINIMA", "Scorta Minima");
+DEFINE("_E3G_PAESE", "Paese");
+DEFINE("_E3G_PESO_VOLUME", "Peso / Volume");
+DEFINE("_E3G_PEZZI_PER_CARTONE", "Pezzi per Cartone");
+DEFINE("_E3G_TIPO_ARTICOLO", "Tipo Articolo");
+DEFINE("_E3G_POSIZIONE", "Posizione");
+DEFINE("_E3G_QTA_SOLO_MULTIPLA", "Q.ta' solo multipla di [pz]");
+DEFINE("_E3G_QTA_MINIMA", "Q.ta' minima [pezzi]");
+DEFINE("_E3G_INSERIMENTO", "Inserimento");
+DEFINE("_E3G_ULTIMA_MODIFICA", "Ultima Modifica");
+DEFINE("_E3G_GIACENZA", "Giacenza");
+DEFINE("_E3G_CATEGORIA", "Categoria");
+DEFINE("_E3G_INDIRIZZO_MAIL", "Indirizzo e-mail");
+DEFINE("_E3G_TIPO_ACCESSO", "Tipo accesso");
+DEFINE("_E3G_DATA_ULT_ACC", "Data ultimo accesso");
+DEFINE("_E3G_NUM_ACC", "N. accessi");
+DEFINE("_E3G_CAP", "CAP");
+DEFINE("_E3G_LOCALITA", "Localita'");
+DEFINE("_E3G_INDIRIZZO", "Indirizzo");
+DEFINE("_E3G_TELEFONO", "Telefono");
+DEFINE("_E3G_FAX", "Fax");
+DEFINE("_E3G_PROVINCIA", "Provincia");
+DEFINE("_E3G_LUOGO_CONS", "Luogo di consegna");
+DEFINE("_E3G_CONTO", "Conto");
+DEFINE("_E3G_MASTRO", "Mastro");
+DEFINE("_E3G_NUOVA_PWD", "Nuova Password:");
+DEFINE("_E3G_VERIFICA_PWD", "Verifica Nuova Password:");
+DEFINE("_E3G_RAGIONE_SOCIALE", "Ragione Sociale");
+DEFINE("_E3G_SITO_WEB", "Sito Web");
+DEFINE("_E3G_TIPI_PAG", "Tipi Pagamento");
+DEFINE("_E3G_DATA_INI_SERVIZIO", "Data inizio servizio");
+DEFINE("_E3G_DATA_FIN_SERVIZIO", "Data fine servizio");
+DEFINE("_E3G_LOGIN_RICH_ACCOUNT", "Login: mostra richiesta account");
+DEFINE("_E3G_GEST_LUOGHI_CONS", "Gestione luoghi di consegna");
+DEFINE("_E3G_PERCORSO_ETI", "Percorso etichette");
+DEFINE("_E3G_NUM_DEC", "N. decimali");
+DEFINE("_E3G_ORDINE_MINIMO", "Ordine minimo [euro]");
+DEFINE("_E3G_TIPO_GEST_PREZZI", "Tipo gestione prezzi");
+DEFINE("_E3G_MOSTRA_PREZZO_SORGENTE", "Mostra prezzo sorgente");
+DEFINE("_E3G_MAGGIORAZIONE_FISSA", "Maggiorazione fissa [euro]");
+DEFINE("_E3G_MAGGIORAZIONE_PERC", "Maggiorazione percentuale [%]");
+DEFINE("_E3G_PIVA", "Partita IVA");
+DEFINE("_E3G_BANCA", "Banca");
+DEFINE("_E3G_AGENZIA", "Agenzia"); 
+DEFINE("_E3G_ABICAB", "ABI - CAB");
+DEFINE("_E3G_COD_DOC_SCONTRINO", "Codice Doc. Scontrino");
+DEFINE("_E3G_SCHEDA_PRODOTTO", "Scheda Prodotto");
+DEFINE("_E3G_STAMPA_LISTINO", "Stampa Listino");
+DEFINE("_E3G_RICERCA", "Ricerca");
+DEFINE("_E3G_TUTTI_PRODOTTI", "Tutti gli articoli");
+DEFINE("_E3G_COD_UTENTE", "Cod. utente");
+DEFINE("_E3G_CAT_MERCEOL", "Cat. Merceol.");
+DEFINE("_E3G_TIPO", "Tipo");
+DEFINE("_E3G_FORNITORE", "Fornitore");
+DEFINE("_E3G_NUM_DOCUM", "Num. docum.");
+DEFINE("_E3G_QTA", "Q.ta");
+DEFINE("_E3G_AGGIUNGI", "Aggiungi");
+DEFINE("_E3G_QTA_CONS", "Q.ta cons.");
+DEFINE("_E3G_SCONTO", "Sconto");
+DEFINE("_E3G_UTENTE", "Utente");
+DEFINE("_E3G_SVUOTA_CARRELLO", "Svuota carrello");
+DEFINE("_E3G_ELIMINA_RIGA", "Elimina riga");
+DEFINE("_E3G_AGGIORNA", "Aggiorna");
+DEFINE("_E3G_CONFERMA", "Conferma");
+DEFINE("_E3G_CODICE_ARTICOLO", "Codice Articolo");
+DEFINE("_E3G_ANNULLA_SCONTRINO", "Annulla Scontrino");
+DEFINE("_E3G_CONFERMA_SCONTRINO", "Conferma Scontrino");
+DEFINE("_E3G_CHIUDI_FINESTRA", "Chiudi Finestra");
+DEFINE("_E3G_APPLICA_FILTRO", "Applica Filtro");
+DEFINE("_E3G_MOSTRA_TUTTO", "Mostra tutto");
+DEFINE("_E3G_PEZZI_ORDINE_ORIG", "Pezzi in ordine (orig.)");
+DEFINE("_E3G_PEZZI_AGGIUNTI", "Pezzi aggiunti");
+DEFINE("_E3G_PEZZI_ORDINE_TOT", "Pezzi in ordine (TOT.)");
+DEFINE("_E3G_NUM_ART_DIVERSI", "N. articoli diversi");
+DEFINE("_E3G_NUM_FOR_DIVERSI", "N. fornitori diversi");
+DEFINE("_E3G_IMPORTO_TOTALE", "Importo totale");
+DEFINE("_E3G_ARTICOLO", "Articolo");
+DEFINE("_E3G_PEZZI_CARTONE", "Pezzi per cartone");
+DEFINE("_E3G_NUM_CARTONI", "N. cartoni");
+DEFINE("_E3G_SURPLUS_PEZZI", "Surplus [pezzi]");
+DEFINE("_E3G_PREZZO", "Prezzo");
+DEFINE("_E3G_IMPORTO", "Importo");
+DEFINE("_E3G_QUANTITA", "Quantita'"); 
+DEFINE("_E3G_AGGIORNA_QUANTITA", "Aggiorna Quantita'");
+DEFINE("_E3G_ESPORTA_ORDINE", "Esporta ordine...");
+DEFINE("_E3G_MIN", "Min.");
+DEFINE("_E3G_PREZZO_UM", "Prezzo/UM");
+DEFINE("_E3G_SCHEDA_PRODOTTO", "Scheda Prodotto");
+DEFINE("_E3G_SPESA_UTE", "Spesa per UTENTE");
+DEFINE("_E3G_SPESA_FOR", "Spesa per FORNITORE");
+DEFINE("_E3G_SPESA_ART", "Spesa per ARTICOLO");
+DEFINE("_E3G_SPESA_DET", "Spesa DETTAGLIO");
+DEFINE("_E3G_LISTINO_ARTICOLI", "Listino Articoli");
+DEFINE("_E3G_FILTRA_LISTA_SPESA", "Filtra lista della spesa");
+DEFINE("_E3G_ELIMINA_TUTTO", "Elimina Tutto...");
+DEFINE("_E3G_RICERCA", "Ricerca");
+DEFINE("_E3G_MOSTRA_ARTICOLI_ORDINABILI", "Mostra tutti gli articoli ordinabili");
+DEFINE("_E3G_ESPORTA_LISTINO", "Esporta Listino...");
+DEFINE("_E3G_LISTA_SPESA", "Lista della Spesa");
+DEFINE("_E3G_QTA_CONS", "Q.ta consegnata");
+DEFINE("_E3G_IMPONIBILE", "Imponibile");
+DEFINE("_E3G_IMPOSTA", "Imposta");
+DEFINE("_E3G_TOTALE", "Totale");
+DEFINE("_E3G_CONSEGNA", "Consegna");
+DEFINE("_E3G_DATA", "Data");
+DEFINE("_E3G_STAMPA", "Stampa");
+DEFINE("_E3G_UTENTE", "Utente");
+DEFINE("_E3G_ESTRAI_ORD_UTE", "Estrai Ordine Utente");
+DEFINE("_E3G_ELIMINA", "Elimina");
+DEFINE("_E3G_ESTRAZIONE", "Estrazione");
+DEFINE("_E3G_TIPO_DOC", "Tipo Documento");
+DEFINE("_E3G_CLI_FOR", "Cliente/Fornitore");
+DEFINE("_E3G_NUMERO", "Numero");
+DEFINE("_E3G_ESTRAI_ORD_FOR", "Estrai Ordine Fornitore");
+DEFINE("_E3G_DATA_DOC_ORDINE", "Data Doc. Ordine");
+DEFINE("_E3G_ELENCO_ARTICOLI_ORDINE", "Elenco articoli in ordine");
+DEFINE("_E3G_QTA_AGGIUNTA", "Q.ta aggiunta");
+DEFINE("_E3G_CAMPO", "Campo");
+DEFINE("_E3G_ORDINE", "Ordine");
+DEFINE("_E3G_NOME_IN_STAMPA", "Nome in stampa");
+DEFINE("_E3G_NOME_DATABASE", "Nome Database");
+DEFINE("_E3G_ORDINAMENTO", "Ordinamento");
+DEFINE("_E3G_DES_BREVE", "Descrizione Breve");
+DEFINE("_E3G_ESTRAI_DAL_DOC", "Estrai dal documento");
+DEFINE("_E3G_NOME_REPORT", "Nome Report");
+DEFINE("_E3G_FAT_NAC", "Fattura/Nota Credito");
+DEFINE("_E3G_CAUSALE_MOV_MAG", "Causale Mov. Magaz.");
+DEFINE("_E3G_TIPO_ANAG", "Tipo Anagrafica");
+DEFINE("_E3G_AUTO_NUM", "Auto Numerazione");
+DEFINE("_E3G_GEN_PRE", "Genera Prestito");
+DEFINE("_E3G_GEN_MOV_CON", "Genera Mov. Contabili");
+DEFINE("_E3G_GEN_MOV_MAG", "Genera Mov. Magazzino");
+DEFINE("_E3G_REGISTRO_DOC", "Registro Documenti");
+DEFINE("_E3G_GEN_STAMPA_ETI", "Genera Stampa Etichette");
+DEFINE("_E3G_GES_SCONTRINO", "Gestione Scontrino");
+DEFINE("_E3G_FILTRO_ART_FORN", "Filtro articoli fornitore");
+DEFINE("_E3G_CONTO_IVA", "Conto Iva");
+DEFINE("_E3G_CONTO_SPESE_VARIE", "Conto spese varie");
+DEFINE("_E3G_CONTO_SPESE_TRASP", "Conto spese trasporto");
+DEFINE("_E3G_DATI_DOC", "Dati Documento");
+DEFINE("_E3G_DATI_CONT", "Dati Contabili");
+DEFINE("_E3G_SOLO_ART_ORDINABILI", "Solo articoli attualmente ordinabili");
+DEFINE("_E3G_ORDINA_PER", "Ordina per");
+DEFINE("_E3G_ESPORTA_PDF", "Esporta come PDF");
+DEFINE("_E3G_ESPORTA_CSV", "Esporta come foglio elettronico (CSV)");
+DEFINE("_E3G_NOME_UTE", "Nome utente:");
+DEFINE("_E3G_INVIA_PWD", "Inviami la password per e-mail");
+DEFINE("_E3G_FILTRA_TIPO_DOC", "Filtra questo tipo Doc.");
+DEFINE("_E3G_AUTO_NUM_DOC", "Auto Num. Doc.");
+DEFINE("_E3G_TUTTE_RIGHE", "Tutte le righe");
+DEFINE("_E3G_ESTRAI", "Estrai");
+DEFINE("_E3G_NUM_EFFETTIVO_DOC", "Num. Effettivo Doc.");
+DEFINE("_E3G_SPESE_VARIE", "Spese varie");
+DEFINE("_E3G_SPESE_TRASPORTO", "Spese trasporto");
+DEFINE("_E3G_DEST_ALTER1", "Dest. Alter. 1");
+DEFINE("_E3G_DEST_ALTER2", "Dest. Alter. 2");
+DEFINE("_E3G_DOC_CHIUSO", "Doc. Chiuso");
+DEFINE("_E3G_TIPO_PAGAMENTO", "Tipo Pagamento");
+DEFINE("_E3G_RICERCA", "Ricerca");
+DEFINE("_E3G_VAI_CODA_DOC", "Vai coda doc.");
+DEFINE("_E3G_STAMPA_ETI", "Stampa etichette");
+DEFINE("_E3G_ESPORTA_PDF2", "Esporta come PDF...");
+DEFINE("_E3G_SALVA_RIGA", "Salva riga");
+DEFINE("_E3G_NUOVO_ARTICOLO", "Nuovo articolo");
+DEFINE("_E3G_ELIMINA_RIGA", "Elimina riga");
+DEFINE("_E3G_ESCI", "Esci");
+DEFINE("_E3G_SALVA_DOC", "Salva Doc.");
+DEFINE("_E3G_QUANTITA2", "Quantita2");
+DEFINE("_E3G_NUM_PROSSIMO_DOC", "Num. Prossimo Doc.");
+DEFINE("_E3G_VEDI_CORPO_DOC", "Vedi Corpo Doc.");
+DEFINE("_E3G_NUOVO_DOC", "Nuovo Doc.");
+DEFINE("_E3G_ELIMINA_DOC", "Elimina Doc.");
+DEFINE("_E3G_DATA_DOC", "Data Doc.");
+DEFINE("_E3G_NUM", "Num.");
+DEFINE("_E3G_TIPO", "Tipo");
+DEFINE("_E3G_ANAG", "Anag.");
+DEFINE("_E3G_CREATO_DA", "Creato da");
+DEFINE("_E3G_IL", "il");
+DEFINE("_E3G_DATABASE", "Database");
+DEFINE("_E3G_TIPO_ACCESSO", "Tipo Accesso");
+DEFINE("_E3G_USER_NAME", "User Name");
+DEFINE("_E3G_PASSWORD", "Password");
+DEFINE("_E3G_ENTRA_IN", "Entra in");
+DEFINE("_E3G_RAGIONE_SOCIALE", "Ragione Sociale");
+DEFINE("_E3G_VERS_DB", "Vers. DB");
+DEFINE("_E3G_NUM_ADERENTI", "N. aderenti");
+DEFINE("_E3G_NUM_CLIENTI", "N. clienti");
+DEFINE("_E3G_ADMIN", "Admin");
+DEFINE("_E3G_NUM_FORNITORI", "N. fornitori");
+DEFINE("_E3G_NUM_ARTICOLI", "N. articoli");
+DEFINE("_E3G_NUM_ACCESSI", "N. accessi");
+DEFINE("_E3G_DATA_ULTIMO_ACCESSO", "Data ultimo accesso");
+DEFINE("_E3G_NOME", "Nome");
+DEFINE("_E3G_INDIRIZZO_MAIL", "Indirizzo E-mail");
+DEFINE("_E3G_PREFISSO", "Prefisso");
+DEFINE("_E3G_VERSIONE_DATABASE", "Versione Database");
+DEFINE("_E3G_GAS", "Nome G.A.S.");
+DEFINE("_E3G_NOME_BOTTEGA", "Nome Bottega");
+DEFINE("_E3G_PREFISSO_TABELLE", "Prefisso Tabelle");
+DEFINE("_E3G_ANNO", "Anno");
+DEFINE("_E3G_DATI", "Dati");
+DEFINE("_E3G_BOTTEGA", "Bottega");
+DEFINE("_E3G_NOME", "Nome");
+DEFINE("_E3G_COGNOME", "Cognome");
+DEFINE("_E3G_AMMINISTRAZIONE", "Amministratore");
+DEFINE("_E3G_CREA_DATABASE", "Crea database...");
+DEFINE("_E3G_CONFERMI_CREAZIONE", "Confermi la creazione di una nuova gestione");
+DEFINE("_E3G_OPERAZIONE_NON_REVERSIBILE", "(l'operazione NON e' reversibile)");
+DEFINE("_E3G_STAMPA", "Stampa");
+DEFINE("_E3G_UTENTE", "Utente");
+DEFINE("_E3G_ESTRAI_ORDINI_UTENTE", "Estrai ordini utente");
+DEFINE("_E3G_REFERETE", "Referente");
+DEFINE("_E3G_DALLA_DATA", "dalla data");
+DEFINE("_E3G_ALLA_DATA", "alla data");
+DEFINE("_E3G_FILTRA", "Filtra");
+DEFINE("_E3G_ANNULLA_FILTRO", "Annulla Filtro");
+DEFINE("_E3G_RICORSIVO", "Ricorsivo");
+DEFINE("_E3G_DAL_MESE", "dal mese");
+DEFINE("_E3G_AL_MESE", "al mese");
+DEFINE("_E3G_EMAIL", "E-mail (ripetere):");
+DEFINE("_E3G_NOME_UTENTE", "Nome utente (ripetere):");
+DEFINE("_E3G_MESSAGGIO", "Messaggio:");
+DEFINE("_E3G_RICHIEDI_NUOVO_ACCOUNT", "Richiedi nuovo account");
+DEFINE("_E3G_PRIMA_VOLTA_ACCESSO", "E' la prima volta che hai accesso qui?");
+DEFINE("_E3G_TORNA_PAG_INIZIALE", "Torna alla pagina iniziale");
+DEFINE("_E3G_SCRIVERE_MAIL_VALIDA", "Scrivere un indirizzo e-mail valido.");
+DEFINE("_E3G_SCRIVERE_DUE_VOLTE_MAIL", "Scrivere due volte l'indirizzo e-mail.");
+DEFINE("_E3G_SCRIVERE_ANCHE_NOME", "Scrivere anche il nome.");
+DEFINE("_E3G_SCRIVERE_ANCHE_COGNOME", "Scrivere anche il cognome.");
+DEFINE("_E3G_INDIRIZZO_MAIL_NON_VALIDO", "L'indirizzo e-mail indicato non sembra essere valido.");
+DEFINE("_E3G_DUE_INDIRIZZI_NON_COINCIDONO", "I due indirizzi e-mail non coincidono, controlla.");
+DEFINE("_E3G_UTENTE_GIA_REGISTRATO", "Un utente con l'indirizzo che hai indicato risulta gia' registrato.");
+DEFINE("_E3G_PREFISSO_TABELLE", "Prefisso Tabelle");
+DEFINE("_E3G_CREA_DATABASE", "Crea database");
+DEFINE("_E3G_NOME_UTENTE", "Nome Utente");
+DEFINE("_E3G_COGNOME_UTENTE", "Cognome Utente");
+DEFINE("_E3G_PASSWORD_ADMIN", "Password Admin");
+DEFINE("_E3G_EMAIL", "E-Mail");
+DEFINE("_E3G_GESTIONE_ORDINI", "GestiGAS - Gestione ordini");
+DEFINE("_E3G_GRU_ACQ_SOL", "Gruppi di Acquisto Solidale");
+DEFINE("_E3G_GESTIONE", "Equogest - Gestione");
+DEFINE("_E3G_BOTTEGHE_MONDO", "Botteghe del Mondo");
+DEFINE("_E3G_RICERCA", "Ricerca");
+DEFINE("_E3G_DETTAGLIO", "Dettaglio");
+DEFINE("_E3G_ORDINE_UTENTE", "Ordine Utente");
+DEFINE("_E3G_DATE", "Date");
+DEFINE("_E3G_SOTTOGATEGORIA_ARTICOLI", "Sottocategorie Articoli");
+DEFINE("_E3G_CATEGORIE_MERCEOLOGICHE_ART", "Categorie Merceologiche Articoli");
+DEFINE("_E3G_ANAG_UTENTI", "Anagrafica utenti");
+DEFINE("_E3G_ANAG_CLIENTI", "Anagrafica clienti");
+DEFINE("_E3G_CERCA", "Cerca");
+DEFINE("_E3G_DATI_ANAG", "Dati Anagrafici");
+DEFINE("_E3G_ALTRI_DATI", "Altri dati");
+DEFINE("_E3G_DATI_CONT", "Dati Contabili");
+DEFINE("_E3G_DATI_LOGIN", "Dati Login");
+DEFINE("_E3G_ANAG_FOR", "Anagrafica Fornitori");
+DEFINE("_E3G_RECAPITI", "Recapiti");
+DEFINE("_E3G_PARAMETRI", "Parametri");
+DEFINE("_E3G_PREZZI", "Prezzi");
+DEFINE("_E3G_CONFIGURAZIONE", "Configurazione");
+DEFINE("_E3G_VENDITA_DETTAGLIO", "Vendita al Dettaglio");
+DEFINE("_E3G_CARRELLO_PRODOTTI_ORDINE", "Carrello articoli in ordine");
+DEFINE("_E3G_FILTRO", "Filtro");
+DEFINE("_E3G_RICERCA_ARTICOLI", "Ricerca Articoli");
+DEFINE("_E3G_ELENCO_ORDINI", "Elenco ordini");
+DEFINE("_E3G_CONSEGNA_PRODOTTI", "Consegna articoli agli Utenti");
+DEFINE("_E3G_ESTRAZIONE_DOCUMENTI", "Estrazione documenti");
+DEFINE("_E3G_DOC_ESTRAIBILI", "Documenti estraibili");
+DEFINE("_E3G_DOC_SELEZIONATI", "Documenti selezionati");
+DEFINE("_E3G_ELENCO_ARTICOLI_IN_ORDINE", "Elenco articoli in ordine");
+DEFINE("_E3G_TIPI_DOC", "Tipi documento");
+DEFINE("_E3G_ESTRAZIONE_ORDINI_ESTRATTI", "Estrazione Ordini Estratti");
+DEFINE("_E3G_ESPORTAZIONE_LISTINO", "Esportazione Listino Articoli");
+DEFINE("_E3G_INVIA_MIEI_DATI", "Invia i miei dati per e-mail");
+DEFINE("_E3G_DOC_CODA", "Documenti: Coda");
+DEFINE("_E3G_DOC_CORPO", "Documenti: Corpo");
+DEFINE("_E3G_GESTIONE_DOC", "Gestione documenti");
+DEFINE("_E3G_INFO_SU", "Informazioni su");
+DEFINE("_E3G_CIAO", "Ciao, sei ritornato?");
+DEFINE("_E3G_HAI_DIMENTICATO", "Hai dimenticato la password");
+DEFINE("_E3G_PRIMA_VOLTA_ACCESSO", "E' la prima volta che hai accesso qui?");
+DEFINE("_E3G_PARAMETRI", "Parametri");
+DEFINE("_E3G_AMMINISTRATORE", "Amministratore");
+DEFINE("_E3G_STATISTICHE", "Statistiche");
+DEFINE("_E3G_CREAZIONE_DATABASE_GAS", "Creazione database per nuova gestione G.A.S.");
+DEFINE("_E3G_CREAZIONE_DATABASE_BOTTEGA", "Creazione database per nuova gestione Bottega");
+DEFINE("_E3G_DATI", "Dati");
+DEFINE("_E3G_ELENCO_ORDINI", "Elenco Ordini");
+DEFINE("_E3G_PERIODO_ORDINI", "Periodi degli ordini");
+DEFINE("_E3G_REPORT_SCONTRINO", "Report Scontrino");
+DEFINE("_E3G_", "Aggiornamento impossibile causa mancanza del file");
+DEFINE("_E3G_", "Impossibile leggere il file");
+DEFINE("_E3G_", "L'aggiornamento alla versione '");
+DEFINE("_E3G_", "' e' fallito.");
+DEFINE("_E3G_", "Aggiornamento concluso: la versione del database e' ora");
+DEFINE("_E3G_", "Nessun articolo trovato.");
+DEFINE("_E3G_", "Eliminazione articolo NON consentita in quanto è attualmente in uso");
+DEFINE("_E3G_", "Compilare i campi obbligatori");
+DEFINE("_E3G_", "Fornitore assegnato ad altro referente.");
+DEFINE("_E3G_", "codice '");
+DEFINE("_E3G_", "' già presente.");
+DEFINE("_E3G_", "Si e' verificato un errore durante la spedizione della notifica di abilitazione.");
+DEFINE("_E3G_", "Notifica di abilitazione inviata all'utente ");
+DEFINE("_E3G_", "Nessun record trovato.");
+DEFINE("_E3G_", "Scrivere un indirizzo e-mail valido.");
+DEFINE("_E3G_", "Compilare la password.");
+DEFINE("_E3G_", "Le due password non coincidono, prova a riscriverle.");
+DEFINE("_E3G_", "Indirizzo e-mail '");
+DEFINE("_E3G_", "' gia' presente.");
+DEFINE("_E3G_", "Compilare i campi obbligatori");
+DEFINE("_E3G_", "Impossibile cancellare questo fornitore perche' ha degli articoli associati.");
+DEFINE("_E3G_", "Modifiche non accettate: non risulti essere referente del fornitore");
+DEFINE("_E3G_", "Ordine NON CONSENTITO in questo periodo.");
+DEFINE("_E3G_", "La quantità MINIMA ordinabile è di ");
+DEFINE("_E3G_", "La quantità PER CONFEZIONE è di ");
+DEFINE("_E3G_", " pezzi.");
+DEFINE("_E3G_", "Prodotto FUORI STAGIONE.");
+DEFINE("_E3G_", "Stai cercando di consegnare una Qta maggiore di quella ordinata!");
+DEFINE("_E3G_", "Non ci sono ordini per questo utente");					
+DEFINE("_E3G_", "Inserire una data valida");
+DEFINE("_E3G_", "Impossibile generare l'ordine. Importo inferiore all'importo minimo previsto");
+DEFINE("_E3G_", "Nessun articolo in ordine per questo fornitore!");
+DEFINE("_E3G_", "Scrivere l'indirizzo e-mail con cui ci si era registrati.");
+
+?>

@@ -1,0 +1,68 @@
+body {
+	background-image:url(../images/bg_e3g.png);	
+	background-color: #FFE1BF;
+	color: #AB5900;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+a:link { color: #F47F00; }
+a:hover { color: #FFC280; }
+a:active { color: #F47F00; }
+a:visited { color: #F47F00; }
+
+ol { text-align:left; }
+
+img { border-width: 0; }
+
+
+div#header {
+	width:750px;
+	margin:auto;
+	text-align:center;
+	padding-top:2px;
+	padding-bottom:2px;
+	background-color: #FFF2BF;
+}
+
+div#header h1 {
+	font-size:14px;
+}
+div#header h2 {
+	font-size:16px;
+}
+
+
+div#content {
+	width:440px;
+	margin:10px auto 10px auto;
+	text-align:center;
+	padding:5px;
+	background-color: #FFFFFF;
+	border-left:150px #FFC280 solid;
+	border-right:150px #FFC280 solid;
+}
+
+div#content h2 {
+	font-size:14px;
+}
+
+
+div#footer {
+	width:750px;
+	margin:auto;
+	font-size:10px;
+	text-align:center;
+	padding-top:2px;
+	padding-bottom:2px;
+	background-color: #FFF2BF;
+}
+
+
+div#error_area {
+	background-color: #BFDFFF;
+	color:#0056AB;
+	padding:5px;
+	margin-bottom:5px;
+	border:2px #0056AB dashed;
+}

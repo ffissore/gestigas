@@ -1,0 +1,24 @@
+/.cvsignore/1.1/Tue May 15 15:26:03 2007//
+/.project/1.1/Thu Jan 12 14:08:09 2006//
+/changelog.txt/1.384/Mon Dec  6 20:33:06 2010//
+/config_const.php/1.68/Mon Feb 15 13:51:37 2010//
+/config_inst.php/1.14/Mon Feb 23 23:21:22 2009//
+/cron.php/1.3/Mon Feb 23 23:21:50 2009//
+/favicon.ico/1.1/Wed Jun 14 15:58:25 2006/-kb/
+/index.php/1.53/Mon Jan 19 16:17:09 2009/-kk/
+/leggimi.txt/1.4/Mon Jan 19 16:17:09 2009//
+D/.settings////
+D/cache////
+D/css////
+D/db////
+D/db_new////
+D/db_old////
+D/docs////
+D/gestigas_login////
+D/images////
+D/immagini////
+D/language////
+D/libraries////
+D/login_inst////
+D/objects////
+D/templates////

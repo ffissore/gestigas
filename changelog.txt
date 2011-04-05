@@ -1,0 +1,988 @@
+ * Progetto e3g - Equogest/GestiGAS
+ *   Software gestionali per l'economia solidale
+ *   <http://www.progettoe3g.org>
+ *
+ * Copyright (C) 2003-2009
+ *   Andrea Piazza <http://www.andreapiazza.it>
+ *   Marco Munari  <http://www.marcomunari.it>
+ *
+ * @package Progetto e3g - Equogest/GestiGAS
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
+ * 
+ * Questo  programma e' software  libero; e' lecito redistribuirlo  o
+ * modificarlo secondo i termini  della Licenza Pubblica Generica GNU
+ * come  pubblicata dalla Free  Software  Foundation; o la versione 2
+ * della licenza o (a propria scelta) una versione successiva.
+ * 
+ * Questo programma e' distribuito nella  speranza che sia  utile, ma
+ * SENZA  ALCUNA GARANZIA;  senza  neppure la  garanzia implicita  di
+ * NEGOZIABILITA' o di APPLICABILITA' PER  UN PARTICOLARE  SCOPO.  Si
+ * veda la Licenza Pubblica Generica GNU per avere maggiori dettagli.
+ * 
+ * Questo  programma deve  essere  distribuito assieme  ad una  copia
+ * della Licenza Pubblica Generica GNU.
+
+
+Legenda:
+
+* -> Fix di sicurezza (Security Fix)
+# -> Fix di correzione (Bug Fix)
++ -> Aggiunta (Addition)
+^ -> Modifica (Change)
+- -> Eliminazione (Removed)
+! -> Nota (Note)
+
+
+Sviluppatori:
+
+AP -> Andrea Piazza (http://www.andreapiazza.it)
+MM -> Marco Munari (http://www.marcomunari.it)
+
+
+Inizio change-log:
+
++ 06/12/10 AP about_admin, inserito pulsante per richiamare la maschera modifica_quantita_articoli   
++ 06/12/10 AP inserita maschera modifica_quantita_articoli per consentire la modifica multipla delle qta in consegna  
++ 06/12/10 AP esporta_listino, inserito controllo per gestione ck_solo_ordini_aperti solo su Gestigas 
+# 01/03/10 AP e3g_doc_routines, inserito delta prezzo nella tabella pagamenti (utenti / fornitori)
+# 01/03/10 AP e3g_doc_routines, corretta impostazione delle colonne in genera_stampa_csv quando sono selezionate tutte le righe
+# 01/03/10 AP e3g_doc_routines, nella routine genera_stampa_csv inserito il metodo e3g_db_source_exportToCsv per la creazione del file CSV
++ 15/02/10 AP rimossa da cassa_eg e opzioni_esport_pdf la gestione AUTO_DB_SEQUENCES
++ 15/02/10 AP config_const.php, inserita costante P4A_AUTO_DB_SEQUENCES per disabilitare la creazione di tabelle _seq
+^ 03/02/10 MM Finestra periodo ordini: modifiche varie
++ 02/02/10 MM Cassa comune: nuova pagina con importi riassuntivi per utente
++ 27/01/10 MM Ordine corrente, svuota lista ed elimina riga: esegue solo se l'ordine e' aperto altrimenti avvisa 
++ 26/01/10 MM Ordine globale, dettaglio articolo: visualizzazione email dell'utente ordinante
+^ 26/01/10 MM Ordine globale, filtro fornitori: elenca solo quelli con articoli in ordine 
+^ 26/01/10 MM Restyling ordine globale: messi in un'unica pagina "spesa per articolo" e "spesa dettaglio"
+^ 16/01/10 MM Ordine corrente: modifiche varie per gestione articoli sfusi (a peso/volume)
+# 16/01/10 MM Ordine corrente: uso dell'operatore di resto fmod() al posto di % (non funzionante quest'ultimo con i decimali)
+^ 15/01/10 MM Ordine corrente: uso di un diverso componente per visualizzare la descrizione articolo sotto il listino
+
+-- 0.20.1/0010/0019 -- 15/01/2010 -- RILASCIO INTERNO --------------------------
+
++ 15/01/10 MM Ordine corrente e listino articoli: visualizzazione colonna e campo "Gestione a peso" 
+# 14/01/10 AP consegna_utente, corretto errore nella quantita in consegna (replace virgola con punto)
+^ 14/01/10 MM Rifacimento finestra anagrafica "Unita' di Misura"
+# 14/01/10 MM Inserimento nuovo fornitore: non veniva precompilato il nuovo campo obbligatorio "cassiere"
+# 14/01/10 MM Aggiornamento _cond_0010: campo importo serve di tipo DOUBLE anzichè INT
+# 12/01/10 AP GG, commentato un ds->firstRow in doc_estrazione_gg perchè generava un error retrieving rows number  
++ 11/01/10 MM Ordine corrente, visualizzazione dati aggiuntivi sugli articoli in listino (disattivata scheda popup)
++ 11/01/10 MM Listino articoli: se gestione a peso, allora obbliga a peso/volume unitario
+# 10/01/10 AP EG, gestionedocumenti1_righe e reportscontrino: modificato l'arrotondamento nei totali di riga (importo, imponibile, totriga)
+# 10/01/10 AP esportazione files formato CSV: inserita stampa intestazione e limitazione del numero di colonne
+# 10/01/10 MM Chiusura ordine, correzione testo messaggio di conferma della chiusura
+^ 09/01/10 MM Archivio e statistiche ordini: visualizzazione confezione in una colonna separata  
+# 09/01/10 MM Ordine corrente, esportazione ordine come CSV: le colonne erano sballate 
+^ 09/01/10 MM Esportazione listino come PDF/CSV: visualizzazione confezione in una colonna separata  
+^ 09/01/10 MM Ordine globale, estrazione fornitore, consegna utente: visualizzazione confezione in una colonna separata  
++ 09/01/10 MM GG, invio opzionale notifica movimenti di cassa in attesa di validazione
+^ 09/01/10 MM Anagrafica articoli, visualizzazione in colonna separata dimensione confezione 
+^ 09/01/10 MM Ordine corrente, visualizzazione dimensione confezione in una colonna separata  
++ 09/01/10 MM Ordine corrente, visualizzazione dati aggiuntivi sugli articoli in ordine
+# 08/01/10 MM Profilo personale, ripristino colore bordi dei campi 
+# 08/01/10 MM Creazione tabella _cassa in script update_cond_0010 e altre correzioni
+
+-- 0.20.0/0010/0019 -- 07/01/2010 -- RILASCIO INTERNO --------------------------
+
+^ 07/01/10 MM Statistiche ordini: ripristinata visualizzazione utenti non attivi
++ 07/01/10 MM GG, articoli: nuovo campo per gestione a peso
++ 07/01/10 MM GG, articoli: nuovo campo per memorizzazione descrizione aggiuntiva 
++ 07/01/10 MM GG, nuova gestione cassa comune
+# 04/01/10 AP GG, modificata consegna_utente per consentire qta consegnata > qta ordinata e utilizzo della virgola nel campo qta consegnata (per prodotti a peso)
+# 04/01/10 AP EG, modificata e3g_doc_routines per eliminare art.um_qta dalla query di Equogest
+^ 07/12/09 AP EG, modificata la stampa dei documenti (riposizionamento tabelle con i totali)
+^ 07/12/09 AP GG, modificate le routine di esportazione su CSV (tab. pagamenti utenti-fornitori e listino) per sostituire il punto con la virgola nei campi numerici
++ 13/11/09 AP GG, inserita la gestione delle note all'ordine
+^ 13/11/09 AP GG, tabella doct e anagrafiche impostato il campo note per le note all'ordine
+^ 13/11/09 AP query creazione archivio modificata dimensione del campo codutente nella tabella docr
+# 27/10/09 MM Multigestione: correzione parametri nel file index.php
+^ 01/10/09 AP doc_estrazione_gg e statistiche_ordini: modificata la costruzione di alcune query a seguito di segnalazione di alcuni errori
++ 13/08/09 AP GG, inserita gestione Note in Ordine Corrente e doc. Consegna a Famiglia
+^ 24/06/09 AP Tabella doct: aggiornato il campo note per la successiva implementazione delle note sul doc. Consegna a Utente
+^ 19/06/09 AP EG, finestra AnagArticoli: implementata gestione campo Bio e disabilitata chiamata all'evento tableBeforeDisplay per Equogest
+# 12/06/09 AP Finestra Gestione documenti righe: spostato l'aggiornamento del Tot. documento dopo la chiamata del SaveRow
+# 11/06/09 MM Finestra modifica prezzi: evidenziava erroneamente più righe se con la stessa descrizione ma conf. diversa
+# 11/06/09 MM Finestra modifica prezzi: errore divisione per zero quando tutte le quantità erano state azzerrate (ordine annullato)  
+^ 11/06/09 AP Finestra modifica prezzi: corretta la query di selezione (campo quantita)
++ 10/06/09 MM Finestra modifica prezzi: visualizzazione peso/volume degli articoli
++ 07/06/09 AP Inserita nuova griglia Utenti/Fornitori in formato CSV
+# 28/05/09 MM Creazione ordine fornitore: nasconde il bottone PDF dopo la selezione di un altro fornitore
+# 22/05/09 MM Opzioni generali: resa non obbligatoria l'indicazione dell'email
+^ 19/05/09 MM Elenco prossime chiusure: si ferma alle prime 5, salvo diversa indicazione 
++ 19/05/09 MM Invio email lista della spesa: scrive anche il subtotale per fornitore 
+# 19/05/09 MM Invio email lista della spesa: sbagliava il calcolo della quantità
+# 18/05/09 MM Statistiche ordini ed altri file: corretto tag delimitazione php ("<?php" al posto di "<?")
+# 18/05/09 MM Invio email a tutti gli utenti attivi: spediva invece ai soli referenti
+
+-- 0.19.2/0009/0018 -- 15/05/2009 ----------------------------------------------
+
+# 15/05/09 MM Ordine (singolo): correzione query per invio email lista spesa
+
+-- 0.19.1/0009/0018 -- 15/05/2009 ----------------------------------------------
+
+# 15/05/09 MM Password dimenticata: gestione password digitata in maiuscolo e/o contenente apostrofi
+# 15/05/09 MM Anagrafica utenti, listino articoli, ordine singolo e globale - filtro per descrizione: errore quando conteneva apostrofi 
+# 15/05/09 MM Estraz. ordine fornitore: rese non ordinabili le colonne relative a campi calcolati 
+# 15/05/09 MM Estraz. ordine fornitore: generava il documento con righe dettagliate per utente anzichè raggruppate per articolo
+# 14/05/09 MM Statistiche ordine: ai normali utenti non permette di visualizzare le statistiche di un altro specifico utente 
+# 14/05/09 MM Invio email: gestione casi in cui non ci sono invii da effettuare (nessun fornitore, nessun referente ecc.)
++ 14/05/09 MM Multigestione, invio email: possibilità (per il superadmin) di spedire ad admin+referenti di tutte le gestioni
+# 14/05/09 AP genera_stampa_pdf: nelle chiamate a questa routine inserito un valore di default per il parametro $tutte_le_righe
+# 13/05/09 MM Statistiche ordini: tabella resa non ordinabile secondo la quantità 
+# 11/05/09 AP Anag. Fornitori e Utenti: autocompilazione del campo codice utilizzando il valore di idanag (per evitare duplicazione di codici)
++ 10/05/09 MM Scheda articolo: visualizzazione anche degli ingredienti
+
+-- 0.19.0/0009/0018 -- 10/05/2009 -- RILASCIO INTERNO --------------------------
+
++ 09/05/09 MM Ordine articoli (singolo): filtro ingredienti (per escludere gli articoli con gli ingredienti specificati)
++ 09/05/09 MM Listino articoli: evidenziazione riga corrente in grassetto
+^ 08/05/09 MM Parametri GAS/bottega: rimozione spazi e forzatura minuscolo per i campi email e www, controllo validità e-mail
+^ 08/05/09 MM Anag. fornitori: rimozione spazi e forzatura minuscolo per i campi email e www, controllo validità e-mail
+^ 08/05/09 MM Anag. utenti e profilo personale: rimozione spazi e forzatura minuscolo per i campi email e www
+# 08/05/09 MM Footer pagina, link sito web GAS/bottega: aggiunge "http://" quando manca
+# 08/05/09 MM GG Scheda articolo: "http://" solo quando manca
+# 07/05/09 AP GG Scheda articolo: aggiunto "http://" davanti all'url per renderlo cliccabile direttamente
++ 06/05/09 MM Listino articoli: filtro ingredienti (per escludere gli articoli con gli ingredienti specificati)
++ 06/05/09 MM Multigestione, invio email: possibilità (per il superadmin) di spedire agli admin di tutte le gestioni
+# 06/05/09 MM Invio email di gruppo: sbagliava il controllo finale sulla correttezza degli invii
++ 05/05/09 MM Listino articoli: possibilità di modifica degli ingredienti da parte di utenti con apposito permesso 
++ 04/05/09 MM Listino articoli: nuovi campi per ingredienti
++ 04/05/09 MM Anag. fornitori, inserimento: assegnazione valore ai nuovi campi obbligatori 
++ 04/05/09 MM GG Anag. utenti: pulisce i campi password passando da un record ad un altro
++ 03/05/09 MM GG Profilo personale: campi per gestione ingredienti articoli (per intolleranze e allergie)
++ 03/05/09 MM GG Anag. utenti: campi per gestione ingredienti articoli (per intolleranze e allergie)
+# 03/05/09 MM GG Schermata iniziale, elenco ultimi articoli inseriti/modificati: esclude quelli disabilitati
+# 19/04/09 MM Visualizzazione elenco prossime chiusure ordini: errore nella query
+# 19/04/09 MM Inserimento fornitori e utenti: mancava l'assegnazione ad un campo obbligatorio 
+
+-- 0.18.0/0009/0018 -- 18/04/2009 -- RILASCIO INTERNO --------------------------
+
++ 18/04/09 MM Inserimento articoli: verifica assegnazione categoria e sotto-categoria
++ 18/04/09 MM Anagrafica utenti: nuovo parametro filtro per vedere anche utenti disabilitati/in attesa
++ 18/04/09 MM Listino articoli: nuovo parametro filtro per vedere anche articoli disabilitati
+# 16/04/09 AP GG, Estrazione Ordine a Fornitore: impostato a 0 il campo delta_prezzo che non accetta NULL
+^ 24/03/09 AP GG, Consegna utente: rimossi i pulsanti filtra e annulla filtro, ora la gestione è affidata al combo fornitore
+^ 20/03/09 MM GG, Schermata iniziale: visualizza prossime aperture quando non ci sono periodi aperti
++ 20/03/09 MM Ordine corrente: possibilità di inviarsi lista della spesa per e-mail 
+^ 19/03/09 MM Ordine corrente: maggiori informazioni sullo stato dell'ordine nel testo iniziale
++ 19/03/09 MM Ordine corrente ed esportazione listino articoli: nuovo filtro per estrarre solo articoli bio
++ 19/03/09 MM Listino articoli: nuovo filtro per estrarre solo articoli bio + visualizzazione numero articoli
+# 18/03/09 MM Recupero password: piccole correzioni
+# 17/03/09 MM File multigestione: sostituito il richiamo di funzioni come URL (non consentito su molti server) in directory assolute
+# 13/03/09 AP GG, Consegna a Utente: sistemata la gestione dei campi prezzo, delta_prezzo, prezzo_originale e importo nella fase di estrazione
++ 09/03/09 AP GG: inseriti campi delta_prezzo e prezzo_originale nei documenti PDF e CSV
++ 08/03/09 MM Finestra multi-gestione: nuovi campi informativi (n. doc. ordini fornitore e consegna utenti)
++ 08/03/09 MM Anagrafica fornitori: nuovo campo descrizione aggiuntiva per tipologia produzione (es. "Tofu e seitan" oppure "Farine e cereali")
++ 08/03/09 MM Viste tabellari: possibilità di specificare il numero di righe per pagina nel profilo personale
++ 05/03/09 MM GG, nuova funzionalità "Modifica prezzi articoli in consegna"
++ 05/03/09 MM GG Schermata iniziale admin: aggiunto bottone per "Modifica prezzi articoli in consegna" 
++ 03/03/09 AP GG, Gestione Documenti: inserita la possibilità di generare PDF e file CSV con anche le righe Non Visibili
+			  (per inviare ai fornitori un documento con le quantità totali e il dettaglio per utente)
+^ 02/03/09 MM Menu strumenti, comando "cron": visibile solo all'amministratore globale
+^ 02/03/09 MM Login: possibile anche premendo "Invio" col fuoco nell'e-mail (utile se si memorizzano i valori nel browser) 
++ 25/02/09 MM Opzioni di notifica del programma: possibilità di inviarne subito (di apertura, chiusura o lista della spesa) 
++ 23/02/09 MM cron.php: file di attivazione operazioni periodiche da richiamare esternamente con cron
++ 23/02/09 MM config_inst.php: nuova costante per attivazione operazioni periodiche tramite login utenti
+# 23/02/09 AP Gestione Documenti: corretto bug nella query di eliminazione dei dati nella tabella docr
++ 20/02/09 MM GG, invio opzionale notifica lista della spesa alla chiusura ordine (da completare)
++ 20/02/09 MM GG, ordine singolo: colonna per segnalare prodotti bio (lista spesa e listino articoli)
++ 13/02/09 MM GG, invio opzionale notifica chiusura ordine
++ 13/02/09 MM Login, richiamo della funzione che gestisce le operazioni periodiche (notifiche, mailing-list ecc.)
++ 12/02/09 MM Opzioni programma (azienda.php): visualizzazione campi per notifiche automatiche
++ 12/02/09 MM GG, invio opzionale notifica apertura ordine
+^ 12/02/09 MM e3g_invia_email(), piccole modifiche al footer 
+# 11/02/09 MM GG, ordine globale: correzione evidenziazione articolo selezionato in spesa dettaglio
+# 10/02/09 AP doc_estrazione_gg.php: in fase di estrazione inserito controllo se il database è vuoto (nessun documento ancora inserito) allora $riga = 0
++ 09/02/09 MM Anagrafica articoli: nuovo campo per contrassegnare prodotti da agricoltura biologica
+# 09/02/09 AP gesdocumenti1.php: corretto errore nella query sul db source ds_doc nella function bu_annulla_filtro_click 
+# 07/02/09 AP doc_estrazione_gg: corretto il posizionamento sul primo fornitore dell'elenco dopo l'estrazione (prima non visualizzava l'elenco dei prodotti) 
+^ 06/02/09 MM GG, ordine singolo e globale: evidenziazione dell'articolo selezionato
+# 06/02/09 MM Referenti/fornitori: corretto ordinamento e visualizzazione referenti/fornitori non attivi 
+- 05/02/09 MM Eliminazione funzione stampa() da doc_estrazione_gg.php perchè non più utilizzata
+^ 05/02/09 MM Esportazione documenti come PDF/CSV: uniformati i nomi dei file
+^ 05/02/09 MM Uso della funzione P4A_Get_Valid_File_Name() per avere sempre nomi di file validi
+^ 04/02/09 MM GG, Statistiche ordini: miglioramento filtro iniziale
+
+-- 0.17.0/0008/0017 -- 02/02/2009 ----------------------------------------------
+
+# 01/02/09 MM GG, Schermata iniziale: il referente non vedeva il bottone "Amministra"
++ 01/02/09 MM Footer di ogni pagina: attivazione link eventuale sito web del GAS o bottega
++ 31/01/09 AP GG, Disp. stagionale prodotti: cassa_gg_singolo.php modificata la query per consentire la disponibilità stagionale a cavallo di due anni 
+# 31/01/09 AP GG, Routine genera_stampa_csv: inserito un break mancante nello switch...case per la definizione del campo fornitore nella query 
++ 30/01/09 MM GG, Nuova finestra per visualizzazione statistiche degli ordini
++ 30/01/09 MM GG, Schermata iniziale: visualizza anche il numero di articoli acquistabili per ogni fornitore
++ 30/01/09 AP Implementata la routine genera_stampa_csv (esportazione documenti come CSV)
+^ 29/01/09 MM GG, archivio ordini: riscrittura completa
++ 28/01/09 MM GG, Esportazione listino come CSV: aggiunte colonne e migliorata estetica
+# 28/01/09 MM GG, Esportazione listino come CSV: non corrispondevano le colonne coi valori
+# 28/01/09 MM GG, Ordine singolo, esportazione lista della spesa come CSV: non corrispondevano le colonne coi valori
+# 28/01/09 MM GG, Ordine globale, esportazione spesa dettaglio come CSV: non corrispondevano le colonne coi valori
+# 28/01/09 MM GG, Ordine globale, Spesa per utente, per fornitore, per articolo e dettaglio: impostate alcune colonne come non ordinabili
+# 28/01/09 MM GG, schermate iniziali user e admin: impostata larghezza oggetti per problemi con Internet Explorer
++ 26/01/09 MM Anag. fornitori: possibilità di esportare elenco come CSV
++ 26/01/09 MM Anag. utenti/clienti: possibilità di esportare elenco come CSV
+^ 26/01/09 AP EG, inserita, in e3g_main, la chiamata alla maschera doc_registri 
+^ 26/01/09 AP EG, inserita la maschera doc_registri per poter modificare la numerazione dei registri documenti
+^ 26/01/09 AP esclusa la chiamata alla routine aggiorna_intro_text() per Equogest
+^ 22/01/09 MM Spostamento funzioni genera_stampa_odt/pdf da e3g_utils a e3g_doc_routines (così ridenominata)
+^ 21/01/09 MM Gestione doc.: pulizia codice, sistemazione estetica e predisposizione esportazione CSV
+^ 20/01/09 AP GG, apertura documenti: nuova gestione con iddoc (in sostituzione della vecchia che utilizzava ancora il campo anno_contabile)
+! 19/01/09 MM Anno finale di copyright da 2008 a 2009, ovunque
+^ 19/01/09 MM GG, cassa singolo e globale: utilizzo costanti di larghezza
+^ 19/01/09 MM Aumentata a 965px la costante di larghezza elementi grafici (il massimo per schermi larghi 1024px)
+# 19/01/09 MM GG, Anag. Articoli: ancora correzione caricamento articoli da parte del referente 
++ 18/01/09 MM Nuova icona articoli
++ 18/01/09 MM GG Schermata iniziale admin: ridisegno estetico con visualizzazione info utili
++ 18/01/09 MM GG Schermata iniziale: elenco degli ultimi articoli inseriti + ridisegno estetico
++ 16/01/09 MM Anag. articoli e utenti: evidenziazione di quelli non attivi
++ 16/01/09 MM Ordine globale: possibilità di esportare spesa utente in CSV
++ 16/01/09 MM Ordine corrente: possibilità di esportare ordine e listino in CSV
++ 16/01/09 MM Nuova funzione globale per esportazione CSV (foglio elettronico)
+^ 16/01/09 MM Referenti/fornitori, categorie e sottocategorie: riorganizzazione estetica ed utilizzo costanti dimensionali 
++ 16/01/09 MM Anag. fornitori: visualizzazione colonna col referente (è inevitabile che appaiano più righe
+              se un fornitore ha più referenti assegnati)
++ 15/01/09 MM config_const: nuove costanti per dimensione elementi grafici (usate per ora in anag. fornitori, articoli
+              e utenti, profilo personale, periodi ordine)
++ 15/01/09 MM Anag. fornitori: bottone per annullare la ricerca e riorganizzazione estetica
+# 14/01/09 MM Script SQL iniziale GG multi: rimessa ogni query su una riga (indispensabile per creazione nuova gestione)
+# 14/01/09 MM Finestra password dimenticata: correzione lettere accentate
+^ 14/01/09 MM GG, nuovo utente: abilita mailing-list di default
+^ 14/01/09 MM Esportazioni PDF: aggiunge data e ora in coda al nome del file
+# 14/01/09 MM Ordine corrente, listino articoli: non funzionava il filtro
+# 05/01/09 MM Anag. fornitori: non compilava il campo obbligatorio "mailing_list"
+
+-- beta 0.16.0/0008/0017 -- 30/12/2008 -----------------------------------------
+
++ 22/12/08 MM Nuova funzione mailing-list/forum (finitura)
+# 22/12/08 MM GG, Anag. Articoli: controcorrezione caricamento articoli referente 
+# 02/12/08 AP GG, Anag. Articoli: nella visualizzazione dei campi (disabled) per il Referente sulla pressione pulsante NewRow 
++ 20/11/08 MM Nuova funzione mailing-list/forum (codice preliminare)
+# 04/11/08 AP GG, Consegna Utente: modificato aggiornamento del dropdown utenti dopo la chisura dell'estrazione 
+              (nel posizionamento sul primo utente non ricaricava i prodotti) 
+# 28/10/08 AP GG, Consegna Utente: modificata query INSERT INTO per rimuovere eventuali apici nella descrizione dell'articolo
+^ 28/10/08 AP GG, esportazione doc. PDF: modificata query in e3g_utils.php per consentire visualizzazione di righe con quantita=0 
++ 10/10/08 MM Gestione parametri per nuova funzionalità "mailing-list"
++ 10/10/08 MM Parametri GAS/bottega: possibilità di specificare l'eventuale codice fiscale
+^ 10/10/08 AP Sostituito il FORMAT con il ROUND nelle query di generazione documenti in 
+              e3g_utils.php (per problema visualizzazione numeri >999)
++ 09/10/08 AP GG, inserita maschera Archivio Ordini
+# 09/10/08 AP GG, maschera Gestione Documenti: correzione alla funzione Elimina Documento   
++ 08/10/08 MM GG, anag. utenti e profilo: verifica correttezza codice fiscale mediante nuova funzione in e3g_utils.php
++ 08/10/08 MM GG, anag. utenti e profilo: possibilità di memorizzare dati fiscali (data e luogo di nascita, cod. fiscale)
+^ 08/10/08 MM Ridenominazione anag_clienti.php in anag_utentigg_clientieg.php
++ 04/10/08 MM Categorie (tipi) articoli: aggiunta vista tabella
++ 04/10/08 MM Sotto-categorie (cat. merc.) articoli: aggiunta vista tabella
++ 04/10/08 MM Invio email: possibilità di scrivere anche ai fornitori (tutti o uno a scelta)
++ 04/10/08 MM Invio email: possibilità di specificare sè stessi come mittente 
++ 04/10/08 MM e3g_invia_email: possibilità di specificare l'utente (e non il software) come mittente
+^ 03/10/08 MM GG, ordine articoli: premendo "Esporta listino" viene visualizzata l'apposita finestra
+              già richiamata dall'home page, al posto della ridondante funzione interna
+^ 03/10/08 MM GG, ordine articoli: ordinamento articoli come nell'esportazione articoli PDF 
+              (utile per chi fa l'ordine ricopiando dal listino cartaceo) 
++ 03/10/08 MM GG, esport. listino: mostra avviso se non c'è niente da esportare con i parametri impostati 
+# 03/10/08 MM GG, esport. listino: esportava anche gli articoli disabilitati 
+^ 03/10/08 MM GG, esport. listino: ordine predefinito per fornitore anzichè categoria
++ 03/10/08 MM Login: possibilità di fare login premendo "Enter" col cursore nel campo "Password"
+^ 03/10/08 MM GG, anag. utenti: sistemazione estetica
+^ 02/10/08 AP GG: Estrazione Ordine a Fornitore, inserito blocco se il periodo ordine per il fornitore selezionato e' ancora aperto 
+^ 02/10/08 AP Maschera Anag. Utenti: inserita ricerca per e-mail
+^ 02/10/08 AP Maschera Anag. Utenti: inserito pulsante Annulla Ricerca
+^ 02/10/08 AP EG: modifica del modulo per la stampa delle etichette
++ 02/10/08 AP EG: inserita tabella [PREFIX]etichette per memorizzare la coda di stampa delle etichette
+# 24/06/08 AP GG: inserita maschera Statistiche Acquisti per Utente
+# 24/06/08 AP EG: corretto errore sui codici a barre non univoci nella maschera Stampa Etichette
+# 05/06/08 AP Maschera consegna_utente: corretta estrazione parziale (getUnformattedNewValue) per errore nelle quantita' estratte
+# 28/05/08 AP Maschera consegna_utente: inserita inclusione del file e3g_routines per la chiamata alla tabella_pagamenti
+^ 08/05/08 AP EG: modifica query e aggiunto Update 0017 per sistemazione campo SegnoContabile sull'anagrafica Vendita al Dettaglio
+# 08/05/08 AP EG: Gestione Documenti, sistemato filtro sul Tipo Doc. 00000 Vendita al Dettaglio
+# 08/05/08 AP Correzioni varie al modulo Movimenti Contabili
+^ 05/05/08 AP Esportazione Documenti PDF: modifiche al layout e campo IBAN
+^ 05/05/08 AP Maschera Invio Mail: modifica lato Equogest (dicitura Clienti al posto di Referenti)
+^ 14/04/08 AP inserito il getUnformattedNewValue nella routine Calcola Totali nella gestionedocumenti1_righe
+^ 12/04/08 MM Script Equogest e GestiGAS iniziali: aggiornati alla versione 0007/0016
+
+-- beta 0.15.1/0007/0016 -- 04/04/2008 -- (rilascio pubblico) ------------------
+
+# 19/03/08 MM Invio email a tutti gli utenti attivi o ai referenti: spediva anche ai fornitori
+^ 05/05/08 MM Spostamento variabile $e3g_consegna_famiglie_fornitore (ora non più globale) direttamente in consegna_utente.php 
+- 05/05/08 MM Rimozione consegna_utente_totale.php e consegna_utente_parziale_det.php e 
+							ridenominazione consegna_utente_parziale.php in consegna_utente.php
+- 05/05/08 MM about_admin e e3g_main, richiamo della consegna ad utente: rimossi i controlli di presenza articoli ancora 
+              da ordinare ai fornitori in quanto ora vengono eseguiti direttamente nella consegna_utente.php
+^ 05/05/08 MM Consegna ad utente: warning se ci sono ancora articoli da ordinare ai fornitori
++ 05/05/08 MM Consegna ad utente, colonne della griglia: unità di misura e importo riga
++ 05/05/08 MM Consegna ad utente: chiusura automatica del doc. dopo aver chiesto la consegna di tutti gli articoli
+^ 05/05/08 MM Consegna ad utente: elenca nel combo solo gli utenti con articoli da consegnare
++ 05/05/08 MM Nuove icone in versione disabilitata
+^ 05/05/08 MM Estraz. ordini fornitore: disattiva il bottone di estrazione e visualizza messaggio quando la lista della spesa rimane vuota
+^ 05/05/08 MM Estraz. ordini fornitore: elenca nel combo solo i fornitori con articoli in ordine
+- 05/05/08 MM Estraz. ordini fornitore: eliminate funzioni di trasformazioni date (sostituite con quelle in e3g_utils)
+^ 05/05/08 MM Pulizia e revisione del codice di doc_estrazione_gg.php
+
+-- beta 0.15.0/0007/0016 -- 02/03/2008 -- (rilascio pubblico) ------------------
+
+^ 02/03/08 MM Aggiornamento versioni PDF dei manuali
++ 02/03/08 MM Aggiornato manuale GestiGAS con nuova funzione invio email
+^ 02/03/08 MM Invio email: possibile anche per i referenti (menu strumenti)
++ 02/03/08 MM Invio email: possibilità di inviare anche ai soli referenti o ad uno specifico utente a scelta
++ 29/02/08 MM Nuova funzionalità per amministratori: invio messaggio email a tutti gli utenti
+^ 29/02/08 MM Consegna ad utenti: aggiunta condizione per visualizzare nel combo solo utenti e fornitori attivi
++ 28/02/08 MM Gest. doc.: impostazione del db_source della finestra
+^ 28/02/08 MM Gest. doc.: varie modifiche estetiche
+- 28/02/08 MM Gest. doc.: eliminate funzioni di trasformazioni date (sostituite con quelle in e3g_utils)
++ 27/02/08 AP Inserito nuovo record nella tabella DocTipiDoc per la riga " Non Indicato" nei combo box
+^ 27/02/08 AP Gestione documenti modifiche al funzionamento del filtro di ricerca documenti 
+^ 15/02/08 AP GG: routines genera_stampa_odt e genera_stampa_pdf nel ds_doct sostituita la query (Numero, Anno, Tipo) con la query per iddoc 
+^ 15/02/08 AP GG: Estrazione Ordine Fornitore: inserito ordinamento alfabetico per descrizione dei fornitori 
+^ 14/02/08 AP GG: maschera documenti inserita label con i dati essenziali del documento selezionato 
+^ 11/02/08 AP GG: maschera documenti modifiche al design, mantenuti solo i pulsanti essenziali 
+- 10/02/08 MM Interfaccia admin (about_admin): eliminato pulsante esportazione listino
+- 09/02/08 MM Cassa_gg_globale - query filtro fornitori: rimossa la join (introdotta il 29/01) che escludeva i fornitori fuori periodo
++ 09/02/08 MM Ordine globale, pagina spesa dettaglio: aggiunta visualizzazione di ulteriori dati sull'ordine (a destra)
+^ 05/02/08 MM Aggiornamento PHPmailer alla v.2.0.0, specie per poter inviare con l'SMTP (ssl) di GMail
+^ 05/02/08 MM Sostituzione (da verificare e confermare) nostra funzione e3g_email_valido() con p4a_validate::email(): 
+# 05/02/08 MM Anagrafica utenti: la notifica abilitazione utente veniva inviata ad un indirizzo errato (quello del primo del db_source)
++ 05/02/08 MM Nuova modalità di invio mail tramite SMTP
++ 05/02/08 MM e3g_utils: nuova funzione globale "e3g_format_data_to_mysql"
+^ 05/02/08 MM Consegna utente: varie sistemazioni estetiche, icone, riorganizzazione del codice e piccole correzioni
+^ 05/02/08 MM Sostituzione ovunque dei termini "catalogo" e "prodotto/i" con "listino" e "articolo/i"
+^ 05/02/08 MM Griglia PDF consegna articoli: reso più leggibile il codice delle query
++ 29/01/08 AP consegna_parziale_utente : aggiunto l'invio mail agli utenti (modifiche apportate dall'utente Federico Munerotto)
+^ 29/01/08 AP tabella anagrafiche: modificato il campo 'descrizione' (Non Indicato) nel record idanag = 0 per consentire l'ordinamento alfabetico
+^ 29/01/08 AP cassa_gg_singolo e cassa_gg_globale: modificate le query per visualizzare solo i fornitori per i quali è aperto il periodo ordini
+# 25/01/07 MM Login: in determinate occasioni diceva "password errata" ma in realta' era l'email ad essere errato
+^ 25/01/08 MM Articoli: disabilitato (anziche' sola lettura) il prezzo di vendita
+# 25/01/07 MM Multigestione: errore se mancava l'admin in una delle gestioni
+# 23/01/08 AP Articoli: modificando il prezzo di acquisto, quello di vendita non prendeva il giusto valore
+# 23/01/08 MM e3g_utils.scheda_articolo, decimali prezzi: uso dell'apposito parametro al posto di 4 fissi
+# 22/01/08 MM e3g_utils.scheda_articolo: bug nella WHERE, aggancio alla sottocateg. (segnalato dall'utente Federico Munerotto)
+! 20/01/08 MM Anno finale di copyright da 2007 a 2008, ovunque
+# 20/01/08 MM Caricamento articoli: piccola correzione nella segnalazione errori al salvataggio riga
++ 15/12/08 AP EG aggiunti campi Imponibile e Imposta sulle righe nella generazione del documento PDF
+# 13/12/08 AP EG estrazione documenti corretti alcuni bug nel calcolo totali di riga
+# 13/12/08 AP EG gestione documenti: spostato il saveRow dopo le operazioni sul record corrente
+^ 11/01/08 AP GG tolta visualizzazione del pulsante etichette in gestione documenti
+# 29/12/07 AP modifiche varie per gestione IBAN (inserito campo in _aziende e previsto in stampa documenti)
+# 28/12/07 AP GG Estraz. Doc. a Fornitore: corretto errore nella generazione del file pdf
+# 28/12/07 AP GG Estraz. Doc. a Fornitore: corretto errore nella caricamento della tabella con gli articoli in ordine all'apertura della maschera
+# 28/12/07 AP GG Estraz. Doc. a Fornitore: corretto errore nella generazione del iddoc quando prefix_doct è vuota 
+
+-- beta 0.14.0/0006/0015 -- 23/12/2007 -- (rilascio pubblico) ------------------
+
+# 23/12/07 MM e3g_scrivi_footer: piccola correzione nell'impostazione di nome GAS/BdM e nome utente
+# 21/12/07 AP Correzione errore su array Coda nella generazione dei documenti in formato PDF
+^ 19/12/07 MM Aggiornamento manuali installazione e d'uso GestiGAS, nel wiki e come PDF
+^ 17/12/07 AP Modificato titolo maschere Consegna Parziale
+# 17/12/07 AP Consegna Parziale Utente: Corretto bug di posizionamento lookup all'apertura della maschera
+^ 17/12/07 AP Consegna Parziale a Utenti: la maschera è stata modificata per consentire sia la consegna parziale sia la consegna totale
+^ 17/12/07 AP Consegna Totale a Utenti: la maschera è stata rimossa (mantenuti per il momento i sorgenti e rimossi i collegamenti)
+- 14/11/07 AP EG rimossa la tabella [PREFIX]doct_estraz a seguito delle modifiche nell'estrazione documenti
+# 14/11/07 AP EG modifica routine per geneazione stampe doc. per rendere visibili le righe descrittive
+# 14/11/07 AP EG correzioni e modifiche nella maschera di estrazione documenti
++ 05/11/07 AP EG attivato un controllo sulla coerenza delle date (data di sistema, ultimo login, data contabile)
+^ 05/11/07 AP class.report.php : modificato il design della routine stampadoc
+^ 05/11/07 AP gestione documenti (testa, righe e coda): unite le routines di generazione dei documenti PDF in una unica routine inserita nel e3g_utils.php
+^ 05/11/07 AP class.ezpdf.php traduzione della dicitura PAGE OF PAGES (modificato OF con DI)
++ 05/11/07 AP EG attivata gestione movimenti contabili
++ 05/11/07 AP EG inserita maschera Piano dei conti
+^ 05/11/07 AP Doc. Tipi Doc.: modificato design maschera (aggiunta Table)
+^ 05/11/07 AP Anag. Articoli: modificata query ricerca per Codice e Barcode
++ 05/11/07 AP EG Azienda: inserita gestione anno contabile
+^ 19/10/07 AP EG Cassa_eg: inseriti db_source per gestione table totali in reportscontrino
+^ 19/10/07 AP EG Report Scontrino: risistemazione generale della maschera (pulsante TORNA INDIETRO + Table per i totali e 
+			  gestione sconto nella generazione dei documenti)
+^ 19/10/07 AP EG gestionedocumenti_righe1.php: inserito codice per la pulizia del nome file per le etichette (rimozione caratteri
+			  non ammissibili restano validi solo numeri e lettere alfabeto)
+^ 19/10/07 AP EG gestionedocumenti1.php : modifiche alle query dei Lookup ed inserimento Lookup Cliente/Fornitore per generazione nuovi documenti
+^ 19/10/07 AP EG e3g_main: sistemata la gestione Visible/Invisible dei menu
+^ 19/10/07 AP EG class.movimenti.php: modificata query relativamente alla colonna numdocum
+^ 19/10/07 AP EG tabella movcont: colonna numdocum trasformata in VARCHAR(10)
++ 09/10/07 AP EG Report Scontrino: inserito pulsante Torna Indietro
+^ 09/10/07 AP GG Ordine Corrente: Modifica query sostituzione FORMAT con ROUND (per problema visualizzazione numeri >999)
+^ 08/10/07 AP Class Report: Modifiche varie di impaginazione
+^ 08/10/07 AP Maschera Referenti Fornitori: Modificato ordinamento query
++ 08/10/07 AP Maschera Anag. Clienti: Inserito campo sconto Equogest
++ 08/10/07 AP Maschera Anag. Articoli: Inserita gestione Aggiungi Carrello per Equogest
+^ 08/10/07 AP Maschera Gest. Documenti : Pulizia Codice
+^ 27/09/07 AP Maschera Gest. Documenti Righe: Modificata collocazione campi (spostati prima della tabella articoli)
+^ 27/09/07 AP Maschera Gest. Documenti Righe: Modificata la gestione calcolo totali di riga
++ 27/09/07 AP Maschera Gest. Documenti Righe: Inserito evento onBlur sul campo codice
++ 27/09/07 AP Maschera Gest. Documenti Righe: Inserito pulsante New Row 
++ 27/09/07 AP Maschera Gest. Documenti Righe: Disabilitato il New Row automatico dopo il SaveRow
++ 16/07/07 AP Inserita Maschera Consegna Utente Chiusura per la chiusura automatica delle righe non estratte. 
++ 16/07/07 AP Stampa Documenti: Inserito CAP e spostato in giù l'indirizzo
++ 20/06/07 AP Gestione Documenti: inserito filtro giorni per vedere solo i documenti più recenti
++ 19/06/07 AP Consegna a Fam. Totale e Parziale disabilitati se il carrello non è vuoto
++ 19/06/07 AP Creato nuovo file e4g_routines.php contenente le routines varie
++ 19/06/07 AP Griglia Famiglie/Fornitori per consegna: inserita nella Cons. a Fam. Totale e Parziale
++ 15/06/07 AP modifiche a varie maschere per inserimento Coordinate Bancarie e Tipo Pagamento in stampadoc (PDF)
++ 12/06/07 AP AnagArticoli: aggiunti i campi Conto Vendita e Conto Acquisto
+^ 12/06/07 AP class.movimenti.php temporaneamente esclusa la routine per il calcolo mov. contabili per errore non ancora individuato
+^ 12/06/07 AP class.report.php piccole modifiche estetiche alla stampa del documento PDF 
++ 12/06/07 AP reportscontrino EG: aggiunta la possibilità di generare altri documenti (non solo il doc. Vendita al Dettaglio)
++ 12/06/07 AP gestionedocumenti_coda aggiunto codice per il ricalcolo dei totali di riga e dei totali del documento 
++ 12/06/07 AP opzioni_esport_pdf e gestionedocumenti aggiunto il campo sconto 
++ 08/06/07 AP aggiunto campo path_logo su tabella _aziende 
++ 08/06/07 AP aggiunta variabile globale $e3g_azienda_path_logo 
++ 08/06/07 AP aggiunta gestione path_logo sulla maschera azienda
+^ 08/06/07 AP anag_clienti spedizione mail di notifica limitata a Gestigas
++ 08/06/07 AP nella funzione stampadoc inserita la stampa della P.IVA del cliente e dell'azienda
+^ 08/06/07 AP modifiche e correzioni varie nelle maschere gestionedocumenti
+# 31/05/07 MM Ordine globale GG: inserito addSlashes() nella query di INSERT (per problema descrizioni con ')
+^ 31/05/07 MM Ordine singolo GG: addSlash() solo sulla descrizione del solo INSERT
++ 30/05/07 AP Aggiunta finestra consegna_utente_chiusura per settaggio dei flag sulle righe non estratte
+# 30/05/07 AP Cassa Globale GG: codice utente ricavato dal combo Utente nel caso la Table del dettaglio ordine sia vuota
+# 30/05/07 AP Cassa Globale GG: button Aggiungi Qta aggiunto campo qta=0 nella query Insert Into
+# 24/05/07 AP Inserito addslashes nelle query di UPDATE e INSERT in cassa_gg_singolo (per problema descrizioni con ')
+
+-- beta 0.13.2/0005/0014 -- 19/05/2007 -- (rilascio pubblico) ------------------
+
++ 19/05/07 MM Aggiunta icona finestre: periodo ordini, profilo personale, anag. utenti/clienti, config.
+# 19/05/07 MM Spostata query di inserimento relativa ad EQ dall'update 0014 allo script iniziale (in GG quella riga è già presente)
++ 17/05/07 MM Opzioni esportazione PDF: aggiunta icona finestra e sistemate denominazioni campi
+^ 17/05/07 MM Rinominato file doccampireport.php (Opzioni esportazione PDF) in opzioni_esport_pdf.php
+
+-- beta 0.13.1/0005/0014 -- 16/05/2007 -- (rilascio pubblico) ------------------
+
+# 16/05/07 AP Consegna Utente Totale: corretto posizionamento del combo all'apertura e dopo estrazione di un ordine
+# 15/05/07 MM Anag. fornitori: corretta gestione della disabilitazione campo codice
+# 15/05/07 MM Anag. utenti: il codice rimaneva disabilitato all'inserimento iniziale degli utenti (tabella vuota)
+# 15/05/07 MM Nuovo utente: inviava e-mail di notifica non solo agli utente abilitati, ma anche ai nuovi
+^ 15/05/07 MM Nuovo utente: propone "tipo accesso: utente' per default
+# 15/05/07 MM Nuovo utente: proponeva codici che potevano essere non univoci
+# 15/05/07 MM Script di agg. multi_0014: alcuni prefissi erano indicati in minuscolo
+# 15/05/07 MM Consegna parziale ad utente (det): mancava dichiarazione p4a in calcola_tot_riga()
+^ 15/05/07 MM Uniformati esteticamente bottoni, icone ed etichette delle finestre estraz. ordine fornitore, consegna (tot/parz.)
+# 15/05/07 AP Corretta chiamata a home->items->admin in e3g_main (il menu non esiste in Equogest)
+# 11/05/07 AP Correzioni setNewValue --> setValue in Gestione Documenti
+
+-- beta 0.13.0/0005/0014 -- 09/05/2007 -- (rilascio interno) -------------------
+
+- 09/05/07 MM e3g_main: disattivata funzione di verifica presenza delle tabelle
+! 09/05/07 MM Verifica compatibilità con p4a 2.0.6
+^ 08/05/07 AP Consegna Utente Totale filtro solo utenti con articoli in ordine
+# 08/05/07 AP Correzione setNewValue --> setValue sui campi Prezzo e Quantita in varie maschere
+^ 08/05/07 AP Maschere Documenti: modifiche varie per esportazione documenti in formato ODT 
+# 08/05/07 AP Consegna Totale a Famiglia: filtro su righe già estratte per evitare di estrarre dai vecchi ordini
+^ 08/05/07 AP Estrazione Ord. Fornitore: modificato il documento per rendere non visibili in stampa le righe con qta = 0 
++ 08/05/07 AP cassa_gg_singolo.php : aggiunto l'importo totale nel pdf dell'ordine (L'importo è stato messo nel titolo)
+^ 08/05/07 AP Tolto il commento al P4A_LOCALE e sostituiti setnewvalue con setvalue nei documenti
++ 08/05/07 AP Aggiunta class.text.php e relative variabili e3g_azienda_tipo_documento e e3g_azienda_path_documento
++ 08/05/07 AP Update DB: aggiunti campi per esportazione documenti in formato ODT
+^ 08/05/07 MM Aggiornamento versioni PDF dei manuali
+# 27/04/07 AP Commentato il define('P4A_LOCALE' nel file config perchè causa di un errore sui decimali
+^ 27/04/07 AP Piccole modifiche al calcolo Totali Carrello EG
+# 27/04/07 AP Modifica DB ai campi codice clifor varchar 15
+# 11/04/07 MM Sostituito in oltre 30 file il '<?PHP' iniziale col più corretto '<?php'
+! 11/04/07 MM Anno finale di copyright da 2006 a 2007, ovunque
+^ 10/04/07 AP Carrello EG: modifiche al design della maschera
+# 06/04/07 AP Query Creazione Db: inserimento valore per campi data NOT NULL
+# 06/04/07 AP Esportazione PDF: modifiche per visualizzazione colonna fornitore e quantita2 (qta aggiunta)
+# 06/04/07 AP Estrazione documenti: modifiche per estrazione qta_agg
+# 04/04/07 AP Estrazione Gestigas: piccole modifiche funzionali
+# 04/04/07 AP Anag. Utenti, Clienti, Fornitori e Articoli: campo Id settato a decimal per evitare problemi con valori >999
+# 26/02/07 AP EquoGest: correzione per visualizzazione finestra Multigestione
++ 12/02/07 AP Upd database: modifica campi qta nelle tabelle docr, movmagr, carrello da INT a DOUBLE
+# 12/02/07 AP EquoGest: Anag Articoli gestione newrecord con db vuoto
++ 12/02/07 AP EquoGest: Report Scontrino aggiunta flag Visibile nelle righe del doc. creato
++ 12/02/07 AP EquoGest: Gest. Doc. visualizzazione tutte le righe non solo Visibili
+# 26/01/07 AP Gestione Doc.: aggiunta dichiarazione $p4a nella routine calcola_tot_riga
+^ 26/01/07 MM Manuali: aggiornato l'anno di copyright da 2006 a 2007
+# 26/01/07 MM Manuale installazione: specificato che il prefisso deve essere minuscolo
+# 26/01/07 AP Gestione Doc.: corretto update dei totali sulla testata del documento
+# 26/01/07 AP Anag. Articoli: corretta gestione enable/disable campo codice
+# 26/01/07 AP cassa_eg.php: tolti filtri qta minima in ordine
++ 25/01/07 AP EquoGest: aggiunta finestra esporta_dati 
++ 24/01/07 MM Finestra anagrafica unità di misura anche per GestiGAS, differenziando tra admin e ref
+^ 24/01/07 MM Ridenominazione anagutenti (usata solo per equogest) in anag_utenti_eg
+# 23/01/07 AP reportscontrino.php: corretti alcuni errori di indirizzamento a vecchie tabelle e nomi campi
++ 23/01/07 AP EquoGest: aggiunta gestione codice utente nelle routine mov.mag. per gestione acquisti da soci 
+# 23/01/07 AP cassa_eg.php: rinominato file che erroneamente si chiamava cassa_eq
+# 23/01/07 AP signup.php: corretto errore ortografia nel messaggio
+# 15/01/07 AP Anag. Clienti: corretto errore nel main() per la gestione zero record
+^ 15/01/07 AP creata update_cond_0005 e modificata maschera azienda.php per campi conto corrente 
++ 15/01/07 AP Anag. Clienti e Utenti: inserito controllo per impedire autoeliminazione utente (AnagCli per GG e AnagUtenti per EG)
++ 12/01/07 AP Ancorati campi Cod. Fisc. e P.Iva in Anag. Clienti e Fornitori
++ 12/01/07 AP Inserita maschera per la gestione unita di misura
++ 12/01/07 AP Inserita maschera per la gestione progetti Equogest
++ 09/01/07 AP Anag. Utenti: resi invisibili record per Admin Globale (Equogest)
++ 09/01/07 AP Anag. Articoli: aggiunto lookup sul campo progetto (Equogest)
+^ 06/01/07 AP Modificata update_0014 per modifica colonna progetto della tabella 
+^ 06/01/07 AP Inserita variabile globale e3g_azienda_anno_contabile
+^ 02/01/07 AP E4G Utils: modificata dicitura footer per Equogest
+# 29/12/06 AP Anag. Cat. Merce: inserito filtro Where per evitare cancellazione record NON INDICATO
+# 29/12/06 AP Anag. Tipo Articolo: inserito filtro Where per evitare cancellazione record NON INDICATO
+# 29/12/06 AP Anag. Articoli: corretto errore nella generazione automatica del barcode
+^ 29/12/06 AP Anag. Articoli: campo codice reso editabile per Equogest
+^ 29/12/06 AP Anag. Articoli: campo tipo reso obbligatorio per Equogest
++ 29/12/06 AP Tabella Catmerceologia: aggiunta query UPDATE 0014 per inserimento record NON INDICATO (Equogest)
+# 29/12/06 AP Anag. Articoli: campo stato obbligatorio solo per Gestigas e non per Equogest
+# 27/12/06 MM Periodi ordine: non visualizzava i periodi dei fornitori senza referente (join anzichè left join)
+^ 26/12/06 MM Sistemazione file remoti multigestione anche per Equogest (login_inst/root/)
+
+-- beta 0.12.0/0004/0013 -- 23/12/2006 00:00 -- (rilascio pubblico) ------------
+
+^ 22/12/06 MM Aggiornamento versioni PDF dei manuali
+^ 22/12/06 MM Uniformati titoli di finestra, bottoni e icone file relativi a consegna articoli ad utenti
+^ 22/12/06 MM Ridenominazione file relativi a consegna articoli ad utenti
+^ 16/12/06 AP Estraz. Totale Doc. Utenti: inserita gestione quantita2
+# 15/12/06 MM Creazione doc. consegna totale: mancava dichiarazione $p4a
++ 12/12/06 AP Estraz. Doc. Utenti: aggiunta la variabile $p4a->e3g_consegna_famiglie_fornitore 
+              per l'estrazione dell'ordine alle famiglie
+^ 12/12/06 AP Estraz. Doc. Utenti: corretta la possibilità di filtrare per Fornitore 
+              ed aggiunta la colonna fornitore nella table 
+^ 08/12/06 AP Estraz. Doc. Utenti: modificato update quantita in ordine a fornitore 
+              (campo quantita invariato, quantita2 con la quantita consegnata)
+^ 08/12/06 AP Query Db: modificato il campo importo in totale nelle query di creazione e aggiornamento in doccampireport
+^ 07/12/06 MM Sistemazione predisposizione multilingua
+^ 07/12/06 MM Personalizzazione report PDF: sistemazione estetica e ridenominazione
+^ 07/12/06 MM Gest. doc.: sistemazione estetica per avere una visione più ampia della griglia
+- 07/12/06 MM GetiGAS, menu admin: nascosta voce "Tipi pagamento" che per ora non serve
+# 06/12/06 AP Gest. Doc.: corretti errori nel recupero dell'anno contabile (se non specificato = date("Y"))
+# 06/12/06 AP Gest. Doc.: corretti errori nella gestione della stampa etichette
+# 06/12/06 AP Gest. Doc.: nelle righe del doc. corretto errore nella gestione del cambio riga
++ 05/12/06 AP inserito file it.php per la traduzione e inclusione del file nel config (temp. commentato)
+# 05/12/06 AP Anag. Articoli: corretto errore campi disabilitati con login come referente e tab. articoli vuota
+^ 04/12/06 AP Estraz. Consegna Famiglie: piccole modifiche funzionali (click su Table) 
+              ed estetiche (Table nella consegna_utente_parziale)
+^ 04/12/06 AP Query Creazione Db: modifica tipo utente per utente ADMIN (installazione Equogest)
++ 30/11/06 AP Gest. Doc.: inserito filtro doc. per Referenti GestiGAS
+# 30/11/06 AP Creazione DB: corretti piccoli errori nella creazione DB per Equogest
+^ 30/11/06 AP Gest. Doc.: gestione docscontrino solo per EG e non per GG
+# 28/11/06 AP Estraz. Doc.: corretto errore nell'estrazione dei prezzi sulle righe visibili  
+^ 28/11/06 AP Stampa Doc.: inserita formattazione decimali nei totali documento
+# 27/11/06 AP Query agg. Db: inserita query (0013) per aggiornamento contenuti field campo in doccampireport 
+# 27/11/06 AP Query creazione Db: corretto nell'inserimento dei record della tabella doccampireport (campo in minuscolo)
+# 27/11/06 AP Campi Report: corretto errore visualizzazione fields 'campo'
+^ 26/11/06 AP Gest. Tipi Doc. : resa visibile dalla gestione Amministrazione la maschera Tipi Doc.
+^ 26/11/06 AP Campi Report: inserito combo per selezione campi database
+^ 26/11/06 AP Gestione doc.: completata dicitura pulsanti stampa
+# 26/11/06 MM Gestione doc.: non visualizzava correttamente l'autore del documento (codice al posto dell'ID)
+
+-- beta 0.11.0/0004/0012 -- 26/11/2006 16:00 -- (rilascio interno) -------------
+
+- 26/11/06 MM Script _multi_0012: eliminazione alcune tabelle non più inutilizzate
++ 26/11/06 MM Esportazione ordine PDF: visualizzazione completa dell'indirizzo con CAP, località e provincia
+^ 26/11/06 MM Gestione doc.: alcune sistemazioni estetiche (icone, colonne, etichette, ecc.)
+# 26/11/06 MM Gestione doc.: aggiunte numerose dichiarazioni di $p4a mancanti
+^ 26/11/06 MM Menu: visualizzazione "Gestione doc." e "Consegna art." anche per i referenti
+^ 25/11/06 MM Manuale instal.: eliminata la proposta di modifica a phpSniff.class.php di p4a
+              nel caso di open_basedir, dato che dalla 1.99.4 questa libreria è stata rimossa
++ 24/11/06 AP Estraz. Doc.: inserita label con totali ordine (num. pezzi, num. cartoni, importo, num. utenti)
+^ 23/11/06 AP Estraz.Doc.: inserito tab panel per visualizzazione articoli e dettaglio
+^ 23/11/06 AP Gestione Doc.: inserito testo label sui pulsanti
+- 22/11/06 MM Script _multi_0012: eliminazione tabella inutilizzata articoloperiodo_id
+# 22/11/06 AP Estraz. doc. : corretti errori in estrazione per consegna a famiglia
+- 22/11/06 AP Eliminata tabella inutilizzata articoloperiodo_id
+^ 19/11/06 AP Stampa Doc.: inserita gestione decimali come da costante globale $p4a
+^ 19/11/06 AP Gestione Doc.: modificata gestione per compilazione automatica data_ins e idanag
+^ 19/11/06 AP Gestione Doc.: inseriti campi data_ins e idanag
+^ 19/11/06 AP Stampa Doc.: modificato layout per stampa dati GAS (indirizzo, telefono, mail)
+^ 19/11/06 AP Stampa Doc.: create 3 nuove variabili globali: indirizzo GAS , telefono GAS , mail GAS
+^ 19/11/06 AP Stampa Doc.: modificate query per descrizione più dettagliata 
+^ 17/11/06 MM Nuova funzione di verifica email per riconoscere anche quelli su domini di terzo livello
+^ 17/11/06 AP Estraz. Ordini: prezzoacq in ordine per fornitore estratto
+# 17/11/06 MM Gestione doc. - Coda: aggiunte numerose dichiarazioni di $p4a mancanti
++ 17/11/06 AP Estraz. Ordini: inserita caption campo Data e Table
+^ 17/11/06 AP Estraz. Ordini: modificate colonne della tabella
++ 17/11/06 AP Estraz. Ordini: inserito filtro fornitori per login come referente
+^ 17/11/06 AP Stampa Etichette: modificata gestione variabile etichette_path
++ 17/11/06 AP Estraz. Ordini: inserito controllo per impedire estrazione di fornitori con 0 articoli in ordine
+# 17/11/06 AP Gest. Documenti: corretto errore su apertura documento inesistente
+# 17/11/06 AP Doc. Estratti: corretto errore apertura pagina (la maschera è solo abbozzata, attualmente non utilizzata)
+# 17/11/06 AP Estraz. Ordini: corretta estraz. quantita (qta+qta_agg) e integrazione qta per raggiungere il minimo per articolo
+^ 16/11/06 MM Ordine globale: eliminazione dei vincoli sull'aggiunta/modifica qtà articoli
+# 16/11/06 MM Anag. fornitori: mancata dichiarazione $p4a in mastro_click()
+# 16/11/06 MM Anag. fornitori: in cancellazione non venivano eliminate eventuali relazioni referente/fornitore
++ 16/11/06 MM Caricamento Referenti/Fornitori: controllo univocità coppia
+# 16/11/06 MM Caricamento Referenti/Fornitori: errore alla conferma (errata attribuzione ID)
+# 16/11/06 MM (GG) Estraz. ordini per forn.: riferimento a var. di sessione e mancata dichiarazione $p4a
+# 16/11/06 MM Ordine globale: correzione esportazione PDF)
+# 16/11/06 MM Recupero password: notice che impediva il recupero della password
+# 15/11/06 AP Estraz. Ordini: corretti errori nella generazione delle righe visibili.(GRUOP BY e codarticolo)
+# 14/11/06 MM Anagrafica utenti: errata attribuzione codice provvisorio in nuovo utente
+# 14/11/06 AP Ordine globale: tab_spesa_forn modificato il tipo della colonna importo [...->cols->importo->setType("decimal");]
+# 14/11/06 AP Ordine globale: ancoraggio oggetti al pane aggiunto il prefisso $this->
+^ 13/11/06 MM Ordine globale: nuova vista spesa raggruppata per fornitore
+^ 09/11/06 MM Statistiche multigestione: ottimizzazione query
++ 09/11/06 AP Esportazione Listino: inserito combo per Order By 
+^ 08/11/06 MM Ordine globale: nuove colonne (qta aggiunta) e allargamento di tutti gli elementi
+^ 08/11/06 AP Maschera Periodo-Articoli: modificata la selezione degli articoli
++ 08/11/06 AP Inserita maschera Wizard (sqldbcreate) per la generazione del database
+# 08/11/06 AP Maschere About: correzione errori nella chiamata aggiorna_db_versione
++ 07/11/06 MM Ordine globale: nuova vista "lista della spesa raggruppata" (per utente)
++ 07/11/06 AP Estrazione Documenti per fornitore: inserito controllo sull'importo minimo
+# 07/11/06 AP Aggiornamento DB: corretto errato riferimento a variabile $prefix
+^ 06/11/06 AP Estrazione e Gestione Doc.: modifiche alle stampe per visualizzazione Totali documento
+# 06/11/06 AP Maschere Estrazione Documenti: Modificate Routine estrazione e corretti errori vari
+
+-- beta 0.10.1/0004/0011 -- 06/11/2006 00:00 -- (rilascio interno) -------------
+
++ 05/11/06 MM Ordine globale: nuova vista "lista della spesa raggruppata" (per articolo)
+# 05/11/06 MM Anag. utenti: errore inserimento nuovi utenti
+# 03/11/06 AP Documenti Estrazione: modificata routine di estrazione 
+# 03/11/06 AP Gest. Documenti: correzione errori nella routine di Stampa Documento 
++ 03/11/06 MM Scheda articolo: visualizzazione di categoria e sottocategoria
+# 03/11/06 MM Il messaggio introduttivo non veniva aggiornato (about_user.php)
+
+-- beta 0.10.0/0004/0011 -- 03/11/2006 01:30 -- (rilascio interno) -------------
+
+# 02/11/06 AP Gest. Documenti: inserita la dichiarazione p4a nella routine cmdapri_click e cmdnuovo_click 
+# 02/11/06 AP Estraz. Ordine Fam.: inserita la dichiarazione p4a nella routine di stampa 
+# 02/11/06 AP Estraz. Ordine Fam.: corretto errore di battitura sul nome della variabile e3g_azienda_prezzi_mag_fissa
++ 02/11/06 MM Ordine globale: rifacimento completo
+# 02/11/06 MM Ordine corrente: numerose correzioni
++ 02/11/06 MM Ordine corrente: nuovo filtro per lista della spesa
++ 02/11/06 MM Nuova voce di menu per interfaccia di amministrazione
++ 02/11/06 MM Rifacimento totale finestra creazione nuova gestione
+# 01/11/06 MM Categorie/tipi articoli e sottocategorie: mancata dichiarazione p4a in main()
+# 01/11/06 MM Esportazione listino CSV: correzione e riorganizzazione funzioni
+^ 31/10/06 AP Anag. Cat. Merce e Tipo Articoli: inserita gestione enable / disable per campo codice
+^ 30/10/06 MM Esportazione listino PDF: sistemazione colonne
+^ 30/10/06 MM Ordine corrente: sistemazione colonne listino PDF
+# 30/10/06 MM Periodo ordini: non si riusciva a caricare il primo record
+# 30/10/06 MM Chiave primaria nella tabella fornitoreperiodo
+- 30/10/06 MM Eliminazione titolo finestra visualizzazione manuale per incompatibilità con IE
+- 30/10/06 MM Eliminazione temporanea icona menu "home" per incompatibilità con IE
+
+-- beta 0.9.0/0004/0011 -- 29/10/2006 14:00 -- (rilascio interno) --------------
+
+^ 29/10/06 MM Finestra ordine corrente: risistemazione estetica, ottimizzazione e numerose correzioni
++ 28/10/06 MM Anag. articoli: nuova colonna con prezzo per unità di misura
++ 28/10/06 MM Anag. articoli: ripropone fornitore e categoria articolo precedente 
++ 28/10/06 MM Verifica iniziale connessione database
+^ 27/10/06 MM Catalogo articoli: nuova gestione tipologia prezzi
++ 26/10/06 MM Azienda (e DB): nuovi campi per la gestione prezzi
+# 26/10/06 MM Estrazione documenti EQ: mancava dichiarazione p4a
+^ 26/10/06 MM Catalogo articoli: risistemazione estetica più campi date
++ 26/10/06 MM Anagrafica articoli: campi date inserimento e ultima modifica
+# 26/10/06 MM Anagrafica fornitori: correzione abilitazione campi
++ 25/10/06 MM Periodo ordini: aggiunta colonna con nome del referente; suo ordinamento 
+              disabilitato temporaneamente (in attesa di p4a bugfix)
++ 25/10/06 MM Luoghi consegna: aggiunta condizione sul prefix e controllo campi obbligatori
+# 25/10/06 MM Profilo personale: mancava il messaggio di codice 35 (email non valido)
+^ 25/10/06 AP Anag. Utenti: corretto errore di visualizzazione del Tipo Utente (mancava 'A' nella query)
+- 25/10/06 AP Catalogo Articoli: disabilitato temporaneamente ordinamento nella colonna descrizione2 (in attesa di p4a bugfix)
+^ 24/10/06 MM Anagrafica fornitori e periodi ordini: risistemazione estetica
++ 24/10/06 MM Nuova gestione luoghi consegna
++ 24/10/06 MM Possibilità di impostare l'importo minimo dell'ordine
+# 23/10/06 MM Notifica richiesta nuovo account e funzione recupero email admin
+
+-- beta 0.8.0/0003/0010 -- 22/10/2006 17:30 -- (rilascio interno) --------------
+
+# 22/10/06 MM Aggiornamento DB: eliminazione del nome db dalla sostituzione del prefisso
+^ 22/10/06 MM Login: usa i nuovi campi di login se dbver >= '0010'
+^ 20/10/06 AP Report PDF: corretto path dei Font 
+^ 20/10/06 AP Anagrafica Utenti/Clienti/Fornitori: modificata la gestione del newrecord 
+			  (ora il controllo avviene sul campo idanag)
+^ 19/10/06 AP Catalogo Prodotti: pannello di ricerca inserito ordinamento alfabetico
+^ 19/10/06 AP Catalogo Prodotti: lookup fornitori inserito ordinamento alfabetico
++ 18/10/06 MM Multigestione: visualizzazione n. login e data ultimo accesso
++ 18/10/06 MM Profilo: visualizzazione n. login e data ultimo accesso
++ 18/10/06 MM Anag. utenti: invio notifica nel caso di abilitazione
+# 17/10/06 MM Anag. utenti: mancava il messaggio di codice 35 (email non valido)
++ 17/10/06 MM Finestra informazioni: PayPal button per donazioni
++ 17/10/06 MM about_user.php: visualizzazione n. login e data ultimo accesso
+^ 16/10/06 MM Anagrafica utenti: risistemazione estetica
++ 16/10/06 MM Utenti: memorizzazione n. login e data ultimo accesso
+# 16/10/06 MM Multigestione: correzione query estrazione dati statistici
++ 16/10/06 MM GestiGAS: attivazione "Strumenti|Esegui query" nel caso di superadmin
+^ 16/10/06 MM Index.php: controllo sull'impostazione del tipo di gestione
+^ 16/10/06 MM Agg. manuale installazione per renderlo utilizzabile anche nel caso di Equogest
+^ 16/10/06 MM Anag. articoli: piccole modifiche estetiche
+
+-- beta 0.7.1/0002/0009 -- 15/10/2006 03:00 -- (primo rilascio pubblico) -------
+
+^ 15/10/06 MM Aggiornamento versioni PDF dei manuali d'installazione e d'uso
++ 15/10/06 MM File "leggimi.txt"
+^ 15/10/06 MM Database: accorpati gli updates fino al 0002/0009 negli script di creazione db
+
+-- beta 0.7.0/0002/0009 -- 14/10/2006 03:00 ------------------------------------
+
+^ 14/10/06 MM Spostamento definitivo del numero di versione db in _aziende
+^ 14/10/06 MM Riscrittura di e3g_where_ordini_aperti() per retrocompatibilità con MySQL 4.0.24
+^ 13/10/06 MM Sistemazione file per link da remoto nel caso di multi-gestione (/login_inst)
+# 13/10/06 MM Non considerava correttamente i periodi ordine ricorsivi
+^ 13/10/06 MM Funzione per inizializzare $e3g_where_referente (ex $p4a->wherereferenti)
+# 13/10/06 MM Ordine singolo e globale: sostituito CONCAT con CONCAT_WS
+^ 13/10/06 AP Catalogo prodotti: nella prima colonna visualizzata la descrizione anzichè il codice  
+^ 13/10/06 AP Anagrafica fornitori : accesso referente disabilitati i campi se non si tratta di fornitore del referente 
+^ 13/10/06 AP Sostituito $_SESSION['wherereferenti'] con $p4a->wherereferenti
+# 13/10/06 AP Catalogo Prodotti: sostituito CONCAT con CONCAT_WS per evitare problema del NULL sul campo um_qta
+# 13/10/06 AP esporta_listino: modificato campo Fornitore in fornitore
++ 13/10/06 AP inserite maschere Modifica Codice
+# 13/10/06 AP inserita istanza di $p4a nelle routine stampa_pdf e stampa_csv della finestra esporta_listino
+# 13/10/06 AP rimessi file class.pdf.php  class.ezpdf.php nella stessa cartella 
+              di class.report.php per evitare il problema con i fonts del pdf
+# 12/10/06 MM Multigestione: non si riusciva a scorrere le righe della griglia
+^ 12/10/06 MM Anagrafiche: campo "prov" -> "provincia" varchar(20)
+^ 12/10/06 MM Anagrafiche: sostituzione campo "citta" col più generico "localita"
+^ 12/10/06 MM Riscrittura completa finestra multi-gestione
+^ 11/10/06 MM Riscrittura finestra "Opzioni" (azienda.php)
++ 11/10/06 MM Icone nelle voci di menu
++ 11/10/06 MM Equogest: richiamo del manuale e della finestra di informazioni
+^ 10/10/06 MM Semplificazione file da usare nel caso di multigestione (login_inst)
+^ 10/10/06 MM Nuova gestione centralizzata del login 
++ 05/10/06 MM Login, richiesta account: verifica se l'utente è già presente
++ 04/10/06 MM Immagine logo e3g nella finestra di informazioni
+# 03/10/06 MM e3g_utils: correzione funzione aggiornamento database
++ 03/10/06 MM Anag. utenti: compilazione automatica della descrizione
++ 03/10/06 AP Tabelle _mesi e _si_no: cancellate per sostituzione con gestione array_source
++ 03/10/06 AP Db Init: ripuliti script creazione db dalle tabelle inutilizzate
++ 03/10/06 AP Db Update: inserita doppia gestione tabelle condivise e tabelle normali
++ 03/10/06 AP HOME: inserita dicitura utenti in attesa di abilitazione
+^ 03/10/06 AP Db Updates: Accorpati gli updates fino al 0007 negli script di creazione db
+# 03/10/06 AP Anag. Articoli: Corretto errore sul controllo univocità nuovo articolo
+# 03/10/06 AP Anag. Articoli: Nuovo articolo inserito controllo associazione Referente/Fornitore
+
+-- beta 0.6.0/0008 -- 03/10/2006 14:00 -----------------------------------------
+
+# 03/10/06 MM Anag. articoli: in inserimento propone lo stato = abilitato
+^ 03/10/06 MM Rinominato il file di configurazione in config_inst.php per evitare problemi con gli aggiornamenti
+^ 02/10/06 MM Ordine singolo: diverse modifiche estetiche alla finestra
+# 02/10/06 MM Ordine singolo: con "svuota carrello" l'admin e il ref eliminavano tutti i carrelli anzichè solo il proprio
+^ 02/10/06 MM Ridenominazione file degli ordini (cassa*.php)
+# 02/10/06 MM Modificate tutte le occorrenze di getRow in queryRow (p4a 1.99.x)
+^ 01/10/06 AP GestiGas: Ordine Corrente spostata in alto la label Importo Carrello
+^ 01/10/06 AP GestiGas: Ordine Globale ridisegnato il layout della maschera
+# 01/10/06 AP Corretti alcuni errori dovuti all'aggiornamento p4a 1.99.x
+^ 27/09/06 MM Correzione url del manuale online sul wiki (in confif.php)
+^ 18/08/06 AP Gest. Documenti: spostata la generazione dei movimenti nella classe class.movimenti.php
+^ 18/08/06 AP Estraz. Documenti: sistemata la maschera doc_estrazione_eg (da finire!)
++ 11/08/06 AP Files Sql: caricati, nella cartella db_new, i files sql con i campi minuscoli per il passaggio a p4a 1.99
+^ 11/08/06 AP Anag. Clienti e Fornitori: sistemati campi Conto e Mastro per la contabilità 
++ 11/08/06 AP Anag. Azienda: introdotto campo etichette_path per memorizzare la cartella delle etichette con il barcode
++ 10/08/06 AP Gestione Documenti - Righe: introdotto il pulsante per la stampa delle etichette con barcode
+^ 04/08/06 AP Periodo Ordini: Referente abilitato a vedere tutto, ma può modificare solo periodi dei propri fornitori 
++ 03/08/06 AP Anag. Articoli: introdotto il campo STATO (update_00006.sql)
++ 03/08/06 AP Anag. Articoli: in fase di cancellazione inserito controllo se l'articolo è in carrello o in un documento
++ 03/08/06 AP Anag. Fornitori: campo Note disabilitato per Utente normale; rich_textarea solo per Referente e Admin
++ 03/08/06 AP Anag. Fornitori, Profilo, Utenti: inseriti campi Data Ins. e Data Agg. (Disabilitati in fondo alla finestra)
++ 02/08/06 AP Anag. Fornitori: in fase di cancellazione inserito controllo se ci sono articoli associati
+# 26/07/06 AP Anag. Articoli: Corretto errore che impediva il salvataggio di 
+              modifiche alla scheda articolo (controllo doppio codice) 
+# 12/07/06 AP Estraz. Ord. Fornitore: Corretto errore nell'incremento di $rigarel nella routine di estrazione righe 
+^ 07/07/06 AP Ordine Corrente: modificata dicitura importo corrente
+^ 07/07/06 AP Ordine Corrente: re-styling con aggiunta del Tab_Pane
+# 05/07/06 AP Ordine Corrente: corretto errore query per esportazione listino
+^ 24/06/06 MM Aggiornamento classi creazione pdf e spostamento in una sottodirectory di libraries
+
+-- beta 0.5.0/0005 -- 24/06/2006 17:00 -----------------------------------------
+
+^ 24/06/06 MM Agg. DB: aggiunto anche il nome del database davanti alle tabelle
+# 21/06/06 AP Anag. Articoli: corretto errore query per Referente senza nessun fornitore associato
+# 21/06/06 AP Anag. Articoli: abilitazione a tutti i campi per Admin e Super Admin
+# 21/06/06 AP Anag. Articoli: corretto il setWhere per Referente 
+# 21/06/06 AP Ordine Corrente: corretto il setWhere per Referente 
+# 21/06/06 AP Periodo Ordini: corretto il setWhere per Referente e sostituita gestione Visbile/Invisible con Enable/Disable 
+^ 20/06/06 MM Aggiornata pagina informazioni sul programma (about)
+^ 19/06/06 AP Anag. Articoli: doppia gestione per il campo descrizione (nella Table e nei Fields)
+^ 19/06/06 AP Anag. Articoli: tutti gli articoli visibili per il referente ma abilitati solo quelli dei fornitori associati
+# 18/06/06 AP Ordine Corrente: corretto errore nel filtro che perdeva il filtro SOLO ART. ORDINABILI
+^ 18/06/06 AP Profilo Personale e Anag. Utenti: Campo Note allargato a 3 righe
+^ 18/06/06 AP Anag. Articoli:cambiata gestione Fields da Visible/Invisible a Enable/Disable 
+# 18/06/06 AP Anag. Articoli: corretto errore nel filtro per Categoria Merce (errore nel nome campo)
++ 18/06/06 AP Anag. Articoli: sdoppiato il campo descrizione (e descrizione2) 
+              per consentire diversa gestione tra table e field
+# 17/06/06 AP Periodo Ordini: corretto errore nel setWhere per login come Referente 
+# 16/06/06 MM Anag. articoli e ordini: chiuso tra due parentesi [] l'um in coda alla descrizione
+^ 16/06/06 MM Aggiornamento del manuale sia HTML nel wiki, che PDF nei sorgenti
++ 14/06/06 AP Ord. Corrente: filtro tabella prodotti per i soli prodotti ordinabili
+# 14/06/06 AP Ord. Corrente: eliminato l'evento change del combo fornitore
+# 14/06/06 AP Ord. Corrente: eliminato l'errore sui combo Categoria e Sottocategoria
+^ 14/06/06 AP Maschere Ord.: inseriti i campi UM e UM_QTA nelle tabelle
++ 14/06/06 AP Inserita gestione dei decimali personalizzabili (Catalogo Articoli e Ord. Corrente e Ord. Globale)
++ 14/06/06 AP Inserito campo NOTE in anag. utenti e profilo
+# 14/06/06 AP Stampa Listino: corretto errore (stampa articoli duplicati)
+# 14/06/06 AP Catalogo Prodotti: tolta la colonna IVA
+# 14/06/06 AP Catalogo Prodotti: tolta la colonna BARCODE e inserito FORNITORE
++ 14/06/06 AP Inserito filtro categoria e sottocategoria in Catalogo Prodotti
+# 14/06/06 AP Anag. Famiglie: corretto errore sul message non visualizzato
+# 14/06/06 AP Periodo Ordini: corretto errore sul message non visualizzato
++ 14/06/06 AP Anag. Fornitori: possibilità per il referente di modificare solo i propri fornitori
+
+-- beta 0.4.0/0004 -- 14/06/2006 15:30 -----------------------------------------
+
++ 14/06/06 MM Icona dei segnalibri/favoriti
++ 14/06/06 MM Agg. db con sistemazione categoria (ovvero tipo) articoli
+# 14/06/06 MM Catalogo articoli: eliminato il vincolo di 2 decimali per i prezzi
++ 14/06/06 MM Aggiunto tra i sorgenti (/docs) il manuale in PDF
++ 14/06/06 MM "? | Manuale": richiamo del manuale GestiGAS on-line
++ 14/06/06 MM config.php: nuovo parametro forzare l'utilizzo del manuale HTML online
+              o quello PDF presente nell'installazione
++ 13/06/06 MM nuova finestra di about con le informazioni sul programma
++ 13/06/06 MM menu: nuova voce ? con richiamo del manuale e info sul software
+^ 13/06/06 MM menu: spostato comando "Esci..." sotto HOME e aggiunta richiesta conferma
+# 12/06/06 AP Ordine: eliminato ricaricamento pagina alla scelta del fornitore
+# 12/06/06 AP Stampa listino: gli articoli si ripetevano più volte
+# 12/06/06 AP Anag. articoli: compilazione del tipo nel saverow
+# 12/06/06 MM Riga di footer: errore nella visualizzazione del db_ver
+# 12/06/06 MM Login diretto: errore se non si scriveva nè email nè pass
+^ 12/06/06 MM Stampa PDF: modificata la riga di footer e aggiunto il nome utente
+^ 12/06/06 MM Finestra ordine: aggiornati alcuni termini e icone
++ 12/06/06 MM Manuale referente/articoli: spiegato il significato dei vari campi qtà
+^ 12/06/06 MM Applicate le icone a vari bottoni e rimpiazzati i vecchi riferimenti
++ 12/06/06 MM Aggiunte numerose nuove icone (GPL tema nuvola)
++ 11/06/06 MM Nuova gestione login diretto con lettura da tabella _aziende
++ 11/06/06 MM Nome dell'applicazione nella barra del titolo del browser
+# 11/06/06 MM Errore in apertura finestra multigestione (nome campo errato)
+# 11/06/06 MM Ordine (corrente e globale): errore se si entra senza articoli
+# 11/06/06 MM azieda.php: visualizzava i numeri di versione solo la prima volta
+^ 11/06/06 MM Footer: se modo debug, allora mostra la versione del db
+              (in grassetto se è diversa da quella attesa)
+^ 11/06/06 MM La costante P4A_EXTENDED_ERRORS è posta uguale allo STATO_DEBUG
+# 11/06/06 MM Corretto update 0002: sostituzione PRIMARY KEY con UNIQUE causa errore
+              (non si può fare primary key un campo che può essere null)
+^ 11/06/06 MM Sostituito ovunque il termine "famiglia" con "utente"
++ 11/06/06 MM Agg. db: verifica dei singoli update con visualizzazione eventuali prob.
++ 11/06/06 MM Aggiunte le icone sotto la directory del template e sistemate le
+              relative costanti nel config-const.php
+^ 10/06/06 MM Spostata definizione della costante P4A_EXTENDED_ERRORS nel config.php
+
+-- beta 0.3.1 -- 10/06/2006 10:30 ----------------------------------------------
+
++ 09/06/06 MM Aggiunte icone ai bottoni della schermata iniziale
+# 09/06/06 MM Correzione nella determinazione di ordine aperto in about2, cassa2 e cassa3
++ 09/06/06 MM Creazione database: avviso finale di creazione avvenuta o meno
++ 09/06/06 MM Richiesta di conferma dell'aggiornamento del database
++ 09/06/06 MM Richiesta di conferma dello svuotamento del carrello
+^ 09/06/06 MM Anagrafiche famiglie, fornitori, articoli: impedita la modifica
+              del codice utente dato che viene usato come chiave (sarebbe meglio
+              per questo motivo usare l'ID)
++ 09/06/06 MM Aggiornamento variabili di sessione lette da db quando i loro 
+              valori possono essere modificati
++ 09/06/06 MM Scheda articolo: visualizzato il genere dell'unità di misura
+
+-- beta 0.3.0 -- 09/06/2006 17:30 ----------------------------------------------
+
++ 09/06/06 MM Nuova gestione aggiornamenti database con versione attesa.
++ 09/06/06 MM Nuovo campo per il genere dell'unità di misura (peso/volume)
+^ 09/06/06 MM Ridenominazione tabelle comuni con "_" iniziale
+
+-- beta 0.2.1 -- 09/06/2006 15:00 ----------------------------------------------
+
+^ 09/06/06 MM Tabelle mesi e si_no: spostamento da multiple a comuni sia negli 
+              script che nella loro gestione
+^ 09/06/06 MM Aggiornamento creazione nuovo db in base al nuovo script specifico
+^ 09/06/06 MM Separazione script creazione tabelle tra quelle comuni e quelle da
+              replicare nel caso di multigestione
+
+-- beta 0.2.0 -- 09/06/2006 12:00 ----------------------------------------------
+
+^ 09/06/06 MM Referenti/fornitori: aggiunti nel lookup anche gli amministratori
+# 08/06/06 MM Agg. db: correzione errore sull'ultimo update
++ 08/06/06 MM Creazione database (sqlnewdb.php): controllo prefisso valido
+^ 08/06/06 MM Carrello: aggiornati msg errore (cassa2 e 3)
+^ 08/06/06 MM Anagrafica articoli: rivisitate etichette delle varie quantità
+# 08/06/06 MM Scheda dettaglio articolo: correzione pezzi per cartone
+^ 08/06/06 MM Scheda dettaglio articolo: aumentati a 4 i decimali dei prezzi
+^ 08/06/06 MM Finestra di login remoto: allargati campi per e-mail e password
++ 08/06/06 MM Anagrafica famiglie: verifica indirizzo e-mail non duplicato
++ 08/06/06 MM Configurazione azienda: aggiunto messaggio con versione database reale e attesa
++ 08/06/06 MM Riga footer: aggiunto nome della ditta, utile nella multigestione
+
+-- beta 0.1.0 -- 08/06/2006 17:00 ----------------------------------------------
+
++ 08/06/06 MM Inizio numerazione delle versioni
+# 08/06/06 MM Correzione invio mail in richiesta account
++ 08/06/06 MM Per facilitare gli aggiornamenti: spezzato in due il config per separare le
+              costanti vere dalle costanti con valori dipendenti dall'installazione
+^ 08/06/06 MM Periodo ordini: completa rivisitazione del funzionamento
+^ 08/06/06 MM Risistemazione della struttura dei menu
+# 07/06/06 MM Ordine corrente: correzione errore articolo non trovato
+# 07/06/06 MM Anagrafica fornitori: correzione errore nell'inserimento primo record
++ 07/06/06 MM Anagrafica fornitori: proposta del codice in inserimento
++ 07/06/06 MM Anagrafica fornitori: controllo codice non duplicato
+# 07/06/06 MM Anagrafica articoli: correzione errore nell'inserimento primo record
++ 07/06/06 MM Anagrafica articoli: proposta del codice in inserimento
++ 07/06/06 MM Anagrafica articoli: controllo codice non duplicato
++ 07/06/06 MM Anagrafica famiglie: proposta del codice in inserimento
++ 07/06/06 MM Anagrafica famiglie: controllo codice non duplicato
++ 07/06/06 MM Anagrafica famiglie: aggiunta gestione modifica password
+# 07/06/06 MM Profilo personale: correzione problemi nell'impostazione nuova password
++ 07/06/06 MM Richiesta nuovo account: verifica codice non duplicato
+# 07/06/06 AP Gest. Documenti: corretto errore in stampa documento
+^ 06/06/06 AP Profilo Personale: modificata la gestione campi e toolbar
+^ 06/06/06 AP Menu E3G: modificata la gestione del menu (Visible / Invisible)
++ 06/06/06 MM Stampe PDF: aggiunto header e footer
++ 06/06/06 MM Richiesta di registrazione da remoto: possibilità di scrivere un messaggio
+^ 06/06/06 MM Nuova gestione della password con MD5
+# 06/06/06 MM Sistemazione problemi sessione nell'accesso da remoto (index.php)
+^ 06/06/06 MM Funzione creazione nuovo db: controllo errori per file non trovati
+# 05/06/06 MM Errori nella richiesta di registrazione da parte di un nuovo utente
+^ 05/06/06 MM Funzione creazione nuovo db: correzione (campo nome era invisibile), aggiunto
+              titolo e messaggio per l'esito dell'operazione
++ 02/06/06 MM Nuova gestione visualizzazione dettaglio "Scheda articolo" con popup
+# 01/06/06 AP Ordine Corrente: corretto errore che impediva la query di inserimento nel carrello
++ 01/06/06 MM Nuova tabella AZIENDE per multigestione
+^ 01/06/06 AP Ordine Corrente: rivista gestione dei due decimali fissi nelle tabelle
+^ 01/06/06 AP Stampa Listino: inseriti due decimali fissi (prezzo) e colonna Min. per Fam.
+^ 01/06/06 AP Anagrafica prodotti: unità di misura inserito lookup
+^ 31/05/06 MM Aggiornate le descrizioni di alcune voci di menu 
+^ 31/05/06 MM Referente: limitato l'accesso al solo proprio profilo
+^ 30/05/06 MM Gestione accesso (anche da GAS remoto) con email al posto di username
+^ 30/05/06 MM Modificate parecchie voci di menu per renderle più conformi ai tipici gestionali
++ 30/05/06 MM Introdotta costante globale per il tipo di gestione (E)quogest o (G)estiGAS
+^ 19/05/06 MM Col logout (esciClick in e3g_main) si direziona verso una specifica pagina
+^ 19/05/06 MM Messaggi nella finestra iniziale, riguardo i prossimi ordini
+# 19/05/06 AP correzioni varie nelle query di creazione del database 
+^ 19/05/06 AP aggiunto il campo ricorsivo nella tabella [prefix]fornitoreperiodo 
+^ 19/05/06 AP campi username e password: portati a VARCHAR(20) 
+^ 19/05/06 AP Inserita tabella [prefix]um per le unità di misura e il campo um_qta per 
+              la confezione nella tabella articoli 
+^ 19/05/06 AP Sdoppiata gestione del menu per Amministratore Globale (A) e Ammin. GAS (AS) 
+^ 19/05/06 AP Ordine Corrente : tolto un pulsante di Ricerca 
+^ 19/05/06 AP Ordine Corrente : revisione generale delle colonne, delle diciture, della 
+              disposizione dei widget
+^ 19/05/06 AP Ordine Corrente : tolto un pulsante di Ricerca 
+^ 19/05/06 AP Anag. Famiglie: revisione generale dei campi e della Table di ricerca
+^ 19/05/06 AP Anag. Articoli: revisione della disposizione dei campi
+# 24/04/06 MM e3g_utils e form_action: correzioni per login automatico da remoto
++ 20/04/06 MM Footer: visualizzazione di nome e tipo utente connesso
++ 20/04/06 MM e3g_utils: nuova funzione per la riga di copyright nel footer
++ 20/04/06 MM Aggiunto in tutti i file in /objects: richiamo funzione per mostrare la riga nel
+              footer, blocco iniziale di copyright, attivazione foglio di stile style.css
++ 19/04/06 MM config.php nuove costanti di errore e per invio email
++ 19/04/06 MM e3g_utils: nuova funzione per invio email
+^ 18/04/06 MM forma_action.php: sistemazione per l'utilizzo delle funzioni comuni
+              di accesso e interrogazione al database
++ 02/03/06 MM config.php costanti per il numero di versione
+^ 02/03/06 MM Gestione degli errori nelle pagine locali di login
++ 23/02/06 MM e3g_utils: aggiunte funzioni per connettersi al db ed eseguire query
+^ 22/02/06 MM Nuova impostazione del file di configurazione
++ 22/02/06 MM Aggiornamento delle immagini, con alcune aggiunte
++ 19/02/06 MM Finestre varie per login+recupero password+richiesta registrazione da parte
+              degli utenti GAS, da installare pressi i rispettivi hosting di terzo livello;
+              file e funzioni di supporto.
++ 16/02/06 MM Nuovo parametro per la selezione del template attivo e relativo spostamento
+              del foglio di stile generico
++ 15/02/06 MM Upload di immagini necessarie soprattutto nelle finestre di login locali
++ 15/02/06 MM Prime finestre per la gestione del login da parte dei singoli GAS
+^ 15/02/06 AP Modificato layout maschera principale
+^ 14/02/06 AP Modificato layout maschera carrello
+           AP Inserita gestione $p4a->CSS
+^ 27/01/06 AP Estrazione Ordini: gestione con la somma delle Qta per lo stesso articolo
+^ 13/01/06 AP Anagrafica Famiglie: inserito automatismo per creazione dati login
++ 13/01/06 AP Inserita libreria PHPMAILER
++ 12/01/06 MM Preparazione directory per gestione upgrade database
++ 12/01/06 MM Preparazione directory per templates
+^ 12/01/06 MM Ridenominazione directory immagini (quella condivisa)
+^ 12/01/06 MM Aggiornamento immagini con nuovi colori e logo equogest
+^ 11/01/06 AP Carrello: inserito campo Data -> collegato al campo dataordine tab. doc_r;
+           AP Carrello: inserito filtro fornitore;
++ 11/01/06 MM Creata la directory /docs e aggiunta la licenza GNU/GPL nel file licenza.txt
+^ 11/01/06 AP Stampa Listino: gestione con i filtri del carrello
+^ 10/01/06 AP Anag. Fornitori: inserito campo Note;
+           AP Anag. Articoli e Carrello: inserito campo Qta minima ordinabile per famiglia;
+           AP Carrello : inserita la possibilità, per l'amministratore (referente), di      
+              modificare le righe già inserite;
+           AP Carrello: modificata disposizione degli oggetti;
+           AP Creato un livello Referente che vede solo determinati Fornitori;
+           AP Inserito un pulsante HOME nel menu di E3G (link alla pagina about.php); 
+^ 15/06/05 AP Conversione di Equogest per P4A: Modulo MovMag (movimenti di magazzino)
+^ 25/03/05 AP Conversione di Equogest per P4A: Gestione Documenti, Vendita al banco
+^ 25/03/05 AP Avvio di Equogest convertito per P4A: i sorgenti di Equogest sviluppati con 
+              Merlinwork sono stati, parzialmente, tradotti per il P4A (il nuovo framework 
+              sviluppato da Crealabs; i vecchi sorgenti sono rimasti nella cartella equoweb;
+              la struttura del database e' come sempre nella cartella sql)

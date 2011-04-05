@@ -1,0 +1,82 @@
+body {
+	background-color: #F47F00;
+	background-image:url(../../../images/bg_e3g.png);	
+	background-repeat:repeat;
+}
+
+
+#mainContainer {
+	background-color: #FFFFFF;
+	width:1000px;
+}
+
+
+#topContainer {
+	width:1000px;
+}
+
+
+label {
+  background-color: transparent;
+  border: none;
+  border-style: none;
+  border-width: 0px;
+}
+
+
+#footer_user {
+	font-size:10px;
+	text-align:center;
+	margin-top:5px;	
+	color:#AB5900;
+}
+
+#footer_user strong,
+#footer_user a:link,
+#footer_user a:visited,
+#footer_user a:active {
+    color:#AB5900;
+}
+
+#footer_user a:hover {
+    color:#F47F00;
+}
+
+
+#footer_e3g {
+	font-size:10px;
+	text-align:center;
+	margin-top:5px;	
+	padding-top:3px;
+	padding-bottom:3px;
+	background-color: #FFE1BF;
+	color:#AB5900;
+}
+
+#footer_e3g strong,
+#footer_e3g a:link,
+#footer_e3g a:visited,
+#footer_e3g a:active {
+	color:#AB5900;
+}
+
+#footer_e3g a:hover {
+	color:#F47F00;
+}
+
+
+#footerContainer {
+	font-size:9px;
+	color:#FFC280;
+	margin-bottom:5px;
+}
+
+#footerContainer a:link,
+#footerContainer a:visited,
+#footerContainer a:active {
+	color:#FFC280;
+}
+
+#footerContainer a:hover {
+	color:#F47F00;
+}
