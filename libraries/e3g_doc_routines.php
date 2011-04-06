@@ -1021,7 +1021,7 @@ function genera_stampa_csv( $numerodoc, $iddoc, $codtipodoc, $codclifor, $codtip
             //$p4a->ds_docr->setSelect("d.codice,ROUND(d.prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo, d.quantita,ROUND(d.totale,".$p4a->e3g_azienda_n_decimali_prezzi.") as totale, d.codiva, CONCAT_WS(' ', d.descrizione, '[', art.um_qta, art.um, ']') AS descrizione, d.visibile, d.nriga, d.iddocr, ana.descrizione as fornitore, d.quantita2, d.sconto");
 	        if ( $righe_det_per_utente == 1 )
 	        {
-	          	$p4a->ds_docr->setSelect("d.idriga, d.codice, CONCAT_WS(' ', d.descrizione, '[', art.um_qta, art.um, ']') AS descrizione, IF(d.visibile='N','',ROUND(d.prezzo + d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.")) as prezzo, IF(d.visibile='N','',ROUND(d.prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.")) as prezzo_originale, IF(d.visibile='N','',ROUND(d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.")) as delta_prezzo, d.quantita, IF(d.visibile='N','',ROUND(d.totale,".$p4a->e3g_azienda_n_decimali_prezzi.")) as totale, IF(d.visibile='N',ana2.descrizione,'') as utente");
+	          	$p4a->ds_docr->setSelect("d.idriga, d.codice, CONCAT_WS(' ', d.descrizione, '[', art.um_qta, art.um, ']') AS descrizione, ROUND(d.prezzo + d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo, ROUND(d.prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo_originale, ROUND(d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as delta_prezzo, d.quantita, ROUND(d.totale,".$p4a->e3g_azienda_n_decimali_prezzi.") as totale, IF(d.visibile='N',ana2.descrizione,'') as utente");
               $p4a->ds_docr->addJoin( $p4a->e3g_prefix . "articoli art", "d.codice = art.codice", "LEFT" );        
               $p4a->ds_docr->addJoin( $p4a->e3g_prefix . "anagrafiche ana2", "ana2.codice = d.codutente", "LEFT" );
 	        }
@@ -1057,7 +1057,7 @@ function genera_stampa_csv( $numerodoc, $iddoc, $codtipodoc, $codclifor, $codtip
 				    else
             {
 	            // AP commentato il 28.10.08 per consentire di vedere in stampa le righe con qta = 0 
-	            // andrà migliorato (in che modo?) con la visualizzazione della Qta Aggiunta
+	            // andrï¿½ migliorato (in che modo?) con la visualizzazione della Qta Aggiunta
 	            //$p4a->ds_docr->setWhere("iddocr=".$iddoc." AND visibile='S' AND quantita > 0 ");
 	            $p4a->ds_docr->setWhere("iddocr=".$iddoc." AND visibile='S' "); 
             }        	             
@@ -1082,7 +1082,7 @@ function genera_stampa_csv( $numerodoc, $iddoc, $codtipodoc, $codclifor, $codtip
     
         
         // Modello: "NomeGasBottega_DocTipoXXX_DataDoc_NumDoc.ext"
-        //   (mantenerlo uguale a quello dell'esportazione PDF più sopra)
+        //   (mantenerlo uguale a quello dell'esportazione PDF piï¿½ sopra)
         $nome_file = P4A_Get_Valid_File_Name( $p4a->e3g_azienda_rag_soc . 
             "_DOC_Tipo" . $codtipodoc . "_Data" . $p4a->ds_doct->fields->data->getValue() . "_N" . $numerodoc );
 
