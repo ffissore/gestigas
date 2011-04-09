@@ -674,7 +674,7 @@ function genera_stampa_pdf( $numerodoc, $iddoc, $codtipodoc, $codclifor, $codtip
         	if ( E3G_TIPO_GESTIONE == 'G' ) 
             {
             	// Gestigas con [art.um_qta]
-          		$p4a->ds_docr->setSelect("d.codice, IF(d.visibile='N','',ROUND(d.prezzo + d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.")) as prezzo, d.quantita, IF(d.visibile='N','',ROUND(d.totale,".$p4a->e3g_azienda_n_decimali_prezzi.")) as totale, d.codiva, CONCAT_WS(' ', d.descrizione, '[', art.um_qta, art.um, ']') AS descrizione, d.visibile, d.nriga, d.iddocr, ana.descrizione as fornitore, d.quantita2, d.sconto, IF(d.visibile='N',ana2.descrizione,'') as utente, ROUND(d.prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo_originale, ROUND(d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as delta_prezzo");
+          		$p4a->ds_docr->setSelect("d.codice, ROUND(d.prezzo + d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo, d.quantita, ROUND(d.totale,".$p4a->e3g_azienda_n_decimali_prezzi.") as totale, d.codiva, CONCAT_WS(' ', d.descrizione, '[', art.um_qta, art.um, ']') AS descrizione, d.visibile, d.nriga, d.iddocr, ana.descrizione as fornitore, d.quantita2, d.sconto, IF(d.visibile='N',ana2.descrizione,'') as utente, ROUND(d.prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo_originale, ROUND(d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as delta_prezzo");
             }
             else
             {

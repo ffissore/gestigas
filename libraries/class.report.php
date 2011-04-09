@@ -502,8 +502,11 @@ class Creport extends Cezpdf {
 		$p4a =& p4a::singleton();
 
         header("Cache-control: private");
-        header("Content-Type: text/comma-separated-values; charset=" .
-        $p4a->i18n->getCharset());
+        if (strpos($filename,".pdf")) {
+            header("Content-Type: application/pdf");
+        } else {
+            header("Content-Type: text/comma-separated-values; charset=" . $p4a->i18n->getCharset());
+        }
         header("Content-Disposition: attachment; filename=" . $filename);
         header("Content-Length: " . strlen($output));
 		echo $output;
