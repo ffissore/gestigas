@@ -145,7 +145,7 @@ class cassa_gg_globale extends P4A_Mask
 		$this->build( "p4a_db_source", "ds_spesa_det" );
 		$this->ds_spesa_det->setPageLimit( $p4a->e3g_utente_db_source_page_limit );
 
-		$this->ds_spesa_det->setSelect( "c.idriga, c.codfornitore, c.data, c.codarticolo, c.descrizione, " .
+		$this->ds_spesa_det->setSelect( "c.idriga, c.codfornitore, c.data, c.codarticolo, c.descrizione, c.descrizione as articolo, " .
             " CONCAT_WS( ' ', art.um_qta, art.um ) AS um_qta_um, " .  // CONCAT_WS non è vuoto se manca l'UM
             " art.um_qta, art.gestione_a_peso, " . 
 			" c.qta, c.qta_agg, " .
@@ -402,6 +402,7 @@ class cassa_gg_globale extends P4A_Mask
 			"desc_fornitore", "pezzi_in_ordine_orig","pezzi_in_ordine_agg", "pezzi_in_ordine_tot",  
 			"articoli_diversi", "utenti_diversi", "importo") );
 			
+                $this->intercept( $this->tab_spesa_forn->rows, "afterClick", "tab_spesa_forn_afterClick" );
 		$tab_spesa_forn->showNavigationBar();
 
         $this->tab_spesa_forn->cols->desc_fornitore->setOrderable( false );
@@ -498,7 +499,7 @@ class cassa_gg_globale extends P4A_Mask
 		$this->tab_spesa_det->setWidth( E3G_NARROW_TABLE_IN_TAB_PANE_WIDTH );
 		$this->tab_spesa_det->setSource($this->ds_spesa_det);	
 		$this->tab_spesa_det->setVisibleCols( array( 
-            "idriga", "desc_utente", "email", "gestione_a_peso", "qta", "qta_agg", "qta_tot", "prezzoven", "importo") );
+            "idriga", "desc_utente", "articolo", "gestione_a_peso", "qta", "qta_agg", "qta_tot", "prezzoven", "importo") );
 		$this->intercept( $this->tab_spesa_det->rows, "afterClick", "tab_spesa_det_afterClick" );
         $this->intercept( $this->tab_spesa_det->rows, "beforeDisplay", "tab_spesa_det_beforeDisplay" );  
 		$this->tab_spesa_det->showNavigationBar();
@@ -515,7 +516,8 @@ class cassa_gg_globale extends P4A_Mask
         $this->tab_spesa_det->cols->importo->setOrderable( false );
 
         $this->tab_spesa_det->cols->desc_utente->setLabel ("Utente" );
-        $this->tab_spesa_det->cols->email->setLabel ("e-mail" );
+        //$this->tab_spesa_det->cols->email->setLabel ("e-mail" );
+        $this->tab_spesa_det->cols->articolo->setLabel ("Articolo");
 		$this->tab_spesa_det->cols->qta->setLabel( "Pezzi in ordine (orig.)" );
 		$this->tab_spesa_det->cols->qta_agg->setLabel( "Pezzi aggiunti" );
 		$this->tab_spesa_det->cols->qta_tot->setLabel( "Pezzi in ordine (TOT)" );
@@ -524,7 +526,7 @@ class cassa_gg_globale extends P4A_Mask
 
 		// Larghezze colonne
 //      $this->tab_spesa_det->cols->desc_utente->setWidth(); per differenza
-        $this->tab_spesa_det->cols->email->setWidth( 200 );
+        $this->tab_spesa_det->cols->articolo->setWidth( 200 );
         $this->tab_spesa_det->cols->qta->setWidth( 50 );
 		$this->tab_spesa_det->cols->qta_agg->setWidth( 50 );
 		$this->tab_spesa_det->cols->qta_tot->setWidth( 50 );
@@ -724,6 +726,7 @@ class cassa_gg_globale extends P4A_Mask
 
 		$this->tab_pane->pages->tabframe1->anchor( $this->tab_spesa_utente);		 
 		$this->tab_pane->pages->tabframe2->anchor( $this->tab_spesa_forn);		 
+        $this->tab_pane->pages->tabframe2->anchor( $this->sh_lista_spesa );
 		$this->tab_pane->pages->tabframe3->anchor( $this->tab_spesa_articolo );		 
         $this->tab_pane->pages->tabframe3->anchor( $this->sh_lista_spesa );      
 		$this->tab_pane->pages->tabframe4->anchor( $this->sh_listino );		 
@@ -890,6 +893,21 @@ class cassa_gg_globale extends P4A_Mask
         // Sincronizza la tabella di dettaglio degli utenti
         $this->ds_spesa_det->setWhere( $this->filtro_ds_spesa_det . 
             " AND c.codarticolo = '" . $this->ds_spesa_articolo->fields->codarticolo->getNewValue() . "'" );
+        $this->ds_spesa_det->load();
+        $this->ds_spesa_det->firstRow();
+
+        $this->tab_spesa_det_afterClick();
+    }
+
+    // -------------------------------------------------------------------------
+    function tab_spesa_forn_afterClick()
+    // -------------------------------------------------------------------------
+    {
+        $db =& p4a_db::singleton();
+
+        // Sincronizza la tabella di dettaglio degli utenti
+        $this->ds_spesa_det->setWhere( $this->filtro_ds_spesa_det .
+            " AND c.codfornitore = '" . $this->ds_spesa_forn->fields->codfornitore->getNewValue() . "'" );
         $this->ds_spesa_det->load();
         $this->ds_spesa_det->firstRow();
 
