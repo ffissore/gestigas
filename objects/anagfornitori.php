@@ -684,6 +684,7 @@ class anagfornitori extends P4A_Mask
                 "cap"           => "CAP",
                 "provincia"     => "Provincia",
                 "telefono"      => "Telefono",
+                "fax"           => "Fax",
                 "email"         => "e-mail",
                 "www"           => "Sito web",
                 "cf"            => "Codice fiscale",

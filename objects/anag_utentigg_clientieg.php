@@ -875,6 +875,7 @@ class anag_utentigg_clientieg extends P4A_Mask
                 "cap"           => "CAP",
                 "provincia"     => "Provincia",
                 "telefono"      => "Telefono",
+                "fax"      => "Fax/Cell",
                 "email"         => "e-mail",
                 "tipoutente"    => "Tipo accesso",
                 "cf"            => "Codice fiscale",
