@@ -43,7 +43,7 @@ class signup extends P4A_Mask
 
 		$this->setTitle( e3g_title() );
 
-	    // Immagine logo (come box HTML anzich√® p4a_image altrimenti non si centra)
+	    // Immagine logo (come box HTML anzich‡ p4a_image altrimenti non si centra)
 		if ( E3G_TIPO_GESTIONE == 'G' )
 			$src_logo = 'images/gestigas_01.jpg';
 		else
@@ -58,12 +58,12 @@ class signup extends P4A_Mask
 			" devi richiedere un nuovo account per te.<br />" .
 			"Questi sono i passi necessari:<br /><br />" .
 			"1. Compila il modulo seguente<br />" .
-			"2. Un messaggio e-mail di conferma contenente la password di accesso verr√† spedito al tuo indirizzo, ma ancora non lo potrai utilizzare perch√® inattivo<br />" .
-			"3. L'amministratore verr√† informato della tua richiesta e provveder√† ad abilitarti<br />" .
-			"4. Un messaggio e-mail di avviso verr√† spedito al tuo indirizzo di posta elettronica per informarti dell'avvenuta abilitazione<br />" .
+			"2. Un messaggio e-mail di conferma contenente la password di accesso verr‡ spedito al tuo indirizzo, ma ancora non lo potrai utilizzare perchË inattivo<br />" .
+			"3. L'amministratore verr‡ informato della tua richiesta e provveder‡ ad abilitarti<br />" .
+			"4. Un messaggio e-mail di avviso verr‡ spedito al tuo indirizzo di posta elettronica per informarti dell'avvenuta abilitazione<br />" .
 			"5. Da questo momento potrai utilizzare i tuoi indirizzo e-mail e password per farti riconoscere ed accedere a $p4a->e3g_nome_sw<br /><br />" .
-			"<strong>Compilare il modulo con le proprie informazioni:</strong> " .
-			"<em>(Nota: il tuo indirizzo e-mail deve realmente esistere)</em>" );
+			"<strong>Compilare il modulo con le proprie informazioni: " .
+			"tutti i campi sono obbligatori</strong>" );
 		$this->lbl_intro->setWidth("650");
 
 		// Message per eventuale segnalazione di errori
@@ -92,6 +92,42 @@ class signup extends P4A_Mask
 		$this->cognome->setLabel( "Cognome:" );
 		$this->cognome->setWidth("250");
 
+		$this->build("p4a_field", "indirizzo");
+		$this->indirizzo->setLabel( "Indirizzo:" );
+		$this->indirizzo->setWidth("250");
+
+		$this->build("p4a_field", "cap");
+		$this->cap->setLabel( "CAP:" );
+		$this->cap->setWidth("250");
+
+		$this->build("p4a_field", "localita");
+		$this->localita->setLabel( "Localita':" );
+		$this->localita->setWidth("250");
+
+		$this->build("p4a_field", "provincia");
+		$this->provincia->setLabel( "Provincia:" );
+		$this->provincia->setWidth("250");
+
+		$this->build("p4a_field", "telefono");
+		$this->telefono->setLabel( "Telefono fisso:" );
+		$this->telefono->setWidth("250");
+
+		$this->build("p4a_field", "fax");
+		$this->fax->setLabel( "Telefono cellulare:" );
+		$this->fax->setWidth("250");
+
+		$this->build("p4a_field", "data_nascita");
+		$this->data_nascita->setLabel( "Data di nascita:" );
+		$this->data_nascita->setWidth("250");
+
+		$this->build("p4a_field", "luogo_nascita");
+		$this->luogo_nascita->setLabel( "Luogo di nascita:" );
+		$this->luogo_nascita->setWidth("250");
+
+		$this->build("p4a_field", "cf");
+		$this->cf->setLabel( "Codice fiscale:" );
+		$this->cf->setWidth("250");
+
 		// Messaggio (facoltativo))
 		$this->build("p4a_field", "messaggio");
 		$this->messaggio->setLabel( "Messaggio:" );
@@ -116,6 +152,15 @@ class signup extends P4A_Mask
  		$this->fs_signup->anchor($this->email2);
  		$this->fs_signup->anchor($this->nome);
  		$this->fs_signup->anchor($this->cognome);
+                $this->fs_signup->anchor($this->indirizzo);
+                $this->fs_signup->anchor($this->cap);
+                $this->fs_signup->anchor($this->localita);
+                $this->fs_signup->anchor($this->provincia);
+                $this->fs_signup->anchor($this->telefono);
+                $this->fs_signup->anchor($this->fax);
+                $this->fs_signup->anchor($this->data_nascita);
+                $this->fs_signup->anchor($this->luogo_nascita);
+                $this->fs_signup->anchor($this->cf);
  		$this->fs_signup->anchor($this->messaggio);
 		$this->fs_signup->anchorRight($this->bu_signup);
 
@@ -169,15 +214,33 @@ class signup extends P4A_Mask
 		elseif ( $email2 == '' )
 			$this->message->setValue( "Scrivere due volte l'indirizzo e-mail." );
 		elseif ( $this->nome->getNewValue() == '' )
-			$this->message->setValue( "Scrivere anche il nome." );
+			$this->message->setValue( "Scrivere il nome." );
 		elseif ( $this->cognome->getNewValue() == '' )
-			$this->message->setValue( "Scrivere anche il cognome." );
+			$this->message->setValue( "Scrivere il cognome." );
+		elseif ( $this->indirizzo->getNewValue() == '' )
+			$this->message->setValue( "Scrivere l'indirizzo." );
+		elseif ( $this->cap->getNewValue() == '' )
+			$this->message->setValue( "Scrivere il CAP." );
+		elseif ( $this->localita->getNewValue() == '' )
+			$this->message->setValue( "Scrivere la localita." );
+		elseif ( $this->provincia->getNewValue() == '' )
+			$this->message->setValue( "Scrivere la provincia." );
+		elseif ( $this->telefono->getNewValue() == '' && $this->fax->getNewValue() == '' )
+			$this->message->setValue( "Scrivere un numero di telefono (fisso o cellulare)." );
+		elseif ( $this->data_nascita->getNewValue() == '' )
+			$this->message->setValue( "Scrivere la data di nascita." );
+		elseif ( $this->luogo_nascita->getNewValue() == '' )
+			$this->message->setValue( "Scrivere il luogo di nascita." );
+		elseif ( $this->cf->getNewValue() == '' )
+			$this->message->setValue( "Scrivere il codice fiscale." );
+                elseif ( $this->cf->getNewValue() <> '' and !CodiceFiscaleEsatto( $this->cf->getNewValue() ) )
+                        $this->message->setValue( "Il codice fiscale non e' corretto." );
 		elseif ( !e3g_email_valido($email) )  // email non valida
 			$this->message->setValue( "L'indirizzo e-mail indicato non sembra essere valido." );
 		elseif ( $email <> $email2 )
 			$this->message->setValue( "I due indirizzi e-mail non coincidono, controlla." );
 		else {
-    		// Verifica che l'email non sia gi√† presente
+    		// Verifica che l'email non sia gi‡ presente
 			$result = $db->queryRow(
 				"SELECT idanag, descrizione, stato FROM " . $p4a->e3g_prefix . "anagrafiche " .
 				" WHERE email = '" . $this->email->getNewValue() . "'" );
@@ -189,6 +252,15 @@ class signup extends P4A_Mask
 	    		$nome = str_replace( "'", "\'", ucwords( strtolower( $this->nome->getNewValue() ) ) );
 	    		$cognome = str_replace( "'", "\'", ucwords( strtolower( $this->cognome->getNewValue() ) ) );
 	    		$note = str_replace( "'", "\'", $this->messaggio->getNewValue() );
+	    		$indirizzo = str_replace( "'", "\'", $this->indirizzo->getNewValue() );
+	    		$localita = str_replace( "'", "\'", $this->localita->getNewValue() );
+	    		$cap = str_replace( "'", "\'", $this->cap->getNewValue() );
+	    		$provincia = str_replace( "'", "\'", $this->provincia->getNewValue() );
+	    		$telefono = str_replace( "'", "\'", $this->telefono->getNewValue() );
+	    		$fax = str_replace( "'", "\'", $this->fax->getNewValue() );
+	    		$cf = str_replace( "'", "\'", $this->cf->getNewValue() );
+	    		$data_nascita = str_replace( "'", "\'", $this->data_nascita->getNewValue() );
+	    		$luogo_nascita = str_replace( "'", "\'", $this->luogo_nascita->getNewValue() );
 	
 	  			// Si prepara i campi necessari
 	  			$result = $db->queryOne( "SELECT MAX( idanag ) FROM $p4a->e3g_prefix" . "anagrafiche" );
@@ -205,8 +277,8 @@ class signup extends P4A_Mask
 	
 	  			// Inserisce nuovo utente con stato = 0 = 'In attesa'
 	  			$db->query( "INSERT $p4a->e3g_prefix" . "anagrafiche " .
-	  				"       ( idanag, codice, email, nome, cognome, descrizione, note, tipoutente, tipocfa, password, admin, stato, data_ins ) " .
-	  				"VALUES ( '$idanag', '$codice', '$email', '$nome', '$cognome', '$nome $cognome', '$note', 'U', 'C', '" . md5($new_pass) . "', 'N', 0, NOW() )" );
+	  				"       ( idanag, codice, email, nome, cognome, descrizione, indirizzo, localita, cap, provincia, telefono, fax, cf, data_nascita, luogo_nascita, note, tipoutente, tipocfa, password, admin, stato, data_ins ) " .
+	  				"VALUES ( '$idanag', '$codice', '$email', '$nome', '$cognome', '$nome $cognome', '$indirizzo', '$localita', '$cap', '$provincia', '$telefono', '$fax', '$cf', '$data_nascita', '$luogo_nascita', '$note', 'U', 'C', '" . md5($new_pass) . "', 'N', 0, NOW() )" );
 	
 	  			// Invia email al richiedente quale conferma della richiesta
 	  			$corpo = "Salve $nome $cognome,\n\n" .

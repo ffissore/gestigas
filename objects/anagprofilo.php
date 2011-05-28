@@ -79,6 +79,7 @@ class anagprofilo extends P4A_Mask
 		// ------------------------------------------------- Campi di anagrafica
  		$this->fields->codice->disable(); 
 		$this->fields->localita->setLabel( "Localita'" );
+                $this->fields->fax->setLabel( "Telefono cellulare" );
 		
         $this->fields->descrizione->setWidth( 250 );
         $this->fields->indirizzo->setWidth( 250 );
@@ -262,6 +263,17 @@ class anagprofilo extends P4A_Mask
         $this->new_pwd2->unsetStyleProperty( "border" );
         $this->fields->cf->unsetStyleProperty( "border" );
         $this->fields->db_source_page_limit->unsetStyleProperty( "border" );
+        $this->fields->nome->unsetStyleProperty( "border" );
+        $this->fields->cognome->unsetStyleProperty( "border" );
+        $this->fields->indirizzo->unsetStyleProperty( "border" );
+        $this->fields->cap->unsetStyleProperty( "border" );
+        $this->fields->localita->unsetStyleProperty( "border" );
+        $this->fields->provincia->unsetStyleProperty( "border" );
+        $this->fields->telefono->unsetStyleProperty( "border" );
+        $this->fields->fax->unsetStyleProperty( "border" );
+        $this->fields->data_nascita->unsetStyleProperty( "border" );
+        $this->fields->luogo_nascita->unsetStyleProperty( "border" );
+        $this->fields->cf->unsetStyleProperty( "border" );
 	}
 
 	
@@ -304,6 +316,46 @@ class anagprofilo extends P4A_Mask
         elseif ( $this->fields->db_source_page_limit->getNewValue() < 5 or $this->fields->db_source_page_limit->getNewValue() > 50 ) {
             $error_text = "Il numero di righe per pagina deve essere compreso tra 5 e 50.";
             $this->fields->db_source_page_limit->setStyleProperty( "border", "1px solid red" );
+        }
+        elseif ( $this->fields->nome->getNewValue() == '' ) {
+            $error_text = "Scrivere il nome.";
+            $this->fields->nome->setStyleProperty( "border", "1px solid red" );
+        }
+	elseif ( $this->fields->cognome->getNewValue() == '' ) {
+            $error_text = "Scrivere il cognome.";
+            $this->fields->cognome->setStyleProperty( "border", "1px solid red" );
+        }
+	elseif ( $this->fields->indirizzo->getNewValue() == '' ) {
+            $error_text = "Scrivere l'indirizzo.";
+            $this->fields->indirizzo->setStyleProperty( "border", "1px solid red" );
+        }
+	elseif ( $this->fields->cap->getNewValue() == '' ) {
+            $error_text = "Scrivere il CAP.";
+            $this->fields->cap->setStyleProperty( "border", "1px solid red" );
+        }
+	elseif ( $this->fields->localita->getNewValue() == '' ) {
+            $error_text = "Scrivere la localita.";
+            $this->fields->localita->setStyleProperty( "border", "1px solid red" );
+        }
+	elseif ( $this->fields->provincia->getNewValue() == '' ) {
+            $error_text = "Scrivere la provincia.";
+            $this->fields->provincia->setStyleProperty( "border", "1px solid red" );
+        }
+	elseif ( $this->fields->telefono->getNewValue() == '' && $this->fields->fax->getNewValue() == '' ) {
+            $error_text = "Scrivere un numero di telefono (fisso o cellulare).";
+            $this->fields->telefono->setStyleProperty( "border", "1px solid red" );
+        }
+	elseif ( $this->fields->data_nascita->getNewValue() == '' ) {
+            $error_text = "Scrivere la data di nascita.";
+            $this->fields->data_nascita->setStyleProperty( "border", "1px solid red" );
+        }
+	elseif ( $this->fields->luogo_nascita->getNewValue() == '' ) {
+            $error_text = "Scrivere il luogo di nascita.";
+            $this->fields->luogo_nascita->setStyleProperty( "border", "1px solid red" );
+        }
+	elseif ( $this->fields->cf->getNewValue() == '' ) {
+            $error_text = "Scrivere il codice fiscale.";
+            $this->fields->cf->setStyleProperty( "border", "1px solid red" );
         }
 
 		if ( $error_text == "" ) {
