@@ -127,7 +127,17 @@ class referenti_fornitori extends P4A_Mask
         $fset->anchor( $this->fields->codanag );
         $fset->anchorLeft( $this->fields->codfornitore );
 
-
+        if ( ( E3G_TIPO_GESTIONE == 'G' and
+               ( $p4a->e3g_utente_tipo = "AS" or $p4a->e3g_utente_tipo = "A" or $p4a->e3g_utente_tipo = "R" ) ) or
+             ( E3G_TIPO_GESTIONE == 'E' ) ) {
+            // --------------------- Bottone toolbar per esportare righe tabella
+            $this->toolbar->addSeparator();
+            $this->toolbar->addButton( "bu_esporta_csv", "spreadsheet" );
+            // Con il false finale non si dovrebbe vedere la label ma solo il tooltip, ma ciò non accade in p4a 2.2.3 (bug?)
+            $this->toolbar->buttons->bu_esporta_csv->setLabel( "Esporta righe come CSV (foglio elettronico)", false );
+            $this->toolbar->buttons->bu_esporta_csv->addAction( "onClick" );
+            $this->intercept( $this->toolbar->buttons->bu_esporta_csv, "onClick", "bu_esporta_csvClick" );
+        }
         // ---------------------------------------------------- Frame principale
 		$frm=& $this->build( "p4a_frame", "frm" );
 		$frm->setWidth( E3G_MAIN_FRAME_WIDTH );
@@ -223,6 +233,23 @@ class referenti_fornitori extends P4A_Mask
 			$this->message->setValue( $error_text );
 	}
 
+    // Esportazione righe tabella come CSV
+    // -------------------------------------------------------------------------
+    function bu_esporta_csvClick()
+    // -------------------------------------------------------------------------
+    {
+        $p4a =& p4a::singleton();
+        $db =& p4a_db::singleton();
+
+        // MM_2009-01-26 Attenzione: causa probabile bug di p4a 2.2.3, non Ã¨ possibile
+        // esportare le colonne in un ordine diverso da come sono presenti in tabella
+        $colonne = array (
+            "referente"        => "Referente",
+            "fornitore"   => "Fornitore"
+        );
+
+        e3g_db_source_exportToCsv( $this->ds_ref, $colonne, "Referente/Fornitore " . $p4a->e3g_azienda_rag_soc );
+    }
 	
 }
 
