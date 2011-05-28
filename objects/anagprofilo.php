@@ -341,9 +341,9 @@ class anagprofilo extends P4A_Mask
             $error_text = "Scrivere la provincia.";
             $this->fields->provincia->setStyleProperty( "border", "1px solid red" );
         }
-	elseif ( $this->fields->telefono->getNewValue() == '' && $this->fields->fax->getNewValue() == '' ) {
-            $error_text = "Scrivere un numero di telefono (fisso o cellulare).";
-            $this->fields->telefono->setStyleProperty( "border", "1px solid red" );
+	elseif ( $this->fields->fax->getNewValue() == '' ) {
+            $error_text = "Scrivere un numero di telefono cellulare.";
+            $this->fields->fax->setStyleProperty( "border", "1px solid red" );
         }
 	elseif ( $this->fields->data_nascita->getNewValue() == '' ) {
             $error_text = "Scrivere la data di nascita.";
