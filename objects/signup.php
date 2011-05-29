@@ -227,6 +227,8 @@ class signup extends P4A_Mask
 			$this->message->setValue( "Scrivere la provincia." );
 		elseif ( $this->fax->getNewValue() == '' )
 			$this->message->setValue( "Scrivere un numero di telefono cellulare." );
+		elseif ( $this->telefono->getNewValue() == '' )
+			$this->message->setValue( "Scrivere un numero di telefono fisso." );
 		elseif ( $this->data_nascita->getNewValue() == '' )
 			$this->message->setValue( "Scrivere la data di nascita." );
 		elseif ( $this->luogo_nascita->getNewValue() == '' )
