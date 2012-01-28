@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -275,7 +275,7 @@ class about_admin extends P4A_Mask
     function bu_fornitoriClick()
     {
         $p4a =& p4a::singleton();
-        $p4a->openMask('anagfornitori');
+        $p4a->openMask('anag_fornitori');
     }
 
 
@@ -299,7 +299,7 @@ class about_admin extends P4A_Mask
     function bu_estrai_ordine_forClick()
     {
         $p4a =& p4a::singleton();
-        $p4a->openMask('doc_estrazione_gg');
+        $p4a->openMask('estraz_ordini_fornitore');
     }
 
 

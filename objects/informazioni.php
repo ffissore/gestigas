@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -58,7 +58,7 @@ class informazioni extends P4A_Mask
 <p align="center"><img src="' . $src_logo . '" alt="Progetto e3g - Equogest/GestiGAS" /></p>
 <p align="center"><a href="http://www.progettoe3g.org" target="_blank">Progetto e3g - Equogest/GestiGAS</a><br />
   <em>Software gestionali per l\'economia solidale</em>
-<p align="center">   Copyright &copy; 2003-2009<br />
+<p align="center">   Copyright &copy; 2003-2012<br />
    <a href="http://www.andreapiazza.it" target="_blank">Andrea Piazza</a> e <a href="http://www.marcomunari.it" target="_blank">Marco
    Munari</a>
 <p align="center"> Questo programma &egrave; software libero;

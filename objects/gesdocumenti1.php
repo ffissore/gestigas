@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -51,12 +51,13 @@ class gesdocumenti1	extends P4A_Mask
 
         // ------------------------------------------------ DB source principale
         $this->build( "p4a_db_source", "ds_doc" );
-        $this->ds_doc->setSelect( "iddoc, data, numdocum, codtipodoc, codclifor, anno, idanag, data_ins, codtipopag, totdoc" );
-        $this->ds_doc->setTable( $p4a->e3g_prefix . "doct" );
+        $this->ds_doc->setSelect( "d.iddoc, d.data, d.numdocum, d.codtipodoc, d.codclifor, d.anno, d.idanag, d.data_ins, d.codtipopag, d.totdoc " );
+        $this->ds_doc->setTable( $p4a->e3g_prefix . "doct AS d" );
+        $this->ds_doc->addJoin( $p4a->e3g_prefix . "anagrafiche AS a",  "a.idanag = d.idanag" );
         $this->ds_doc->setWhere( "0 = 1" );  // Il vero where viene impostato da bu_filtro_click();
-        $this->ds_doc->addOrder( "data", "DESC" );
-        $this->ds_doc->addOrder( "iddoc", "DESC" );
-        $this->ds_doc->setPk( "iddoc" );
+        $this->ds_doc->addOrder( "d.data", "DESC" );
+        $this->ds_doc->addOrder( "d.iddoc", "DESC" );
+        $this->ds_doc->setPk( "d.iddoc" );
         $this->ds_doc->setPageLimit( $p4a->e3g_utente_db_source_page_limit );
         $this->ds_doc->load();
         $this->ds_doc->firstRow();
@@ -79,7 +80,7 @@ class gesdocumenti1	extends P4A_Mask
         $this->ds_tipodoc->setTable($p4a->e3g_prefix."doctipidoc");
         $this->ds_tipodoc->setPk("codice");
         $this->ds_tipodoc->load();
-		
+		        
         $this->build("p4a_field", "fld_tipodoc");
         $this->fld_tipodoc->setLabel('Tipo doc.');
         $this->fld_tipodoc->label->setWidth(80);
@@ -89,6 +90,22 @@ class gesdocumenti1	extends P4A_Mask
         $this->fld_tipodoc->setSourceValueField('codice');
         $this->fld_tipodoc->setSourceDescriptionField('descrizione');
         
+        // Combo (opzionale) luogo di consegna
+        $this->build( "p4a_db_source", "ds_luoghi_cons" );
+        $this->ds_luoghi_cons->setTable( "_luoghi_cons" );
+        $this->ds_luoghi_cons->setWhere( "prefix = '" . $p4a->e3g_prefix . "' OR id_luogo_cons = 0 " );
+        $this->ds_luoghi_cons->setPk( "id_luogo_cons" );
+        $this->ds_luoghi_cons->load();
+                
+        $this->build( "p4a_field", "fld_luogo_cons" );
+        $this->fld_luogo_cons->setLabel( "Luogo di consegna" );
+        $this->fld_luogo_cons->label->setWidth( 150 );
+        $this->fld_luogo_cons->setWidth( 250 );
+        $this->fld_luogo_cons->setType( "select" );
+        $this->fld_luogo_cons->setSource( $this->ds_luoghi_cons );
+        $this->fld_luogo_cons->setSourceValueField( "id_luogo_cons" );
+        $this->fld_luogo_cons->setSourceDescriptionField( "descrizione" );
+       
         /* 
         Flag per la stampa delle Righe Invisibili
         e campo per la selezione dell'ordinamento 
@@ -301,6 +318,8 @@ class gesdocumenti1	extends P4A_Mask
         $this->fs_filtro->setTitle( "Filtro documenti" );
         $this->fs_filtro->setWidth( E3G_FIELDSET_SEARCH_WIDTH );
         $this->fs_filtro->anchor($this->fld_tipodoc);
+        if ( $p4a->e3g_azienda_gestione_luoghi_cons )
+            $this->fs_filtro->anchorLeft( $this->fld_luogo_cons );
         $this->fs_filtro->anchor($this->fld_filtro_dal);
         $this->fs_filtro->anchorLeft($this->fld_filtro_al);
         $this->fs_filtro->anchorRight($this->bu_annulla_filtro);
@@ -377,20 +396,25 @@ class gesdocumenti1	extends P4A_Mask
 		if ( E3G_TIPO_GESTIONE == 'G' ) {
            	switch ($p4a->e3g_utente_tipo) {
                 case "R":
-					$this->ds_doc->setWhere(str_replace("#CAMPOCODICE#", "codclifor", $p4a->e3g_where_referente));
+                    // Il referente vede solo i documenti da lui creati e quelli relativi ai propri fornitori
+                    $this->ds_doc->setWhere( 
+                        "( d.idanag = " . $p4a->e3g_utente_idanag . " OR " .
+                        str_replace("#CAMPOCODICE#", "codclifor", $p4a->e3g_where_referente) . " ) " );
+//					$this->ds_doc->setWhere( str_replace("#CAMPOCODICE#", "codclifor", $p4a->e3g_where_referente) );
 					break;
 				default:
-					$this->ds_doc->setWhere("1=1");
+					$this->ds_doc->setWhere( "1 = 1" );
 					break;
             }
 		}
 		else {
-			$docscontrino = $db->queryOne("SELECT eg_cod_doc_scontrino  FROM _aziende WHERE prefix='".$p4a->e3g_prefix."'");
+			$docscontrino = $db->queryOne( "SELECT eg_cod_doc_scontrino  FROM _aziende WHERE prefix='".$p4a->e3g_prefix."'" );
 			$this->ds_doc->setWhere("codtipodoc <> '" . $docscontrino . "'");
 		}
-		$this->fld_filtro_dal->setNewValue(""); 
-		$this->fld_filtro_al->setNewValue("");   
-    	$this->fld_tipodoc->setNewValue("00000");
+		$this->fld_filtro_dal->setNewValue( "" ); 
+		$this->fld_filtro_al->setNewValue( "" );   
+    	$this->fld_tipodoc->setNewValue( "00000" );
+        $this->fld_luogo_cons->setNewValue( 0 );
 	}
 	
     
@@ -400,25 +424,32 @@ class gesdocumenti1	extends P4A_Mask
 		$db =& p4a_db::singleton();
 		
 		$filtro = "";
+
+        // Tipo documento
         // controllo se il filtro tipo doc è valido <>"" e <>00000 (Non Indicato)   
-        if ( $this->fld_tipodoc->getNewValue() != "" && $this->fld_tipodoc->getNewValue() != "00000" )  {
+        if ( $this->fld_tipodoc->getNewValue() != "" && $this->fld_tipodoc->getNewValue() != "00000" )  
             $filtro .= " AND codtipodoc = '" . $this->fld_tipodoc->getNewValue() . "'";                  
-        }   
-		if ( $this->fld_filtro_dal->getNewValue() != "" ) {
+
+        // Dalla data, alla data
+		if ( $this->fld_filtro_dal->getNewValue() != "" ) 
 			$filtro .= " AND data >= '" . e3g_format_data_to_mysql($this->fld_filtro_dal->getNewValue()) . "'";	
-		}	
 		if ( $this->fld_filtro_al->getNewValue() != "" )
-		{
 			$filtro .= " AND data <= '" . e3g_format_data_to_mysql($this->fld_filtro_al->getNewValue()) . "'";	
-		}
-        
+
+        // Luogo consegna
+        if ( ( $p4a->e3g_azienda_gestione_luoghi_cons ) and ( $this->fld_luogo_cons->getNewValue() != 0 ) )
+            $filtro .= " AND a.id_luogo_cons = " . $this->fld_luogo_cons->getNewValue();
+
 		if ( E3G_TIPO_GESTIONE == 'G' ) {
            	switch ($p4a->e3g_utente_tipo) {
                 case "R":
-					$this->ds_doc->setWhere( str_replace("#CAMPOCODICE#", "codclifor", $p4a->e3g_where_referente) . $filtro );
+                    // Il referente vede solo i documenti da lui creati e quelli relativi ai propri fornitori
+                    $this->ds_doc->setWhere( 
+                        "( d.idanag = " . $p4a->e3g_utente_idanag . " OR " .
+    					str_replace("#CAMPOCODICE#", "codclifor", $p4a->e3g_where_referente) . " ) " . $filtro );
 					break;
 				default:
-					$this->ds_doc->setWhere( "1=1 " . $filtro );				
+					$this->ds_doc->setWhere( "1 = 1 " . $filtro );				
 					break;
             }
 		}
@@ -426,6 +457,9 @@ class gesdocumenti1	extends P4A_Mask
 			$docscontrino = $db->queryOne( "SELECT eg_cod_doc_scontrino FROM _aziende WHERE prefix = '" . $p4a->e3g_prefix . "'" );
 			$this->ds_doc->setWhere( "codtipodoc <> '" . $docscontrino . "' " . $filtro );
 		}
+        $this->ds_doc->load();
+        $this->ds_doc->firstRow();
+        $this->tbl_doct->syncPageWithSource();
     }
 		
 
@@ -442,16 +476,14 @@ class gesdocumenti1	extends P4A_Mask
 		
 		$this->fld_codclifor->setNewValue($this->codclifor);
 		
-		$doc_estraibile = $db->queryOne("SELECT codaltridoc FROM ".$p4a->e3g_prefix."doctipidoc WHERE codice='".$this->fld_cod_tipo_doc->getNewValue()."'");
-		if ($doc_estraibile != "")
-		{
+		$doc_estraibile = $db->queryOne( 
+            "SELECT codaltridoc " .
+            "  FROM " . $p4a->e3g_prefix . "doctipidoc " .
+            " WHERE codice = '" . $this->fld_cod_tipo_doc->getNewValue() . "'" );
+		if ( $doc_estraibile != "" )
 			$this->fld_tutte->setVisible();
-		}
 		else 
-		{
 			$this->fld_tutte->setInvisible();
-		}
-		
 	}	
 
 
@@ -595,120 +627,6 @@ class gesdocumenti1	extends P4A_Mask
 	}
 
 	
-	function estrai_click()
-	{
-		$p4a =& p4a::singleton();
-		$db =& p4a_db::singleton();
-		
-		// trovo il cod tipo doc da generare estrarre 
-		$estraidoc = $db->queryOne("SELECT codaltridoc FROM ".$p4a->e3g_prefix."doctipidoc WHERE codice='".$this->fields->codtipodoc->getNewValue()."'");
-		
-		$clifor = $this->codute->getNewValue();
-		$datadoc = date("Y-m-d");
-		
-		$this->build("p4a_db_source", "ds_docr");
-		$this->ds_docr->setTable($p4a->e3g_prefix."docr");
-		$this->ds_docr->setPk("iddocr");
-		$this->ds_docr->setWhere("1=0");
-		$this->ds_docr->load();
-		
-		$this->build("p4a_db_source", "ds_righe");
-		$this->ds_righe->setTable($p4a->e3g_prefix."docr");
-		$this->ds_righe->setPk('idriga');
-		$this->ds_righe->setPageLimit(10);
-		$this->ds_righe->setWhere("visibile='S' AND iddocr=".$this->fields->iddoc->getNewValue());
-		$this->ds_righe->addOrder("idriga");
-		$this->ds_righe->load();
-		
-		
-		// creo la testata del nuovo doc $estraidoc
-		$this->ds_doct->newRow(); 
-		$this->ds_doct->fields->data->setNewValue($datadoc); 
-		$this->ds_doct->fields->codtipodoc->setNewValue($estraidoc);
-		$this->ds_doct->fields->codclifor->setNewValue($clifor);
-		$this->ds_doct->fields->anno->setNewValue($p4a->e3g_azienda_anno_contabile);
-		// mettere tutti i riferimenti rifestrnum RifEstranno rifiddoc rifestrtipodoc
-		$this->ds_doct->fields->rifestrnum->setNewValue($this->fields->numdocum->getNewValue());
-		$this->ds_doct->fields->RifEstranno->setNewValue($this->fields->anno->getNewValue());
-		$this->ds_doct->fields->rifestrtipodoc->setNewValue($this->fields->codtipodoc->getNewValue());
-		$this->ds_doct->fields->rifiddoc->setNewValue($this->fields->iddoc->getNewValue());
-		
-		
-		// Recupero ultimo numero documento
-		$registro = $db->queryOne("SELECT codregdoc FROM ".$p4a->e3g_prefix."doctipidoc WHERE codice='".$estraidoc."'");
-		$ultimo = $db->queryOne("SELECT MAX(seriale) FROM ".$p4a->e3g_prefix."docregistri WHERE codice='".$registro."'");
-		$ultimo++;
-		$this->ds_doct->fields->numdocum->setNewValue($ultimo);
-		$numdoct = $ultimo;
-		$query = "UPDATE ".$p4a->e3g_prefix."docregistri SET seriale=".$ultimo." WHERE codice='".$registro."'";
-		$db->query($query);
-			
-		// Recupero ultimo iddoc
-		$ultimo = $db->queryOne("SELECT MAX(iddoc) FROM ".$p4a->e3g_prefix."doct");
-		$ultimo++;
-		$this->ds_doct->fields->iddoc->setNewValue($ultimo);
-			
-		// questo sotto va in errore perche' ? 
-		$this->ds_doct->saveRow(); 
-			
-		// faccio scorrere le righe del documento
-		$this->ds_righe->firstRow();
-		$riga = 1 ;
-		$idriga = $db->queryOne("SELECT MAX(idriga) FROM ".$p4a->e3g_prefix."docr");
-		$idriga++;
-		
-    	while($riga <= $this->ds_righe->getNumRows()) {
-    		$this->ds_docr->newRow();
-    		if ($this->tutterighe->getNewValue()) {
-    			// ho selezionato tutte le righe
-				$this->ds_docr->fields->codtipodoc->setNewValue($estraidoc);
-				$this->ds_docr->fields->numdocum->setNewValue($numdoct);
-				$this->ds_docr->fields->anno->setNewValue($p4a->e3g_azienda_anno_contabile);
-				
-				$this->ds_docr->fields->codice->setNewValue($this->ds_righe->fields->codice->getNewValue());
-				$this->ds_docr->fields->descrizione->setNewValue($this->ds_righe->fields->descrizione->getNewValue());
-				$this->ds_docr->fields->barcode->setNewValue($this->ds_righe->fields->barcode->getNewValue());
-				$this->ds_docr->fields->prezzo->setValue($this->ds_righe->fields->prezzo->getNewValue());
-				$this->ds_docr->fields->codiva->setNewValue($this->ds_righe->fields->codiva->getNewValue());
-				$this->ds_docr->fields->quantita->setValue($this->ds_righe->fields->quantita->getNewValue());
-				$this->ds_docr->fields->codutente->setNewValue($this->ds_righe->fields->codutente->getNewValue());
-
-        		// Recupero ultimo iddocr
-        		$this->ds_docr->fields->idriga->setNewValue($idriga);
-				$this->ds_docr->fields->nriga->setNewValue($idriga);
-				$this->ds_docr->fields->iddocr->setNewValue($ultimo);
-			}
-    		else {
-    			// NON ho selezionato tutte le righe cerco = $clifor selezionato
-				if ($this->ds_righe->fields->codutente->getNewValue() == $clifor) 
-        		{		
-					$this->ds_docr->fields->codtipodoc->setNewValue($estraidoc);
-    				$this->ds_docr->fields->numdocum->setNewValue($numdoct);
-    				$this->ds_docr->fields->anno->setNewValue($p4a->e3g_azienda_anno_contabile);
-    				
-    				$this->ds_docr->fields->codice->setNewValue($this->ds_righe->fields->codice->getNewValue());
-    				$this->ds_docr->fields->descrizione->setNewValue($this->ds_righe->fields->descrizione->getNewValue());
-    				$this->ds_docr->fields->barcode->setNewValue($this->ds_righe->fields->barcode->getNewValue());
-    				$this->ds_docr->fields->prezzo->setValue($this->ds_righe->fields->prezzo->getNewValue());
-    				$this->ds_docr->fields->codiva->setNewValue($this->ds_righe->fields->codiva->getNewValue());
-    				$this->ds_docr->fields->quantita->setValue($this->ds_righe->fields->quantita->getNewValue());
-    				$this->ds_docr->fields->codutente->setNewValue($this->ds_righe->fields->codutente->getNewValue());
-    
-            		// Recupero ultimo iddocr
-            		$this->ds_docr->fields->idriga->setNewValue($idriga);
-    				$this->ds_docr->fields->nriga->setNewValue($idriga);
-    				$this->ds_docr->fields->iddocr->setNewValue($ultimo);
-        		}
-    		}	
-    		
-    		$this->ds_docr->saveRow(); 
-    		$this->ds_righe->nextRow();
-    		$riga++;
-			$idriga++;
-    	}	
-	}
-
-
 	function saveRow()
 	{
 		$p4a =& p4a::singleton();
@@ -859,14 +777,15 @@ class gesdocumenti1	extends P4A_Mask
 	{
 		$p4a =& p4a::singleton();
 		$db =& p4a_db::singleton();
-		
+
 		genera_stampa_pdf( 
             $this->numerodoc->getNewValue(), 
             $this->ds_doc->fields->iddoc->getNewValue(), 
             $this->ds_doc->fields->codtipodoc->getNewValue(), 
             $this->ds_doc->fields->codclifor->getNewValue(), 
             $this->ds_doc->fields->codtipopag->getNewValue(), 
-            $this->fld_tutte->getNewValue() );
+            ( $this->fld_tutte->isVisible() and $this->fld_tutte->getNewValue() ) 
+        );
 	}
 
 
@@ -894,7 +813,8 @@ class gesdocumenti1	extends P4A_Mask
             $this->ds_doc->fields->codtipodoc->getNewValue(), 
             $this->ds_doc->fields->codclifor->getNewValue(), 
             $this->ds_doc->fields->codtipopag->getNewValue(), 
-            $this->fld_tutte->getNewValue() );
+            ( $this->fld_tutte->isVisible() and $this->fld_tutte->getNewValue() ) 
+        );
     }
 
 }

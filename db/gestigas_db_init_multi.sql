@@ -150,7 +150,16 @@ CREATE TABLE [PREFIX]doccampireport ( idtable int(11) unsigned default NULL, cod
 -- Dump dei dati per la tabella '[PREFIX]doccampireport'
 -- 
 
-INSERT INTO [PREFIX]doccampireport (idtable, codtipodoc, campo, nomecampo, ordine) VALUES (1, '00024', 'codice', 'Codice', 1), (2, '00024', 'descrizione', 'Descrizione', 2), (3, '00024', 'quantita', 'Quantita', 3), (4, '00024', 'prezzo', 'Prezzo', 4), (5, '00024', 'totale', 'Importo', 5), (7, '00023', 'codice', 'Codice', 1), (8, '00023', 'descrizione', 'Descrizione', 2), (9, '00023', 'quantita', 'Quantita', 3), (10, '00023', 'prezzo', 'Prezzo', 4), (11, '00023', 'totale', 'Importo', 5), (5, '00024', 'totale', 'Importo', 5), (11, '00023', 'totale', 'Importo', 5);
+INSERT INTO [PREFIX]doccampireport ( idtable, codtipodoc, campo, nomecampo, ordine ) VALUES 
+	( 1, '00023', 'fornitore',   'Fornitore', 10), 
+	( 2, '00023', 'quantita',    'Q.tà', 20), 
+	( 3, '00023', 'descrizione', 'Descrizione', 30), 
+	( 4, '00023', 'prezzo',      'Prezzo', 40), 
+	( 5, '00023', 'totale',      'Importo', 50),
+	( 6, '00024', 'quantita',    'Q.tà', 10), 
+	( 7, '00024', 'descrizione', 'Descrizione', 20), 
+	( 8, '00024', 'prezzo',      'Prezzo', 30), 
+	( 9, '00024', 'totale',      'Importo', 40);
 
 -- --------------------------------------------------------
 

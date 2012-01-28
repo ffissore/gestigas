@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -58,33 +58,34 @@ class multigestione extends P4A_Mask
 
 			
 		// Griglia iniziale ----------------------------------------------------
-		$table =& $this->build( "p4a_table", "table" );
- 		$table->setWidth( E3G_TABLE_WIDTH );
-		$table->setSource($this->ds_aziende);
-		$table->setVisibleCols( array("rag_soc", "dbver", "admin_desc",
+		$this->build( "p4a_table", "tbl_aziende" );
+ 		$this->tbl_aziende->setWidth( E3G_TABLE_WIDTH );
+		$this->tbl_aziende->setSource($this->ds_aziende);
+		$this->tbl_aziende->setVisibleCols( array("rag_soc", "dbver", "admin_desc",
 			"n_login", "n_clienti", "n_fornitori", "n_articoli", "n_doc_ord_fornitori", "n_doc_cons_utenti", "last_login") );
+        $this->intercept( $this->tbl_aziende->rows, "afterClick", "tbl_aziende_AfterClick" );
 		
-		$table->cols->rag_soc->setLabel( "Ragione sociale" );
-		$table->cols->dbver->setLabel( "Vers. DB" );
-		$table->cols->admin_desc->setLabel( "Admin" );
-        $table->cols->n_login->setLabel( "N. accessi" );
-		$table->cols->n_clienti->setLabel( (E3G_TIPO_GESTIONE == 'G' ? "N. utenti attivi" : "N. clienti attivi") );
-		$table->cols->n_fornitori->setLabel( "N. fornitori" );
-		$table->cols->n_articoli->setLabel( "N. articoli" );
-        $table->cols->n_doc_ord_fornitori->setLabel( "N. ord. fornitore" );
-        $table->cols->n_doc_cons_utenti->setLabel( "N. cons. utente" );
-        $table->cols->last_login->setLabel( "Data ultimo accesso" );
+		$this->tbl_aziende->cols->rag_soc->setLabel( "Ragione sociale" );
+		$this->tbl_aziende->cols->dbver->setLabel( "Vers. DB" );
+		$this->tbl_aziende->cols->admin_desc->setLabel( "Admin" );
+        $this->tbl_aziende->cols->n_login->setLabel( "N. accessi" );
+		$this->tbl_aziende->cols->n_clienti->setLabel( (E3G_TIPO_GESTIONE == 'G' ? "N. utenti attivi" : "N. clienti attivi") );
+		$this->tbl_aziende->cols->n_fornitori->setLabel( "N. fornitori" );
+		$this->tbl_aziende->cols->n_articoli->setLabel( "N. articoli" );
+        $this->tbl_aziende->cols->n_doc_ord_fornitori->setLabel( "N. ord. fornitore" );
+        $this->tbl_aziende->cols->n_doc_cons_utenti->setLabel( "N. cons. utente" );
+        $this->tbl_aziende->cols->last_login->setLabel( "Data ultimo accesso" );
 
-//      $table->cols->rag_soc-> per differenza
-		$table->cols->dbver->setWidth( 40 );
-//      $table->cols->admin_desc-> per differenza
-        $table->cols->n_login->setWidth( 60 );
-		$table->cols->n_clienti->setWidth( 50 );
-		$table->cols->n_fornitori->setWidth( 50 );
-		$table->cols->n_articoli->setWidth( 50 );
-        $table->cols->n_doc_ord_fornitori->setWidth( 50 );
-        $table->cols->n_doc_cons_utenti->setWidth( 50 );
-        $table->cols->last_login->setWidth( 130 );
+//      $this->tbl_aziende->cols->rag_soc-> per differenza
+		$this->tbl_aziende->cols->dbver->setWidth( 40 );
+//      $this->tbl_aziende->cols->admin_desc-> per differenza
+        $this->tbl_aziende->cols->n_login->setWidth( 60 );
+		$this->tbl_aziende->cols->n_clienti->setWidth( 50 );
+		$this->tbl_aziende->cols->n_fornitori->setWidth( 50 );
+		$this->tbl_aziende->cols->n_articoli->setWidth( 50 );
+        $this->tbl_aziende->cols->n_doc_ord_fornitori->setWidth( 50 );
+        $this->tbl_aziende->cols->n_doc_cons_utenti->setWidth( 50 );
+        $this->tbl_aziende->cols->last_login->setWidth( 130 );
 
 	
 		// Dati anagrafici -----------------------------------------------------
@@ -194,23 +195,36 @@ class multigestione extends P4A_Mask
 		$this->build ("p4a_message", "message" );
 		$this->message->setWidth( 650 );
 
+
 		//Mandatory Fields -----------------------------------------------------
 	    $this->mf = array( "rag_soc", "dbver", "prefix", "data_inizio" );
 		foreach( $this->mf as $mf ) 
 			$this->fields->$mf->label->setFontWeight("bold");
 
+
 		// Toolbar -------------------------------------------------------------
 		$this->build( "p4a_standard_toolbar", "toolbar" );
+        $this->toolbar->setMask( $this );
+
    		$this->toolbar->buttons->new->setInvisible();  // PROVVISORIO: dovrà gestire la creazione di una nuova gestione
 		$this->toolbar->buttons->delete->setInvisible();  // PROVVISORIO: dovrà gestire l'eliminazione completa di una gestione
-		$this->toolbar->setMask( $this );
+
+
+        // ------------------------- Bottone toolbar per esportare righe tabella
+        $this->toolbar->addSeparator();
+        $this->toolbar->addButton( "bu_aggiorna_database", "warning" );
+        $this->toolbar->buttons->bu_aggiorna_database->setLabel( "Aggiorna database...", false );  // Con il false finale non si dovrebbe vedere la label ma solo il tooltip, ma ciò non accade in p4a 2.2.3 (bug?)
+        $this->toolbar->buttons->bu_aggiorna_database->addAction( "onClick" );
+        $this->toolbar->buttons->bu_aggiorna_database->requireConfirmation( "onClick", "Confermi l'operazione di aggiornamento del database ?" );
+        $this->toolbar->buttons->bu_aggiorna_database->setInvisible();
+        $this->intercept( $this->toolbar->buttons->bu_aggiorna_database, "onClick", "bu_aggiorna_database_Click" );
 
 
 		// Frame principale ----------------------------------------------------
 		$frm=& $this->build( "p4a_frame", "frm" );
 		$frm->setWidth( E3G_MAIN_FRAME_WIDTH );
 	
-		$frm->anchorCenter( $this->table );
+		$frm->anchorCenter( $this->tbl_aziende );
 		$frm->anchorCenter( $this->message );
 		$frm->anchorCenter( $this->fs_anagrafica );
 		$frm->anchorCenter( $this->fs_parametri );
@@ -223,6 +237,8 @@ class multigestione extends P4A_Mask
 		$this->display( "menu", $p4a->menu );
 		$this->display( "top", $this->toolbar );
 		$this->display( "main", $frm );
+        
+        $this->tbl_aziende_AfterClick();
 	}
 
 	
@@ -358,6 +374,36 @@ class multigestione extends P4A_Mask
 		}
 	}
 	
+
+    // -------------------------------------------------------------------------
+    function tbl_aziende_AfterClick() 
+    // -------------------------------------------------------------------------
+    {
+        $p4a =& p4a::singleton();
+        $db =& p4a_db::singleton();
+
+        $dbver = $db->queryOne( "SELECT dbver FROM _aziende WHERE prefix = '" . $this->fields->prefix->getValue() . "'" );   
+        if ( $dbver < E3G_DB_MULTI_VERSIONE_ATTESA ) 
+            $this->toolbar->buttons->bu_aggiorna_database->setVisible();
+        else
+            $this->toolbar->buttons->bu_aggiorna_database->setInvisible();
+    }  
+
+
+    // -------------------------------------------------------------------------
+    function bu_aggiorna_database_Click()
+    // -------------------------------------------------------------------------
+    {
+        $p4a =& p4a::singleton();
+        $db =& p4a_db::singleton();
+        
+        $result = (array)e3g_aggiorna_database( $this->fields->prefix->getValue() );
+        $this->message->setIcon( $result[0] ? "info" : "warning" );
+        $this->message->setValue( $result[1] );
+        
+        $this->tbl_aziende_AfterClick();
+    }
+    
 }
 
 ?>

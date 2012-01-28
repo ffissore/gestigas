@@ -1,12 +1,6 @@
 /barcode_img.php/1.4/Wed Oct  4 08:21:07 2006//
 /class.ezpdf.php/1.4/Thu Nov 15 20:44:42 2007/-kk/
-/class.movimenti.php/1.14/Mon Jan 19 16:17:09 2009//
 /class.pdf.php/1.3/Fri Oct 13 09:40:04 2006/-kk/
-/class.report.php/1.35/Mon Dec  7 07:43:26 2009//
-/class.text.php/1.4/Mon Jan 19 16:17:09 2009//
-/e3g_cron.php/1.16/Sat Jan  9 16:16:44 2010//
-/e3g_doc_routines.php/1.17/Mon Mar  1 16:06:27 2010//
-/e3g_utils.php/1.116/Sun Jan 10 17:06:22 2010//
 /index.html/1.1/Sat Jun 24 17:16:07 2006//
 D/Compat////
 D/Image////
@@ -19,3 +13,9 @@ D/phpdoc////
 D/phpmailer////
 D/pop3_class////
 D/test////
+/class.movimenti.php/1.15/Sat Jan 28 07:10:43 2012//
+/class.report.php/1.38/Result of merge//
+/class.text.php/1.5/Sat Jan 28 07:10:43 2012//
+/e3g_cron.php/1.20/Sat Jan 28 07:10:43 2012//
+/e3g_doc_routines.php/1.23/Result of merge+Sat Jan 28 07:10:43 2012//
+/e3g_utils.php/1.119/Result of merge//

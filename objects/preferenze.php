@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -30,10 +30,10 @@ require_once( dirname(__FILE__) . '/../libraries/e3g_utils.php' );
 require_once( dirname(__FILE__) . '/../config.php' );
 
 
-class azienda extends P4A_Mask
+class preferenze extends P4A_Mask
 {
     // -------------------------------------------------------------------------
-	function azienda()
+	function preferenze()
     // -------------------------------------------------------------------------
 	{
 		$this->p4a_mask();
@@ -41,7 +41,7 @@ class azienda extends P4A_Mask
 		$p4a =& p4a::singleton();
 
 
-		$this->SetTitle( "Configurazione $p4a->e3g_nome_sw" );
+		$this->SetTitle( "Preferenze $p4a->e3g_nome_sw" );
 		$this->setIcon( "misc" );
 
 		
@@ -126,6 +126,7 @@ class azienda extends P4A_Mask
         $fields->n_decimali_prezzi->setWidth(100);
 
         $fields->ordine_minimo->setLabel("Ordine minimo [euro]");
+        $fields->ordine_minimo->setTooltip( "Persuade gli utenti ad ordinare per un importo superiore a quello specificato" );
 		$fields->ordine_minimo->label->setWidth( 180 );
         $fields->ordine_minimo->setWidth(100);
 
@@ -299,13 +300,37 @@ class azienda extends P4A_Mask
 		
 
         // ----------------------------------------------- Notifiche automatiche
-        $fields->notifica_apertura->setLabel( "Apertura periodo ordine" );
-        $fields->notifica_apertura->label->setWidth( 150 );
+        $fields->notifica_apertura_ref->setLabel( "Apertura ordine (referenti)" );
+        $fields->notifica_apertura_ref->setTooltip( "Invio ai REFERENTI notifica per invitarli a controllare i listini." );
+        $fields->notifica_apertura_ref->label->setWidth( 200 );
+        $fields->notifica_apertura_ref->setType( "checkbox" );
+
+        $fields->notifica_apertura_ref_data->setLabel( "Ultimo invio" );
+        $fields->notifica_apertura_ref_data->label->setWidth( 80 );
+        $fields->notifica_apertura_ref_data->setWidth( 80 );
+        $fields->notifica_apertura_ref_data->disable();
+
+        $fields->notifica_apertura_ref_gg->setLabel( "Giorni di anticipo" );
+        $fields->notifica_apertura_ref_gg->setTooltip( "Giorni di anticipo con cui inviare la notifica rispetto alla data di apertura dell'ordine." );
+        $fields->notifica_apertura_ref_gg->label->setWidth( 120 );
+        $fields->notifica_apertura_ref_gg->setWidth( 30 );
+
+        $this->build( "p4a_button", "bu_notifica_apertura_ref" );
+        $this->bu_notifica_apertura_ref->setLabel( "Notifica adesso" );
+        $this->bu_notifica_apertura_ref->setIcon( "mail_new" );
+        $this->bu_notifica_apertura_ref->setSize( 16 );
+        $this->bu_notifica_apertura_ref->setWidth( 150 );
+        $this->bu_notifica_apertura_ref->addAction( "onClick" );
+        $this->intercept( $this->bu_notifica_chiusura, "onClick", "bu_notifica_apertura_ref_click" );
+
+
+        $fields->notifica_apertura->setLabel( "Apertura ordine (utenti)" );
+        $fields->notifica_apertura->label->setWidth( 200 );
         $fields->notifica_apertura->setType( "checkbox" );
 
         $fields->notifica_apertura_data->setLabel( "Ultimo invio" );
-        $fields->notifica_apertura_data->label->setWidth( 100 );
-        $fields->notifica_apertura_data->setWidth( 100 );
+        $fields->notifica_apertura_data->label->setWidth( 80 );
+        $fields->notifica_apertura_data->setWidth( 80 );
         $fields->notifica_apertura_data->disable();
 
         $this->build( "p4a_button", "bu_notifica_apertura" );
@@ -317,19 +342,19 @@ class azienda extends P4A_Mask
         $this->intercept( $this->bu_notifica_apertura, "onClick", "bu_notifica_apertura_click" );
 
 
-        $fields->notifica_chiusura->setLabel( "Chiusura periodo ordine" );
-        $fields->notifica_chiusura->label->setWidth( 150 );
+        $fields->notifica_chiusura->setLabel( "Chiusura ordine (utenti)" );
+        $fields->notifica_chiusura->label->setWidth( 200 );
         $fields->notifica_chiusura->setType( "checkbox" );
 
         $fields->notifica_chiusura_data->setLabel( "Ultimo invio" );
-        $fields->notifica_chiusura_data->label->setWidth( 100 );
-        $fields->notifica_chiusura_data->setWidth( 100 );
+        $fields->notifica_chiusura_data->label->setWidth( 80 );
+        $fields->notifica_chiusura_data->setWidth( 80 );
         $fields->notifica_chiusura_data->disable();
 
         $fields->notifica_chiusura_gg->setLabel( "Giorni di anticipo" );
-        $fields->notifica_chiusura_gg->setTooltip( "Giorni di anticipo con cui inviare la notifica rispetto alla data chiusura ordine." );
-        $fields->notifica_chiusura_gg->label->setWidth( 150 );
-        $fields->notifica_chiusura_gg->setWidth( 50 );
+        $fields->notifica_chiusura_gg->setTooltip( "Giorni di anticipo con cui inviare la notifica rispetto alla data di chiusura ordine." );
+        $fields->notifica_chiusura_gg->label->setWidth( 120 );
+        $fields->notifica_chiusura_gg->setWidth( 30 );
 
         $this->build( "p4a_button", "bu_notifica_chiusura" );
         $this->bu_notifica_chiusura->setLabel( "Notifica adesso" );
@@ -340,14 +365,15 @@ class azienda extends P4A_Mask
         $this->intercept( $this->bu_notifica_chiusura, "onClick", "bu_notifica_chiusura_click" );
 
 
-        $fields->notifica_lista_spesa->setLabel( "Lista della spesa" );
+// NON ANCORA ATTIVATI A CAUSA DELLA COMPLESSITA'
+        $fields->notifica_lista_spesa->setLabel( "Lista della spesa (utenti)" );
         $fields->notifica_lista_spesa->setTooltip( "Invia notifica con lista della spesa alla chiusura dell'ordine." );
-        $fields->notifica_lista_spesa->label->setWidth( 150 );
+        $fields->notifica_lista_spesa->label->setWidth( 200 );
         $fields->notifica_lista_spesa->setType( "checkbox" );
 
         $fields->notifica_lista_spesa_data->setLabel( "Ultimo invio" );
-        $fields->notifica_lista_spesa_data->label->setWidth( 100 );
-        $fields->notifica_lista_spesa_data->setWidth( 100 );
+        $fields->notifica_lista_spesa_data->label->setWidth( 80 );
+        $fields->notifica_lista_spesa_data->setWidth( 80 );
         $fields->notifica_lista_spesa_data->disable();
 
         $this->build( "p4a_button", "bu_notifica_lista_spesa" );
@@ -357,16 +383,17 @@ class azienda extends P4A_Mask
         $this->bu_notifica_lista_spesa->setWidth( 150 );
         $this->bu_notifica_lista_spesa->addAction( "onClick" );
         $this->intercept( $this->bu_notifica_lista_spesa, "onClick", "bu_notifica_lista_spesa_click" );
+// 
 
 
-        $fields->notifica_mov_cassa->setLabel( "Movimenti di cassa" );
-        $fields->notifica_mov_cassa->setTooltip( "Invia al cassiere notifica dei movimenti di cassa in attesa di validazione." );
-        $fields->notifica_mov_cassa->label->setWidth( 150 );
+        $fields->notifica_mov_cassa->setLabel( "Movimenti cassa (cassiere)" );
+        $fields->notifica_mov_cassa->setTooltip( "Invia al CASSIERE notifica dei movimenti di cassa in attesa di validazione." );
+        $fields->notifica_mov_cassa->label->setWidth( 200 );
         $fields->notifica_mov_cassa->setType( "checkbox" );
 
         $fields->notifica_mov_cassa_data->setLabel( "Ultimo invio" );
-        $fields->notifica_mov_cassa_data->label->setWidth( 100 );
-        $fields->notifica_mov_cassa_data->setWidth( 100 );
+        $fields->notifica_mov_cassa_data->label->setWidth( 80 );
+        $fields->notifica_mov_cassa_data->setWidth( 80 );
         $fields->notifica_mov_cassa_data->disable();
 
         $this->build( "p4a_button", "bu_notifica_mov_cassa" );
@@ -378,18 +405,24 @@ class azienda extends P4A_Mask
         $this->intercept( $this->bu_notifica_mov_cassa, "onClick", "bu_notifica_mov_cassa_click" );
 
 
-        // Fieldset
+        // -------------------------------------------------- Fieldset NOTIFICHE
         $this->build( "p4a_fieldset", "fs_notifiche" );
         $this->fs_notifiche->setWidth( E3G_FIELDSET_DATI_WIDTH );
-        $this->fs_notifiche->setTitle( "Notifiche automatiche agli utenti" );
+        $this->fs_notifiche->setTitle( "Notifiche automatiche" );
+        
+        $this->fs_notifiche->anchor( $fields->notifica_apertura_ref );
+        $this->fs_notifiche->anchorLeft( $fields->notifica_apertura_ref_data );
+        $this->fs_notifiche->anchorLeft( $fields->notifica_apertura_ref_gg );
+//      $this->fs_notifiche->anchorRight( $this->bu_notifica_apertura_ref );
+
         $this->fs_notifiche->anchor( $fields->notifica_apertura );
         $this->fs_notifiche->anchorLeft( $fields->notifica_apertura_data );
-        $this->fs_notifiche->anchorRight( $this->bu_notifica_apertura );
+//      $this->fs_notifiche->anchorRight( $this->bu_notifica_apertura );
 
         $this->fs_notifiche->anchor( $fields->notifica_chiusura );
         $this->fs_notifiche->anchorLeft( $fields->notifica_chiusura_data );
         $this->fs_notifiche->anchorLeft( $fields->notifica_chiusura_gg );
-        $this->fs_notifiche->anchorRight( $this->bu_notifica_chiusura );
+//      $this->fs_notifiche->anchorRight( $this->bu_notifica_chiusura );
 /* TODO da completare
         $this->fs_notifiche->anchor( $fields->notifica_lista_spesa );
         $this->fs_notifiche->anchorLeft( $fields->notifica_lista_spesa_data );
@@ -485,6 +518,25 @@ class azienda extends P4A_Mask
 
 
     // -------------------------------------------------------------------------
+    function bu_notifica_apertura_ref_click()
+    // -------------------------------------------------------------------------
+    {
+        $n_invii = e3g_notifica_apertura_ref();
+        
+        if ( $n_invii ) { 
+            $this->message->setIcon( "info" );
+            $this->message->setValue( "Notifica di apertura ordine inviata a $n_invii referent" .
+                ( $n_invii==1 ? "e" : "i" ) . "." );
+        }
+        else {
+            $this->message->setIcon( "warning" );
+//TODO Così non va bene...
+            $this->message->setValue( "Notifica di apertura ordine non inviata: nessun ordine si apre oggi." );
+        }
+    }
+    
+    
+    // -------------------------------------------------------------------------
     function bu_notifica_apertura_click()
     // -------------------------------------------------------------------------
     {
@@ -497,6 +549,7 @@ class azienda extends P4A_Mask
         }
         else {
             $this->message->setIcon( "warning" );
+//TODO Così non va bene...
             $this->message->setValue( "Notifica di apertura ordine non inviata: nessun ordine si apre oggi." );
         }
     }
@@ -516,6 +569,7 @@ class azienda extends P4A_Mask
         }
         else {
             $this->message->setIcon( "warning" );
+//TODO Così non va bene...
             $this->message->setValue( "Notifica di chiusura ordine non inviata: nessun ordine si chiude oggi." );
         }
     }

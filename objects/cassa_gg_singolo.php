@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -162,17 +162,22 @@ class cassa_gg_singolo extends P4A_Mask
         $this->build( "p4a_label", "lbl_situazione" );
         $this->lbl_situazione->setWidth( E3G_MAIN_FRAME_WIDTH-$this->bu_chiudi->getWidth()-25 );
 
-		// Message per eventuali warning relativi...
+	// Message per eventuali warning relativi a...
 		
-		// ...al singolo prodotto che si sta aggiungendo/modificando (vengono visualizzati una sola volta)
-		$this->build( "p4a_message", "msg_warning" );
-		$this->msg_warning->setWidth( 750 );
+        // ...all'inserimento/rimozione di un prodotto in lista della spesa (vengono visualizzati una sola volta)
+        $this->build( "p4a_message", "msg_info" );
+        $this->msg_info->setWidth( 750 );
+        $this->msg_info->setIcon( "info" );
+
+        // ...al singolo prodotto che si sta aggiungendo/modificando (vengono visualizzati una sola volta)
+        $this->build( "p4a_message", "msg_warning" );
+        $this->msg_warning->setWidth( 750 );
 
 		// ...ordine chiuso, importo minimo non raggiunto (rimangono visualizzati sempre)
-		$this->build( "p4a_message", "msg_info" );
-		$this->msg_info->setWidth( 750 );
-		$this->msg_info->setIcon( "info" );
-		$this->msg_info->autoClear( false );
+		$this->build( "p4a_message", "msg_minimo" );
+		$this->msg_minimo->setWidth( 750 );
+		$this->msg_minimo->setIcon( "warning" );
+		$this->msg_minimo->autoClear( false );
 
 
 		// -------------------------------- Pannello ricerca in LISTINO ARTICOLI
@@ -572,10 +577,10 @@ class cassa_gg_singolo extends P4A_Mask
         $this->SPE_fld_info_surplus->label->setWidth( 150 );
         $this->SPE_fld_info_surplus->label->setWidth( $this->SPE_fld_info_ordinemulti->label->getWidth() );
 
-        $this->build( "p4a_message", "SPE_msg_info" );
-        $this->SPE_msg_info->setWidth( E3G_NARROW_TABLE_IN_TAB_PANE_WIDTH );
-        $this->SPE_msg_info->setIcon( "warning" );
-        $this->SPE_msg_info->autoClear( false );
+        $this->build( "p4a_message", "SPE_msg_minimo" );
+        $this->SPE_msg_minimo->setWidth( E3G_NARROW_TABLE_IN_TAB_PANE_WIDTH );
+        $this->SPE_msg_minimo->setIcon( "warning" );
+        $this->SPE_msg_minimo->autoClear( false );
 
 
         // ---------------- Pannello "Lista della Spesa": oggetti colonna destra
@@ -681,6 +686,74 @@ class cassa_gg_singolo extends P4A_Mask
         $SPE_sh_lista_spesa->anchor( $SPE_sh_spalla_lista_spesa, 1, 2 );
         
 
+        // ---------------------------------- Sorgente dati ARTICOLI IN CONSEGNA
+
+        $this->build( "p4a_db_source", "CON_ds_articoli_consegna" );
+        $this->CON_ds_articoli_consegna->setSelect(
+            " f.descrizione AS desc_fornitore, " .
+            " (d.quantita-d.quantita2) AS qta_originale, " .
+            " d.quantita, " .
+            " art.codice, " .
+            " art.descrizione AS desc_articolo, " .
+            " CONCAT_WS( ' ', um_qta, um ) AS um_qta_um, " .  // CONCAT_WS non è vuoto se manca l'UM 
+            " FORMAT( d.prezzo, $p4a->e3g_azienda_n_decimali_prezzi ) AS prezzo_unitario_originale, " . 
+            " FORMAT( d.prezzo+d.delta_prezzo, $p4a->e3g_azienda_n_decimali_prezzi ) AS nuovo_prezzo_unitario, " . 
+            " FORMAT( d.totale, $p4a->e3g_azienda_n_decimali_prezzi ) AS importo_totale, " .
+            " f.descrizione, art.descrizione " );  // necessari per l'ORDER BY, altrimenti si ottiene errore            
+
+        $this->CON_ds_articoli_consegna->setTable( $p4a->e3g_prefix . "docr AS d" );
+        $this->CON_ds_articoli_consegna->addJoin( $p4a->e3g_prefix . "doct AS t", "d.iddocr = t.iddoc" );
+        $this->CON_ds_articoli_consegna->addJoin( $p4a->e3g_prefix . "articoli AS art", "d.codice = art.codice" );
+        $this->CON_ds_articoli_consegna->addJoin( $p4a->e3g_prefix . "anagrafiche AS f", "art.centrale = f.codice" );
+        
+        $this->CON_ds_articoli_consegna->setWhere( 
+            " d.codutente = '$p4a->e3g_utente_codice' AND " .
+            " d.visibile = 'N' AND " .
+            " d.codtipodoc = '" . $p4a->e3g_azienda_gg_cod_doc_ordine . "' AND " .
+            " ( d.estratto <> 'S' OR ISNULL(d.estratto) ) " );
+  
+        $this->CON_ds_articoli_consegna->addOrder( "f.descrizione" );
+        $this->CON_ds_articoli_consegna->addOrder( "art.descrizione" );  // Sembra non funzionare
+
+        $this->CON_ds_articoli_consegna->setPk( "art.codice" );
+        $this->CON_ds_articoli_consegna->setPageLimit( $p4a->e3g_utente_db_source_page_limit );
+        $this->CON_ds_articoli_consegna->load();
+
+
+        // ---------------------------------------- Griglia ARTICOLI IN CONSEGNA
+
+        $this->build( "p4a_table", "CON_tab_articoli_consegna" );
+        $this->CON_tab_articoli_consegna->setWidth( E3G_TABLE_IN_TAB_PANE_WIDTH );
+        $this->CON_tab_articoli_consegna->setSource( $this->CON_ds_articoli_consegna ); 
+        $this->CON_tab_articoli_consegna->setVisibleCols( array("desc_fornitore", "qta_originale", "quantita", "desc_articolo", "um_qta_um", 
+            "prezzo_unitario_originale", "nuovo_prezzo_unitario", "importo_totale") );
+        $this->CON_tab_articoli_consegna->showNavigationBar();
+        $this->intercept( $this->CON_tab_articoli_consegna->rows, "beforeDisplay", "CON_tab_articoli_consegna_beforeDisplay" );  
+
+        $this->CON_tab_articoli_consegna->cols->desc_fornitore->setLabel( "Fornitore" );
+        $this->CON_tab_articoli_consegna->cols->qta_originale->setLabel( "Q.ta' (orig.)" );
+        $this->CON_tab_articoli_consegna->cols->quantita->setLabel( "Q.ta'" );                             // oscurata se uguale all'originale  
+        $this->CON_tab_articoli_consegna->cols->desc_articolo->setLabel( "Articolo" );
+        $this->CON_tab_articoli_consegna->cols->um_qta_um->setLabel( "Conf." );
+        $this->CON_tab_articoli_consegna->cols->prezzo_unitario_originale->setLabel( "Prezzo (orig.)" );
+        $this->CON_tab_articoli_consegna->cols->nuovo_prezzo_unitario->setLabel( "Prezzo" );               // oscurata se uguale all'originale
+        $this->CON_tab_articoli_consegna->cols->importo_totale->setLabel( "Importo" );
+
+        // Larghezze colonne
+        $this->CON_tab_articoli_consegna->cols->desc_fornitore->setWidth( 160 );
+        $this->CON_tab_articoli_consegna->cols->qta_originale->setWidth( 50 );
+        $this->CON_tab_articoli_consegna->cols->quantita->setWidth( 50 );
+//      $this->CON_tab_articoli_consegna->cols->desc_articolo->setWidth( 160 );  per differenza
+        $this->CON_tab_articoli_consegna->cols->um_qta_um->setWidth( 50 );
+        $this->CON_tab_articoli_consegna->cols->prezzo_unitario_originale->setWidth( 50 );
+        $this->CON_tab_articoli_consegna->cols->nuovo_prezzo_unitario->setWidth( 50 );
+        $this->CON_tab_articoli_consegna->cols->importo_totale->setWidth( 50 );
+        
+        $this->CON_tab_articoli_consegna->cols->desc_fornitore->setOrderable( false );
+        $this->CON_tab_articoli_consegna->cols->desc_articolo->setOrderable( false );
+        $this->CON_tab_articoli_consegna->cols->um_qta_um->setOrderable( false );
+
+
         // ------------------------------------------------------- Pannello NOTE
 
         // Campo Note
@@ -713,14 +786,16 @@ class cassa_gg_singolo extends P4A_Mask
 		$this->tab_pane->pages->build( "p4a_frame", "tabframe1" );
 		$this->tab_pane->pages->build( "p4a_frame", "tabframe2" );
         $this->tab_pane->pages->build( "p4a_frame", "tabframe3" );
+        $this->tab_pane->pages->build( "p4a_frame", "tabframe4" );
 
         $this->tab_pane->addAction( "OnClick" );
         $this->intercept( $this->tab_pane, "OnClick", "tab_pane_tabClick" );
 		$this->tab_pane->setWidth( E3G_TAB_PANE_WIDTH ); 
 
-		//$this->tab_pane->pages->tabframe1->setLabel( "Listino Articoli" ); Compilata in ART_bu_filtraClick()
-        //$this->tab_pane->pages->tabframe2->setLabel( "Lista della Spesa (...)" );  Compilata in update_top_message()
-        //$this->tab_pane->pages->tabframe3->setLabel( "Note all'ordine (...)" );  Compilata in update_label_note()
+		$this->tab_pane->pages->tabframe1->setLabel( "Listino (...)" );         // Compilata in ART_bu_filtraClick()
+        $this->tab_pane->pages->tabframe2->setLabel( "Lista della Spesa" );  
+        $this->tab_pane->pages->tabframe3->setLabel( "Articoli in consegna" );  
+        $this->tab_pane->pages->tabframe4->setLabel( "Note all'ordine (...)" ); // Compilata in update_label_note()
 
 		$this->tab_pane->pages->tabframe1->anchor( $ART_fs_filtro_articoli );		 
         $this->tab_pane->pages->tabframe1->anchor( $ART_sh_listino );        
@@ -744,10 +819,12 @@ class cassa_gg_singolo extends P4A_Mask
         $this->tab_pane->pages->tabframe2->anchor( $this->SPE_fld_info_ordinegas );
         $this->tab_pane->pages->tabframe2->anchorLeft( $this->SPE_fld_info_cartonigas );
         $this->tab_pane->pages->tabframe2->anchorLeft( $this->SPE_fld_info_surplus );
-        $this->tab_pane->pages->tabframe2->anchor( $this->SPE_msg_info );
+        $this->tab_pane->pages->tabframe2->anchor( $this->SPE_msg_minimo );
         
-        $this->tab_pane->pages->tabframe3->anchor( $this->NOT_fld_note );        
-        $this->tab_pane->pages->tabframe3->anchorRight( $this->SPE_bu_salva_note );        
+        $this->tab_pane->pages->tabframe3->anchor( $this->CON_tab_articoli_consegna );        
+
+        $this->tab_pane->pages->tabframe4->anchor( $this->NOT_fld_note );        
+        $this->tab_pane->pages->tabframe4->anchorRight( $this->SPE_bu_salva_note );        
 
 		
         // ------------------------------------- Sheet per situazione e chiusura
@@ -801,6 +878,7 @@ class cassa_gg_singolo extends P4A_Mask
 		$frm->setWidth( E3G_MAIN_FRAME_WIDTH );
         $frm->anchor( $this->sh_info );
         $frm->anchor( $this->msg_info );
+        $frm->anchor( $this->msg_minimo );
         $frm->anchor( $this->msg_warning );
 		$frm->anchor( $this->tab_pane );
 //        $frm->anchor( $this->tp_articolo );
@@ -855,7 +933,7 @@ class cassa_gg_singolo extends P4A_Mask
     }
 
    
-    // NON SI RIESCE A FAR RICHIAMARE QUEST'EVENTO 
+    // TODO: NON SI RIESCE, PURTROPPO, A FAR RICHIAMARE QUEST'EVENTO 
     // -------------------------------------------------------------------------
     function tab_pane_tabClick()
     // -------------------------------------------------------------------------
@@ -874,7 +952,7 @@ class cassa_gg_singolo extends P4A_Mask
         sdasd;
 //        echo "Pannello attivo: " . $this->tab_pane->getActivePage();
         $this->lbl_situazione->setValue( "Pannello attivo: " . $this->tab_pane->getActivePage() );
-        $this->msg_info->setValue( "Pannello attivo: " . $this->tab_pane->getActivePage() );
+        $this->msg_minimo->setValue( "Pannello attivo: " . $this->tab_pane->getActivePage() );
         
         
 //      $this->setSource($this->SPE_ds_lista_spesa);
@@ -896,7 +974,7 @@ class cassa_gg_singolo extends P4A_Mask
     
     2) ORDINE CHIUSO + ARTICOLI NEL CARRELLO 
         Il periodo d'ordine è concluso.
-        La lista della spesa è in elaborazione da parte dei referenti: rimangono da elaborare ...
+        La lista della spesa è in elaborazione da parte dei referenti: rimangono da elaborare 88 articoli per un importo totale di 123,45 euro.
     
     3) ORDINE APERTO + NESSUN ARTICOLO NEL CARRELLO
         La tua lista della spesa è vuota.
@@ -907,7 +985,12 @@ class cassa_gg_singolo extends P4A_Mask
     4) ORDINE APERTO + ARTICOLI NEL CARRELLO
         Hai 88 articoli in ordine per un importo totale di 123,45 euro.
         [stesso testo in coda al caso 3)]
+
+    SE (NON) CI SONO ARTICOLI IN CONSEGNA:        
+        Nessun articolo in consegna.
+        Hai 88 articoli in consegna per un importo totale di 123,45 euro.        
 */
+
         $n_ordini_aperti = $db->queryOne(
             "SELECT COUNT(*) FROM ".$p4a->e3g_prefix."fornitoreperiodo WHERE " . e3g_where_ordini_aperti() );
 
@@ -920,15 +1003,19 @@ class cassa_gg_singolo extends P4A_Mask
         $testo_msg = "";
         $testo_lbl = "";
         if ( $n_ordini_aperti == 0 ) {
-            if ( $qta == 0 )
+            if ( $qta == 0 ) {
                 // 1) ORDINE CHIUSO + NESSUN ARTICOLO NEL CARRELLO
                 $testo_lbl .= "<p>Nessun ordine e' attualmente aperto. Il prossimo periodo sara':</p>" .
                     e3g_get_html_elenco_prossime_aperture();
-            else 
+//              $this->tab_pane->pages->tabframe2->setLabel( "Lista della Spesa (vuota)" );
+            }
+            else {
                 // 2) ORDINE CHIUSO + ARTICOLI NEL CARRELLO 
                 $testo_lbl .= "<p>Il periodo d'ordine e' concluso.</p>" .
-                    "<p>La lista della spesa e' in elaborazione da parte dei referenti: riman" . ( $qta==1 ? "e" : "gono" ) . " da elaborare " .
+                    "<p>La <strong>lista della spesa</strong> e' in elaborazione da parte dei referenti: riman" . ( $qta==1 ? "e" : "gono" ) . " da elaborare " .
                     "<strong>$qta articol" . ( $qta==1 ? "o" : "i" ) . "</strong> per un importo totale di <strong>" . $importo . " euro</strong>.</p>";
+//              $this->tab_pane->pages->tabframe2->setLabel( "Lista della Spesa ($qta articol" . ( $qta==1 ? "o" : "i" ) . " / $importo euro)" );
+            }
         }
         else {
             if ( $p4a->e3g_azienda_gestione_cassa ) {
@@ -939,16 +1026,17 @@ class cassa_gg_singolo extends P4A_Mask
                 $testo_lbl .= 
                     "<p>Il tuo " . ( $saldo_utente>=0 ? "credito" : "debito" ) . " nella cassa comune risulta di <strong>$saldo_utente euro</strong>.</p>";
             }
+            
             if ( $qta == 0 ) {
                 // 3) ORDINE APERTO + NESSUN ARTICOLO NEL CARRELLO
-                $testo_lbl .= "<p>La tua lista della spesa e' vuota.</p>";
-                $this->tab_pane->pages->tabframe2->setLabel( "Lista della Spesa (vuota)" );
+                $testo_lbl .= "<p>La tua <strong>lista della spesa</strong> e' vuota.</p>";
+//              $this->tab_pane->pages->tabframe2->setLabel( "Lista della Spesa (vuota)" );
             }
             else {
                 // 4) ORDINE APERTO + ARTICOLI NEL CARRELLO
                 $testo_lbl .= "<p>Hai <strong>$qta articol" . ( $qta==1 ? "o" : "i" ) . 
                     "</strong> in ordine per un importo totale di <strong>" . $importo . " euro</strong>.</p>";
-                $this->tab_pane->pages->tabframe2->setLabel( "Lista della Spesa ($qta articol" . ( $qta==1 ? "o" : "i" ) . " / $importo euro)" );
+//              $this->tab_pane->pages->tabframe2->setLabel( "Lista della Spesa ($qta articol" . ( $qta==1 ? "o" : "i" ) . " / $importo euro)" );
             }
         
             $testo_lbl .= "<p>Scegli i prodotti nel listino articoli, specifica la quantita' desiderata e poi premi il bottone \"Aggiungi\".<br />" .
@@ -956,10 +1044,27 @@ class cassa_gg_singolo extends P4A_Mask
                 e3g_get_html_elenco_prossime_chiusure();
     
             if ( $p4a->e3g_azienda_ordine_minimo > 0 and $importo < $p4a->e3g_azienda_ordine_minimo ) 
-                $testo_msg .= "<p>L'ordine minimo e' di $p4a->e3g_azienda_ordine_minimo euro.</p>" ;
-                        }
+                $testo_msg .= "<p>ATTENZIONE: l'importo del tuo ordine NON raggiunge il minimo richiesto pari a $p4a->e3g_azienda_ordine_minimo euro.</p>" ;
+        }
 
-        $this->msg_info->setValue( $testo_msg );
+        // Eventuali articoli IN CONSEGNA                        
+        $result = $db->queryRow( 
+            "SELECT SUM( quantita ) AS quantita, " .
+            "       FORMAT( SUM(totale), $p4a->e3g_azienda_n_decimali_prezzi ) AS importo_totale " .
+            "  FROM  " . $p4a->e3g_prefix . "docr " .
+            " WHERE codutente = '$p4a->e3g_utente_codice' " .
+            "  AND visibile = 'N' " .
+            "  AND codtipodoc = '" . $p4a->e3g_azienda_gg_cod_doc_ordine . "' " .
+            "  AND ( estratto <> 'S' OR ISNULL(estratto) ) " );
+        $quantita = (integer) $result[ "quantita" ];
+        $importo_totale = (double) $result[ "importo_totale" ];
+        if ( $result )
+            $testo_lbl .= "<p>Hai $quantita <strong>articol" . ( $quantita==1 ? "o" : "i" ) . " in consegna</strong> per un importo totale di $importo_totale euro.</p>";
+        else
+            $testo_lbl .= "<p>Nessun <strong>articolo in consegna</strong>.</p>";
+                               
+
+        $this->msg_minimo->setValue( $testo_msg );
         $this->lbl_situazione->setValue( $testo_lbl );
     }
 
@@ -1180,6 +1285,8 @@ class cassa_gg_singolo extends P4A_Mask
             }
         }
         
+        // INSERIMENTO DELL'ARTICOLO
+        
         if ( $cod_articolo != '' && $periodo_ordine_aperto > 0 && $qtamin == 0 && $pzperconf == 0 && 
              ( $articolo_stagionale == 0 || ($articolo_stagionale > 0 && $stagione > 0) ) )
         {
@@ -1187,6 +1294,7 @@ class cassa_gg_singolo extends P4A_Mask
                 "SELECT idriga FROM " . $p4a->e3g_prefix . "carrello " .
                 " WHERE codutente = '" . $p4a->e3g_utente_codice . "' AND codarticolo = '" . $cod_articolo . "'" );
                 
+            // ARTICOLO già presente in lista spesa
             if ( is_numeric($rigaid) ) {
                 // ho un ID RIGA valido quindi ho già righe per questo utente
                 $db->query(
@@ -1198,6 +1306,7 @@ class cassa_gg_singolo extends P4A_Mask
                 // seguente istruzione altrimenti in $this->SPE_ds_lista_spesa->fields->qta rimane il valore non aggiornato
                 $this->SPE_ds_lista_spesa->fields->qta->setValue( $this->SPE_ds_lista_spesa->fields->qta->getNewValue() + $this->ART_fld_aggiungi_qta->getNewValue() );
             }
+            // ARTICOLO non presente in lista spesa
             else {
                 $new_idriga = $db->queryOne( "SELECT MAX( idriga ) FROM " . $p4a->e3g_prefix . "carrello" );
                 if ( is_numeric ($new_idriga) )
@@ -1224,7 +1333,10 @@ class cassa_gg_singolo extends P4A_Mask
                         $db->queryOne( "SELECT dettaglio_causale_mov_mag FROM _aziende WHERE prefix = '$p4a->e3g_prefix'" ). "', " .
                         "CURDATE() ) " );
             }
-        
+            $this->msg_info->setValue( 
+                "Aggiunt" . ($this->ART_fld_aggiungi_qta->getNewValue()==1 ? "o" : "i") . ": " .
+                $this->ART_fld_aggiungi_qta->getNewValue() . "x " . $this->ART_ds_articoli->fields->descrizione->getNewValue() );
+
             $this->ART_tab_listino_afterClick();
             $this->SPE_tab_lista_spesa_afterClick();
             $this->update_top_message();
@@ -1239,7 +1351,7 @@ class cassa_gg_singolo extends P4A_Mask
                 $testo_errore .= "<br />- la quantita' MINIMA e' di " . $qtamin . " pezzi";
 
             if ( $pzperconf != 0 )
-                $testo_errore .= "<br />- solo ordini multipli di " . ($pzperconf * -1) . " pezzi";
+                $testo_errore .= "<br />- sono ammessi solo ordini multipli di " . ($pzperconf * -1) . " pezzi";
             
             if ( $articolo_stagionale > 0 && $stagione == 0 )
                 $testo_errore .= "<br />- prodotto FUORI STAGIONE.";
@@ -1255,7 +1367,7 @@ class cassa_gg_singolo extends P4A_Mask
     {       
         $p4a =& p4a::singleton();
         
-        $p4a->openMask('esporta_listino');
+        $p4a->openMask( "esporta_listino" );
     }
 
 
@@ -1265,7 +1377,7 @@ class cassa_gg_singolo extends P4A_Mask
     {       
         $p4a =& p4a::singleton();
         
-        $p4a->openMask('esporta_listino');
+        $p4a->openMask( "esporta_listino" );
     }
     
 
@@ -1375,10 +1487,10 @@ class cassa_gg_singolo extends P4A_Mask
                 $this->SPE_fld_info_surplus->setStyleProperty( "border", "1px solid red" );
                 
                 if ( $ordine_globale["qta"] < $this->SPE_ds_lista_spesa->fields->qtaminordine->getNewValue() )        
-                    $this->SPE_msg_info->setValue( "Se non verra' raggiunto il quatitativo minimo per formare un cartone (" .
+                    $this->SPE_msg_minimo->setValue( "Se non verra' raggiunto il quatitativo minimo per formare un cartone (" .
                      $this->SPE_ds_lista_spesa->fields->qtaminordine->getNewValue() . " pezzi), allora il tuo ordine potrebbe essere annullato." );
                 else
-                    $this->SPE_msg_info->setValue( 
+                    $this->SPE_msg_minimo->setValue( 
                         "Se i pezzi in ordine globalmente (attualmente " .  $ordine_globale["qta"] . ") non saranno multipli di quelli contenuti in un cartone (" .
                         $this->SPE_ds_lista_spesa->fields->qtaminordine->getNewValue() . "), allora il tuo ordine potrebbe subire una modifica in piu' o in meno." );
             }
@@ -1386,7 +1498,7 @@ class cassa_gg_singolo extends P4A_Mask
                 $this->SPE_fld_info_surplus->label->unsetStyleProperty( "color" );
                 $this->SPE_fld_info_surplus->unsetStyleProperty( "border" );
                 
-                $this->SPE_msg_info->setValue( "" );
+                $this->SPE_msg_minimo->setValue( "" );
             }
         }
     }
@@ -1530,6 +1642,9 @@ class cassa_gg_singolo extends P4A_Mask
             
             $this->SPE_tab_lista_spesa_afterClick();
             $this->update_top_message();
+
+            $this->msg_info->setValue( 
+                "Modificata quantita': " . $this->SPE_fld_spesa_qta->getNewValue() . "x " . $this->SPE_ds_lista_spesa->fields->descrizione->getNewValue() );
 		}
         else {
 			$testo_errore = $this->SPE_ds_lista_spesa->fields->descrizione->getNewValue() . ":";
@@ -1567,10 +1682,13 @@ class cassa_gg_singolo extends P4A_Mask
             "   AND " . e3g_where_ordini_aperti() );
         
         if ( $periodo_ordine_aperto ) {
+            $desc_articolo = $this->SPE_ds_lista_spesa->fields->descrizione->getNewValue();
             $db->query(
                 "DELETE FROM " . $p4a->e3g_prefix . "carrello " .
                 " WHERE idriga = " . $this->SPE_ds_lista_spesa->fields->idriga->getNewValue() );
             
+            $this->msg_info->setValue( "Articolo eliminato: $desc_articolo" );
+
             $this->SPE_tab_lista_spesa_afterClick();
             $this->update_top_message();
         }
@@ -1759,13 +1877,36 @@ class cassa_gg_singolo extends P4A_Mask
     
 
     // -------------------------------------------------------------------------
+    function CON_tab_articoli_consegna_beforeDisplay( $obj, $rows ) 
+    // -------------------------------------------------------------------------
+    {  
+        // array("desc_fornitore", "qta_originale", "quantita", "desc_articolo", "um_qta_um", "prezzo_unitario_originale", "nuovo_prezzo_unitario", "importo_totale") 
+        for( $i=0; $i<count($rows); $i++ ) {  
+            // Evidenzia quando la quantità è variata
+            if ( $rows[$i]["quantita"] <> $rows[$i]["qta_originale"] )
+//TODO Purtroppo non funziona, i valori vengono inspiegabilmente visualizzati come zero
+//  Succede perchè il campo "quantita" è un double; non succede quando c'è la possibilità di usare la funzione FORMAT() che converte in stringa 
+//  (vedere infatti altrove con i campi prezzo)
+//              $rows[$i]["quantita"] = "<span style='color:purple;'>" . $rows[$i]["quantita"] . "</span>";
+//  rimediamo cambiando colore lla descrizione articolo
+                $rows[$i]["desc_articolo"] = "<span style='color:purple;'>" . $rows[$i]["desc_articolo"] . "</span>";
+
+            // Evidenzia quando il prezzo è variato
+            if ( $rows[$i]["nuovo_prezzo_unitario"] <> $rows[$i]["prezzo_unitario_originale"] )
+                $rows[$i]["nuovo_prezzo_unitario"] = "<span style='color:blue;'>" . $rows[$i]["nuovo_prezzo_unitario"] . "</span>";
+        }  
+        return $rows;  
+    }  
+
+
+    // -------------------------------------------------------------------------
     function update_label_note()
     // -------------------------------------------------------------------------
     {
         if ( trim( $this->NOT_fld_note->getNewValue() ) <> "" )
-            $this->tab_pane->pages->tabframe3->setLabel( "Note all'ordine" ); 
+            $this->tab_pane->pages->tabframe4->setLabel( "Note all'ordine" ); 
         else
-            $this->tab_pane->pages->tabframe3->setLabel( "Note all'ordine (nessuna)" ); 
+            $this->tab_pane->pages->tabframe4->setLabel( "Note all'ordine (nessuna)" ); 
     }
 
     // -------------------------------------------------------------------------

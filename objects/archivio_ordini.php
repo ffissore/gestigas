@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -61,7 +61,8 @@ class archivio_ordini extends P4A_Mask
         $this->ds_utenti->addJoin( $p4a->e3g_prefix . "doct AS t",  "a.codice = t.codclifor" );
 
         $str_where = "t.codtipodoc = '" . $p4a->e3g_azienda_gg_cod_doc_ordine_fam . "' AND t.totdoc <> 0 ";
-        if ( $p4a->e3g_utente_tipo == "U" )  // I normali utenti possono vedere solo i propri ordini (o di tutto il GAS)
+        // I normali utenti (U) possono vedere solo i propri ordini; referenti (R) e amministratori (AS) invece, tutti gli ordini
+        if ( $p4a->e3g_utente_tipo == "U" )   
             $str_where .= " AND a.idanag = " . $p4a->e3g_utente_idanag;
         $this->ds_utenti->setWhere( $str_where );
 
@@ -109,7 +110,12 @@ class archivio_ordini extends P4A_Mask
         $fs_utente_width = E3G_FIELDSET_SEARCH_WIDTH/2 - 140;
         $this->tab_doct->setWidth( E3G_TABLE_WIDTH - $fs_utente_width - 40 );
         $this->tab_doct->setSource( $this->ds_doct );
-        $this->tab_doct->setTitle( "Elenco ordini utente selezionato" );
+
+        if ( $p4a->e3g_utente_tipo == "U" )   
+            $this->tab_doct->setTitle( "Elenco documenti di consegna" );
+        else
+            $this->tab_doct->setTitle( "Elenco documenti di consegna utente selezionato" );
+
         $this->tab_doct->setVisibleCols( array( "data", "numdocum", "totdoc", "n_for_diversi", "n_art_diversi", "tot_qta") );
         $this->tab_doct->showNavigationBar();
         $this->intercept( $this->tab_doct->rows, "afterClick", "tab_doct_afterClick" );        
@@ -226,7 +232,7 @@ class archivio_ordini extends P4A_Mask
 	{
 		$p4a =& p4a::singleton();
 
-        $this->tab_row->setTitle( "Dettaglio ordine n." . $this->ds_doct->fields->numdocum->getNewValue() .
+        $this->tab_row->setTitle( "Dettaglio consegna n." . $this->ds_doct->fields->numdocum->getNewValue() .
             " del " . e3g_format_mysql_data( $this->ds_doct->fields->data->getNewValue() ) );
 
 		// Controllo inserito perchè la prima volta che entra iddocr non restituisce niente e la query andrebbe in errore

@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -577,8 +577,7 @@ $this->ck2_art_non_dispo->setInvisible();
         else
             $this->fld1_variazione->setNewValue( "0 euro" ); 
     }
-
-
+    
     // 1) Modifica prezzi di tutti gli articoli in elenco
     // -------------------------------------------------------------------------
     function bu1_esegui_modifica_tutti_click()
@@ -617,7 +616,7 @@ $this->ck2_art_non_dispo->setInvisible();
             $sql_txt =
                 "UPDATE " . $p4a->e3g_prefix . "docr " . 
                 "   SET delta_prezzo = $new_delta_prezzo, " .
-                "       totale = ( prezzo + $new_delta_prezzo ) * ( quantita + quantita2 ) " .
+                "       totale = ( prezzo + $new_delta_prezzo ) * quantita " .
                 " WHERE codice = '" . $this->fields->codice->getNewValue() . "' " .
                 "   AND visibile = 'N' " .
                 "   AND codtipodoc = '" . $p4a->e3g_azienda_gg_cod_doc_ordine . "' " .
@@ -631,7 +630,7 @@ $this->ck2_art_non_dispo->setInvisible();
         // Aggiorna anche i totali di testata (doct.imponibile e doct.totdoc)
         $sql_txt =
             "UPDATE " . $p4a->e3g_prefix . "doct AS t " . 
-            "   SET t.imponibile = ( SELECT SUM( (r.prezzo+r.delta_prezzo) * (r.quantita+r.quantita2) ) " .
+            "   SET t.imponibile = ( SELECT SUM( (r.prezzo+r.delta_prezzo) * r.quantita ) " .  
             "                          FROM " . $p4a->e3g_prefix . "docr AS r " .
             "                         WHERE r.iddocr = t.iddoc " .
             "                           AND r.visibile = 'N' AND r.codtipodoc = '" . $p4a->e3g_azienda_gg_cod_doc_ordine . "' " .
@@ -682,7 +681,7 @@ $this->ck2_art_non_dispo->setInvisible();
         // Aggiorna anche i totali di testata (doct.imponibile e doct.totdoc)
         $sql_txt =
             "UPDATE " . $p4a->e3g_prefix . "doct AS t " . 
-            "   SET t.imponibile = ( SELECT SUM( (r.prezzo+r.delta_prezzo) * (r.quantita+r.quantita2) ) " .
+            "   SET t.imponibile = ( SELECT SUM( (r.prezzo+r.delta_prezzo) * r.quantita ) " .
             "                          FROM " . $p4a->e3g_prefix . "docr AS r " .
             "                         WHERE r.iddocr = t.iddoc " .
             "                           AND r.visibile = 'N' AND r.codtipodoc = '" . $p4a->e3g_azienda_gg_cod_doc_ordine . "' " .

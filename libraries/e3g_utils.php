@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -190,7 +190,7 @@ function e3g_scrivi_footer( &$a_this, &$a_object ) {
 			"/$p4a->e3g_db_cond_versione/$p4a->e3g_azienda_db_multi_versione"; 
 			
 	$riga2 .= 
-		' - (C) 2003-2009 <a href="http://www.progettoe3g.org/">Progetto e3g</a> - Software gestionali per l\'economia solidale</div>';
+		' - (C) 2003-2012 <a href="http://www.progettoe3g.org/">Progetto e3g</a> - Software gestionali per l\'economia solidale</div>';
 
 	$footer_copy =& $a_this->build( "p4a_label", "footer_copy" );
 	$footer_copy->setWidth( "720" );
@@ -202,15 +202,15 @@ function e3g_scrivi_footer( &$a_this, &$a_object ) {
 
 //------------------------------------------------------------------------------
 // Restituisce una riga per il footer con nome del software e copyright,
-//   solo testo e senza formattazioni (usata ad esempio per le stampe)
+//   solo testo e link attivi (usata nelle stampe PDF)
 //------------------------------------------------------------------------------
 function e3g_get_text_footer( ) {
 	
 	$p4a =& p4a::singleton();
 
-	return "$p4a->e3g_nome_sw v. " . E3G_VERSIONE . 
+	return "<b>$p4a->e3g_nome_sw</b> v. " . E3G_VERSIONE . 
 		( STATO_DEBUG ? "/$p4a->e3g_db_cond_versione/$p4a->e3g_azienda_db_multi_versione" : "" ) .
-		" - (C) 2003-2009 Progetto e3g - Software gestionali per l'economia solidale (http://www.progettoe3g.org)";
+		" - (C) 2003-2012 Progetto e3g - Software gestionali per l'economia solidale (<c:alink:http://www.progettoe3g.org>www.progettoe3g.org</c:alink>)";
 }
 
 
@@ -829,8 +829,10 @@ function CodiceFiscaleEsatto( $cf ) {
 // -----------------------------------------------------------------------------
 function e3g_db_source_exportToCsv( $a_db_source, $a_colonne, $nome_file )
 {
-    // Appende la data di esportazione in coda al nome file ricevuto e sostuisce i caratteri non ammessi
-    $nome_file = P4A_Get_Valid_File_Name( $nome_file . date( "_Y-m-d_H-i" ) . ".csv" );
+    // Appende la data di esportazione in coda al nome file ricevuto (se già non c'è ".csv" in coda a significare
+    // che il nome del file è già stato composto)  e sostuisce i caratteri non ammessi
+    if ( strpos( strrev($nome_file), 'vsc.' ) <> 0 ) 
+        $nome_file = P4A_Get_Valid_File_Name( $nome_file . date( "_Y-m-d_H-i" ) . ".csv" );
 
     //$a_db_source->exportToCsv( $nome_file, ";", $a_colonne );
     send_file_to_client($nome_file, export_array_to_csv($a_db_source->getAll(), $a_colonne));

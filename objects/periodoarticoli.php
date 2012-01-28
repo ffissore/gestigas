@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -32,24 +32,32 @@ class periodoarticoli extends P4A_Mask
 	function &periodoarticoli ()
 	{
 		$this->p4a_mask();
-		$this->addCss(E3G_TEMPLATE_DIR . 'css/style.css');
+		$this->addCss( E3G_TEMPLATE_DIR . 'css/style.css' );
 		$p4a =& p4a::singleton();
 
-		$this->SetTitle("Disponibilita' Stagionale Prodotti");
+		$this->SetTitle( "Disponibilita' Stagionale Articoli" );
+
+        // Toolbar
+        $this->build( "p4a_standard_toolbar", "toolbar");
+        $this->toolbar->setMask( $this );
+
+
+        // Message
+        $message =& $this->build("p4a_message", "message" );
+        $message->setWidth( 600 );
+
 
 		// Sorgente dati principale
-		$this->build("p4a_db_source", "ds_per");
-		$this->ds_per->setTable($p4a->e3g_prefix."articoloperiodo");
-		$this->ds_per->setPk("idtable");
-		//$this->ds_per->addJoin ("articoli", "codice=codice", "INNER");
-		//$this->ds_per->setSelect("articoloperiodo.codice, articoloperiodo.dalmese, articoloperiodo.almese, articoli.descrizione");
-		
-		
-		$this->ds_per->addOrder("dalmese");
+		$this->build( "p4a_db_source", "ds_per" );
+      //$this->ds_per->setSelect( "articoloperiodo.codice, articoloperiodo.dalmese, articoloperiodo.almese, articoli.descrizione" );
+		$this->ds_per->setTable( $p4a->e3g_prefix."articoloperiodo" );
+      //$this->ds_per->addJoin ( "articoli", "codice=codice", "INNER" );
+        $this->ds_per->addOrder( "dalmese" );
+        $this->ds_per->setPk( "idtable" );
 		$this->ds_per->load();
+        $this->ds_per->firstRow();
 
-		$this->setSource($this->ds_per);
-		$this->ds_per->firstRow();
+		$this->setSource( $this->ds_per );
 		
 		// Bottone "Cerca" 
 		$this->build("p4a_button", "bu_cerca");
@@ -114,30 +122,30 @@ class periodoarticoli extends P4A_Mask
 
 
 		// ds articoli per ricerca
-		$this->build("p4a_db_source", "ds_art");
-		$this->ds_art->setTable($p4a->e3g_prefix."articoli");
-		$this->ds_art->setPk("codice");		
-		$this->ds_art->setWhere("1=1");		
-		$this->ds_art->addOrder("descrizione");	
-		$this->ds_art->setPageLimit(5);	
+		$this->build( "p4a_db_source", "ds_art" );
+		$this->ds_art->setTable( $p4a->e3g_prefix . "articoli" );
+		$this->ds_art->setPk ("codice" );		
+		$this->ds_art->setWhere( "1=1" );		
+		$this->ds_art->addOrder( "descrizione" );	
+		$this->ds_art->setPageLimit( 10 );	
 		$this->ds_art->load();		
 
 
-		$tab_art =& $this->build("p4a_table", "tab_art");
- 		$tab_art->setWidth(350);
-		$tab_art->setSource($this->ds_art);
-		$this->intercept($this->tab_art->rows, "afterClick", "tabart_click");
+		$this->build( "p4a_table", "tab_art" );
+ 		$this->tab_art->setWidth( E3G_TABLE_WIDTH );
+		$this->tab_art->setSource( $this->ds_art );
+		$this->intercept( $this->this->tab_art->rows, "afterClick", "tabart_click" );
 		
-		$tab_art->setVisibleCols(array('codice','descrizione', 'centrale'));
-		$tab_art->cols->codice->setLabel('Codice');
-		$tab_art->cols->descrizione->setLabel('Descrizione');
-		$tab_art->cols->centrale->setLabel('Fornitore');
+		$this->tab_art->setVisibleCols( array('centrale', 'codice','descrizione') );
 
-		$tab_art->cols->codice->setWidth('50');
-		$tab_art->cols->descrizione->setWidth('200');
-		$tab_art->cols->centrale->setWidth('100');
+        $this->tab_art->cols->centrale->setLabel('Fornitore');
+        $this->tab_art->cols->centrale->setWidth( 200 );
 
+		$this->tab_art->cols->codice->setLabel('Codice');
+        $this->tab_art->cols->codice->setWidth( 50 );
 
+		$this->tab_art->cols->descrizione->setLabel('Descrizione');
+//      $this->tab_art->cols->descrizione->setWidth( 200 );  Per differenza
 
 
 		// Fields properties
@@ -194,80 +202,77 @@ class periodoarticoli extends P4A_Mask
 		$this->fields->almese->setSourceDescriptionField("desc");
 	
 				
-		$table =& $this->build("p4a_table", "table");
- 		$table->setWidth(730);
-		$table->setSource($this->ds_per);
-		//$table->setVisibleCols(array('codice', 'descrizione','dalmese', 'almese'));
-		$table->setVisibleCols(array('codice','dalmese', 'almese'));
-		//$this->intercept($table->rows, "afterClick", "cambia_click");
+		$this->build( "p4a_table", "table" );
+        $this->table->setWidth( E3G_TABLE_WIDTH );
+		$this->table->setSource( $this->ds_per );
+		$this->table->setVisibleCols( array('codice','dalmese', 'almese') );
+		//$this->intercept($this->table->rows, "afterClick", "cambia_click");
 		
-		$table->cols->dalmese->setLabel('Dal Mese');
-		$table->cols->dalmese->setSource($array_source);
-		$table->cols->dalmese->setSourceValueField("id");
-		$table->cols->dalmese->setSourceDescriptionField("desc");
+		$this->table->cols->dalmese->setLabel('Dal Mese');
+		$this->table->cols->dalmese->setSource($array_source);
+		$this->table->cols->dalmese->setSourceValueField("id");
+		$this->table->cols->dalmese->setSourceDescriptionField("desc");
 		
-		$table->cols->almese->setLabel('Al Mese');
-		$table->cols->almese->setSource($array_source);
-		$table->cols->almese->setSourceValueField("id");
-		$table->cols->almese->setSourceDescriptionField("desc");
+		$this->table->cols->almese->setLabel('Al Mese');
+		$this->table->cols->almese->setSource($array_source);
+		$this->table->cols->almese->setSourceValueField("id");
+		$this->table->cols->almese->setSourceDescriptionField("desc");
 		
 		
-		$table->cols->codice->setLabel('codice');
+		$this->table->cols->codice->setLabel('codice');
 		//$table->cols->codice->setSource($this->ds_anagr);
 		//$table->cols->codice->setSourceValueField("codice");
 		//$table->cols->codice->setSourceDescriptionField("descrizione");
 		
 				
-		// Toolbar
-		$this->build("p4a_standard_toolbar", "toolbar");
-		$this->toolbar->setMask($this);
-
-
-		// Message
-		$message =& $this->build("p4a_message", "message");
-		$message->setWidth("300");
-
-
-		$sh_campi =& $this->build("p4a_sheet", "sh_campi");
-	    $this->sh_campi->defineGrid(4, 3);
-	    $this->sh_campi->setWidth(700);
-	
-		$this->sh_campi->anchor($this->fld_cerca_forn,1,1,1,2);
-		$this->sh_campi->anchor($this->tab_art,1,3,4,1);
-		$this->sh_campi->anchor($this->fld_cerca_cat,2,1,1,2);
-		$this->sh_campi->anchor($this->bu_cerca,3,1);
-		$this->sh_campi->anchor($this->bu_annulla_cerca,3,2);
-
+        //Fieldset 
+        $this->build("p4a_fieldset", "fs_cerca");
+        $this->fs_cerca->setWidth( E3G_FIELDSET_SEARCH_WIDTH );
+        $this->fs_cerca->anchor( $this->fld_cerca_forn );
+        $this->fs_cerca->anchor( $this->fld_cerca_cat );
+        $this->fs_cerca->anchorRight( $this->bu_annulla_cerca );
+        $this->fs_cerca->anchorRight( $this->bu_cerca );
+        
 
 		//Fieldset con l'elenco dei campi
-		$fset=& $this->build("p4a_fieldset", "frame");
-
- 		
- 		$fset->anchor($this->sh_campi);
- 		$fset->anchor($this->fields->codice);
- 		$fset->anchor($this->fields->dalmese);
-		$fset->anchor($this->fields->almese);
-		$fset->anchor($this->table);
-		
-		$fset->setWidth(700);
+		$this->build("p4a_fieldset", "fset");
+        $this->fset->setWidth( E3G_FIELDSET_DATI_WIDTH );
+ 		$this->fset->anchor( $this->fields->codice );
+ 		$this->fset->anchor( $this->fields->dalmese );
+		$this->fset->anchorLeft( $this->fields->almese );
 
 
 		// Frame
-		$frm=& $this->build("p4a_frame", "frm");
-		$frm->setWidth(730);
+		$frm=& $this->build( "p4a_frame", "frm" );
+        $frm->setWidth( E3G_MAIN_FRAME_WIDTH );
 
-		$frm->anchor($message);
-		$frm->anchor($fset);
+		$frm->anchor( $message );
+        $frm->anchor( $this->fs_cerca );
+        $frm->anchor( $this->tab_art );
+        $frm->anchor( $this->table );
+        $frm->anchor( $this->fset );
 
 		e3g_scrivi_footer( $this, $frm );
 
   		// Display
-		$this->display("main", $frm);
-		$this->display("menu", $p4a->menu);
-		$this->display("top", $this->toolbar);
+		$this->display( "main", $frm ); 
+		$this->display( "menu", $p4a->menu );
+		$this->display( "top", $this->toolbar );
 	}
 	
 	
+    function main()
+    {
+        $p4a =& p4a::singleton();
+        $db =& p4a_db::singleton();
+
+        parent::main();
+
+        foreach($this->mf as $mf)
+            $this->fields->$mf->unsetStyleProperty("border");
+    }
+
+
 	function saveRow()
 	{
 		$p4a =& p4a::singleton();
@@ -275,7 +280,7 @@ class periodoarticoli extends P4A_Mask
 		
 		$valid = true;
 
-		foreach($this->mf as $mf){
+		foreach ($this->mf as $mf) {
 			$value = $this->fields->$mf->getNewValue();
 			if(trim($value) === ""){
 				$this->fields->$mf->setStyleProperty("border", "1px solid red");
@@ -299,51 +304,41 @@ class periodoarticoli extends P4A_Mask
 			parent::saveRow();
 		}
 		else
-		{
 			$this->message->setValue("Compilare i campi obbligatori");
-		}
 	}
 	
-	
-
-	function main()
-	{
-		parent::main();
-
-		foreach($this->mf as $mf){
-			$this->fields->$mf->unsetStyleProperty("border");
-		}
-	}
 
 	function tabart_click()
 	{
-		$this->fields->codice->setnewValue($this->tab_art->data->fields->codice->getNewValue());
-			
+        $p4a =& p4a::singleton();
+        $db =& p4a_db::singleton();
+
+		$this->fields->codice->setnewValue( $this->tab_art->data->fields->codice->getNewValue() );
 	}	
+
 
 	function bu_cerca_click()
 	{
-		$p4a =& p4a::singleton();
+        $p4a =& p4a::singleton();
+        $db =& p4a_db::singleton();
 
-		$strwhere = " 1=1 ";
+		$strwhere = " 1 = 1 ";
 		if ($this->fld_cerca_forn->getNewValue() != "00") 
-		{
 			$strwhere .= " AND centrale = '".$this->fld_cerca_forn->getNewValue()."'";	
-		}
 
 		if ($this->fld_cerca_cat->getNewValue() != "00") 
-		{
 			$strwhere .= " AND catmerce = '".$this->fld_cerca_cat->getNewValue()."'";	
-		}
 		
-		$this->ds_art->setWhere($strwhere);
+		$this->ds_art->setWhere( $strwhere );
 		$this->ds_art->firstRow();
-		
 	}
 
 	
 	function bu_annulla_cerca_click()
 	{
+        $p4a =& p4a::singleton();
+        $db =& p4a_db::singleton();
+
 		$this->fld_cerca_forn->setNewValue("00");
 		$this->fld_cerca_cat->setNewValue("00");
 		

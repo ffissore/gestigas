@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -46,6 +46,13 @@ class modifica_quantita_articoli extends P4A_Mask
 
 
         // ------------------------------------------- DB source filtro iniziale
+        // Luoghi di consegna (solo se attivati)
+        $this->build( "p4a_db_source", "ds_luoghi_cons" );
+        $this->ds_luoghi_cons->setTable( "_luoghi_cons" );
+        $this->ds_luoghi_cons->setWhere( "prefix = '" . $p4a->e3g_prefix . "' OR id_luogo_cons = 0 " );
+        $this->ds_luoghi_cons->setPk( "id_luogo_cons" );
+        $this->ds_luoghi_cons->load();
+                
         // Fornitori (solo quelli interessati)
         $this->build( "p4a_db_source", "ds_filtro_for" );
         $this->ds_filtro_for->setQuery( 
@@ -60,25 +67,13 @@ class modifica_quantita_articoli extends P4A_Mask
             "   AND " . str_replace("#CAMPOCODICE#", "f.codice", $p4a->e3g_where_referente) : "" ) .
           "GROUP BY f.codice, f.descrizione " .
           "ORDER BY f.descrizione" );
-        // non Ë possibile inserire il record NON INDICATO perchË c'Ë il JOIN 
+        // non ÔøΩ possibile inserire il record NON INDICATO perchÔøΩ c'ÔøΩ il JOIN 
         // provando con il LEFT JOIN si blocca durante la query
         // AP 22.06.10        
         $this->ds_filtro_for->setPk( "f.codice" );        
         $this->ds_filtro_for->load();     
         $this->ds_filtro_for->firstRow();
 
-        $this->build( "p4a_db_source", "ds_utente" );
-        $this->ds_utente->setTable( $p4a->e3g_prefix . "anagrafiche");
-        $this->ds_utente->setSelect( "codice,descrizione");
-        $this->ds_utente->setPk( "codice" );        
-        $this->ds_utente->load();     
-        
-        $this->build( "p4a_db_source", "ds_fornit" );
-        $this->ds_fornit->setTable( $p4a->e3g_prefix . "anagrafiche");
-        $this->ds_fornit->setSelect( "codice,descrizione");
-        $this->ds_fornit->setPk( "codice" );     
-        $this->ds_fornit->load();     
-        
         // Categorie (tipi articoli)
         $this->build( "p4a_db_source", "ds_filtro_cat" );
         $this->ds_filtro_cat->setTable( $p4a->e3g_prefix . "tipiarticoli" );
@@ -101,6 +96,16 @@ class modifica_quantita_articoli extends P4A_Mask
 
 
         // -------------------------------------------------------------- Filtro
+        // Combo (opzionale) luogo di consegna
+        $this->build( "p4a_field", "fld_filtro_luogo_cons" );
+        $this->fld_filtro_luogo_cons->setLabel( "Luogo di consegna" );
+        $this->fld_filtro_luogo_cons->label->setWidth( 130 );
+        $this->fld_filtro_luogo_cons->setWidth( 250 );
+        $this->fld_filtro_luogo_cons->setType( "select" );
+        $this->fld_filtro_luogo_cons->setSource( $this->ds_luoghi_cons );
+        $this->fld_filtro_luogo_cons->setSourceValueField( "id_luogo_cons" );
+        $this->fld_filtro_luogo_cons->setSourceDescriptionField( "descrizione" );
+       
         // Filtro fornitore
         $this->build( "p4a_field", "fld_filtro_for" );
         $this->fld_filtro_for->setLabel( "Fornitore" );
@@ -161,22 +166,27 @@ class modifica_quantita_articoli extends P4A_Mask
         // ------------------------------------------------ DB source principale
         $this->build( "p4a_db_source", "ds_doc_righe" );
         $this->ds_doc_righe->setSelect(
-            "d.idriga, t.iddoc, t.totdoc, t.data, t.codclifor, " .  // ID testata documento (docr.iddocr = doct.iddoc)
-            "a.codice, " .
-            "d.quantita, " .
-            "a.descrizione, " .
-            "CONCAT_WS( ' ', um_qta, um ) AS um_qta_um, " .  // CONCAT_WS non Ë vuoto se manca l'UM 
-        	"d.codutente" ); 
+            " d.idriga, t.iddoc, t.totdoc, t.data, t.codclifor, " .  // ID testata documento (docr.iddocr = doct.iddoc)            
+        	" anag.descrizione AS desc_utente, " .
+            " a.descrizione AS desc_articolo, " .
+            " (d.quantita-d.quantita2) AS qta_originale, " .
+            " CONCAT_WS( ' ', um_qta, um ) AS um_qta_um, " .  // CONCAT_WS non e' vuoto se manca l'UM 
+            " d.quantita, " .
+            " CEILING( d.quantita / a.qtaminordine ) AS cartoni, " .
+            " anag.descrizione, a.descrizione " );  // necessari per l'ORDER BY, altrimenti si ottiene errore
         $this->ds_doc_righe->setTable( $p4a->e3g_prefix . "docr AS d" );
+
         $this->ds_doc_righe->addJoin( $p4a->e3g_prefix . "articoli AS a", "d.codice = a.codice" );
         $this->ds_doc_righe->addJoin( $p4a->e3g_prefix . "doct AS t", "d.iddocr = t.iddoc" );
-        $this->ds_doc_righe->setWhere( "( d.estratto <> 'S' OR ISNULL(d.estratto) ) AND d.visibile = 'N'" );  // Impostato in bu_filtra_click()
-        //$this->ds_doc_righe->addGroup( "a.codice, a.descrizione" );
-        $this->ds_doc_righe->addOrder( "d.codutente" );
-        $this->ds_doc_righe->addOrder( "t.codclifor" );
-        $this->ds_doc_righe->addOrder( "a.descrizione" );
+        $this->ds_doc_righe->addJoin( $p4a->e3g_prefix . "anagrafiche AS anag",  "anag.codice = d.codutente" );
+        
+        $this->ds_doc_righe->setWhere( "1 = 0" );  // Impostato in bu_filtra_click()
+        
+        $this->ds_doc_righe->addOrder( "anag.descrizione" );
+        $this->ds_doc_righe->addOrder( "a.descrizione" );  // Sembra non funzionare
+
         $this->ds_doc_righe->setPk( "d.idriga" );
-        //$this->ds_doc_righe->setPageLimit( $p4a->e3g_utente_db_source_page_limit );
+        $this->ds_doc_righe->setPageLimit( $p4a->e3g_utente_db_source_page_limit );
         $this->ds_doc_righe->load();
 
         $this->setSource( $this->ds_doc_righe );
@@ -187,122 +197,60 @@ class modifica_quantita_articoli extends P4A_Mask
         $this->tab_doc_righe->setWidth( E3G_TABLE_WIDTH );
         $this->tab_doc_righe->setTitle( "Articoli in consegna" );
         $this->tab_doc_righe->setSource( $this->ds_doc_righe );
-        $this->tab_doc_righe->setVisibleCols( array( "codutente", "codclifor" ,"data","descrizione", "quantita") );
+        $this->tab_doc_righe->setVisibleCols( array( "desc_utente", "data", "desc_articolo", "um_qta_um", "qta_originale", "quantita", "cartoni") );
         $this->intercept( $this->tab_doc_righe->rows, "afterClick", "tab_doc_righe_AfterClick" );  
-        //$this->intercept( $this->tab_doc_righe->rows, "beforeDisplay", "tab_doc_righe_BeforeDisplay" );  
+        $this->intercept( $this->tab_doc_righe->rows, "beforeDisplay", "tab_doc_righe_BeforeDisplay" );  
         
-        $this->tab_doc_righe->cols->quantita->setLabel( "Q.ta'" );
-        $this->tab_doc_righe->cols->descrizione->setLabel( "Articolo" );
-        $this->tab_doc_righe->cols->descrizione->setWidth( 300 );
-        $this->tab_doc_righe->cols->quantita->setWidth( 30 );
-        $this->tab_doc_righe->cols->quantita->setOrderable( false );
-        $this->tab_doc_righe->cols->codutente->setLabel( "Utente" );
-        $this->tab_doc_righe->cols->codutente->setWidth( 300 );
-        $this->tab_doc_righe->cols->codutente->setSource( $this->ds_utente );
-        $this->tab_doc_righe->cols->codutente->setSourceValueField( "codice" );
-        $this->tab_doc_righe->cols->codutente->setSourceDescriptionField( "descrizione" );
+        $this->tab_doc_righe->cols->desc_utente->setLabel( "Utente" );
         $this->tab_doc_righe->cols->data->setLabel( "Data Ordine" );
-        $this->tab_doc_righe->cols->codclifor->setLabel( "Fornitore" );
-        $this->tab_doc_righe->cols->codclifor->setSource( $this->ds_fornit );
-        $this->tab_doc_righe->cols->codclifor->setSourceValueField( "codice" );
-        $this->tab_doc_righe->cols->codclifor->setSourceDescriptionField( "descrizione" );
+        $this->tab_doc_righe->cols->desc_articolo->setLabel( "Articolo" ); 
+        $this->tab_doc_righe->cols->um_qta_um->setLabel( "Conf." );
+        $this->tab_doc_righe->cols->qta_originale->setLabel( "Q.ta' (orig.)" );
+        $this->tab_doc_righe->cols->quantita->setLabel( "Q.ta'" );
+        $this->tab_doc_righe->cols->cartoni->setLabel( "N. cartoni" );
         
-        
-        $this->fields->quantita->data_field->setType("float");
+        $this->tab_doc_righe->cols->desc_utente->setWidth( 180 );
+        $this->tab_doc_righe->cols->data->setWidth( 80 );
+//      $this->tab_doc_righe->cols->desc_articolo->setWidth();  Per differenza 
+        $this->tab_doc_righe->cols->um_qta_um->setWidth( 50 );
+        $this->tab_doc_righe->cols->qta_originale->setWidth( 50 );
+        $this->tab_doc_righe->cols->quantita->setWidth( 50 );
+        $this->tab_doc_righe->cols->cartoni->setWidth( 50 );
+
+        $this->tab_doc_righe->cols->desc_utente->setOrderable( false );
+        $this->tab_doc_righe->cols->desc_articolo->setOrderable( false ); 
+        $this->tab_doc_righe->cols->um_qta_um->setOrderable( false );
+        $this->tab_doc_righe->cols->qta_originale->setOrderable( false );
+        $this->tab_doc_righe->cols->quantita->setOrderable( false );
+        $this->tab_doc_righe->cols->cartoni->setOrderable( false );
+
         
         // ------------------------------------------------------------- Message
         $this->build("p4a_message", "message" );
         $this->message->setWidth( 500 );
 
-/* 
- 
-        // ------------------------- Frame 1: Modifica prezzo tutti gli articoli
-        $this->build( "p4a_field", "fld1_n_art_diversi" );
-        $this->build( "p4a_field", "fld1_tot_originale" );
-        $this->build( "p4a_field", "fld1_variazione" );
-//      $this->fields->totdoc
-        $this->build( "p4a_field", "fld1_valore" );
 
-        $this->fld1_n_art_diversi->setLabel( "N. articoli diversi" );
-        $this->fld1_tot_originale->setLabel( "Importo totale originale" );
-        $this->fld1_variazione->setLabel( "Variazione totale" );
-        $this->fields->totdoc->setLabel( "Nuovo totale" );
-//      $this->fld1_valore->setLabel( "" );  // Compilato nel fld_tipo_modifica_prezzo_Change()
-
-        $this->fld1_n_art_diversi->disable();
-        $this->fld1_tot_originale->disable();
-        $this->fld1_variazione->disable();
-        $this->fields->totdoc->disable();
-
-        $this->fld1_n_art_diversi->label->setWidth( 150 );
-        $this->fld1_tot_originale->label->setWidth( 150 );
-        $this->fld1_variazione->label->setWidth( 100 );
-        $this->fields->totdoc->label->setWidth( 100 );
-        $this->fld1_valore->label->setWidth( 150 );
-
-        $this->fld1_n_art_diversi->setWidth( 75 );
-        $this->fld1_tot_originale->setWidth( 75 );
-        $this->fld1_variazione->setWidth( 250 );
-        $this->fields->totdoc->setWidth( 100+75 );
-        $this->fld1_valore->setWidth( 75 );
-
-
-        $this->fld1_valore->setStyleProperty( "border", "1px solid black" );  // Viene impostato anche in bu1_esegui_modifica_tutti_click()
-        $this->fld1_valore->setNewValue( 0 );
-
-        
-        $values = array();
-        $values[] = array( "id" => "1", "desc" => "a) Suddividi l'importo sul prezzo di tutti gli articoli (considera come sconto se negativo o spese di consegna se positivo)" );
-        $values[] = array( "id" => "2", "desc" => "b) Applica una variazione percentuale al prezzo di ogni articolo" );
-        $values[] = array( "id" => "3", "desc" => "c) Applica una variazione assoluta al prezzo di ogni articolo (aggiunge l'importo da considerare)" );
-        $values[] = array( "id" => "4", "desc" => "d) Ripristina prezzi originali" );
-        $this->build( "p4a_array_source", "array_source" ); 
-        $this->array_source->load( $values ); 
-        $this->array_source->setPk( "id" ); 
-        $this->build( "p4a_field", "fld1_tipo_modifica_prezzo" );
-        $this->fld1_tipo_modifica_prezzo->setLabel( "Scelta" );
-        $this->fld1_tipo_modifica_prezzo->label->setWidth( 150 );
-        $this->fld1_tipo_modifica_prezzo->setType( "radio" );
-        $this->fld1_tipo_modifica_prezzo->setSource( $this->array_source ); 
-        $this->fld1_tipo_modifica_prezzo->setSourceDescriptionField( "desc" );
-        $this->fld1_tipo_modifica_prezzo->setValue( 1 );
-        $this->fld1_tipo_modifica_prezzo->addAction( "onChange" );
-        $this->intercept( $this->fld1_tipo_modifica_prezzo, "onChange", "fld1_tipo_modifica_prezzo_Change" );
-
-        // Bottone "Esegui modifica"
-        $this->build( "p4a_button", "bu1_esegui_modifica_tutti" );
-        $this->bu1_esegui_modifica_tutti->setLabel( "Esegui modifica..." );
-        $this->bu1_esegui_modifica_tutti->setIcon( "execute" );
-        $this->bu1_esegui_modifica_tutti->addAction( "onClick" );
-        $this->intercept( $this->bu1_esegui_modifica_tutti, "onClick", "bu1_esegui_modifica_tutti_click" );
-        $this->bu1_esegui_modifica_tutti->requireConfirmation( "onClick", "Confermi la modifica alla quantita' degli articoli in elenco?" );
- */
-        
-
-        // --------------------------- Frame 2: Modifica quantita singolo articolo
+        // --------------------------- Frame: Modifica quantita singolo articolo
         $this->build( "p4a_field", "fld2_nuova_qta" );
 
+        $this->fields->desc_utente->setLabel( "Utente" );
+        $this->fields->desc_articolo->setLabel( "Articolo" );
         $this->fields->quantita->setLabel( "Quantita' in ordine" );
-        $this->fields->codutente->setLabel( "Utente" );
-        $this->fields->codutente->setSource( $this->ds_utente );
-        $this->fields->codutente->setSourceValueField( "codice" );
-        $this->fields->codutente->setSourceDescriptionField( "descrizione" );
-
-        $this->fields->descrizione->setLabel( "Articolo" );
         $this->fld2_nuova_qta->setLabel( "Nuova Quantita'" );
 
+        $this->fields->desc_utente->label->setWidth( 150 );
+        $this->fields->desc_articolo->label->setWidth( 150 );
         $this->fields->quantita->label->setWidth( 150 );
-        $this->fields->codutente->label->setWidth( 150 );
-        $this->fields->descrizione->label->setWidth( 150 );
         $this->fld2_nuova_qta->label->setWidth( 150 );
 
+        $this->fields->desc_utente->setWidth( 800 );
+        $this->fields->desc_articolo->setWidth( 800 );
         $this->fields->quantita->setWidth( 250 );
-        $this->fields->descrizione->setWidth( 800 );
         $this->fld2_nuova_qta->setWidth( 100 );
         
 
-        $this->fields->descrizione->setFontWeight( "bold" );
-        $this->fields->descrizione->setFontColor( "black" );
+        $this->fields->desc_articolo->setFontWeight( "bold" );
+        $this->fields->desc_articolo->setFontColor( "black" );
         $this->fld2_nuova_qta->setStyleProperty( "border", "1px solid black" );  // Viene impostato anche in bu2_esegui_modifica_singolo_click()
 
         
@@ -339,6 +287,8 @@ $this->ck2_art_non_dispo->setInvisible();
         $this->fs_filtro->setTitle( "Filtro" );
         $this->fs_filtro->setWidth( E3G_FIELDSET_SEARCH_WIDTH );
         $this->fs_filtro->anchor( $this->fld_filtro_for );
+        if ( $p4a->e3g_azienda_gestione_luoghi_cons )
+            $this->fs_filtro->anchorLeft( $this->fld_filtro_luogo_cons );
         $this->fs_filtro->anchor( $this->fld_filtro_cat );
         $this->fs_filtro->anchorLeft( $this->fld_filtro_sottocat );
         $this->fs_filtro->anchorLeft( $this->bu_filtra );
@@ -351,11 +301,11 @@ $this->ck2_art_non_dispo->setInvisible();
         $this->tab_pane->pages->build( "p4a_frame", "tab_frame_1" );
 
             
-        $this->tab_pane->pages->tab_frame_1->setLabel( "Modifica Q.ta articolo selezionato" );
-        $this->tab_pane->pages->tab_frame_1->anchor( $this->fields->codutente );        
+        $this->tab_pane->pages->tab_frame_1->setLabel( "Modifica quantita' articolo selezionato" );
+        $this->tab_pane->pages->tab_frame_1->anchor( $this->fields->desc_utente );        
+        $this->tab_pane->pages->tab_frame_1->anchor( $this->fields->desc_articolo );        
         $this->tab_pane->pages->tab_frame_1->anchor( $this->fields->quantita );        
-        $this->tab_pane->pages->tab_frame_1->anchor( $this->fields->descrizione );        
-        $this->tab_pane->pages->tab_frame_1->anchorLeft( $this->fld2_nuova_qta );        
+        $this->tab_pane->pages->tab_frame_1->anchor( $this->fld2_nuova_qta );        
 
         $this->tab_pane->pages->tab_frame_1->anchor( $this->ck2_art_ora_non_dispo );        
         $this->tab_pane->pages->tab_frame_1->anchor( $this->ck2_art_non_dispo );
@@ -424,19 +374,28 @@ $this->ck2_art_non_dispo->setInvisible();
             "d.codtipodoc = '" . $p4a->e3g_azienda_gg_cod_doc_ordine . "' AND " .
             "( d.estratto <> 'S' OR ISNULL(d.estratto) ) AND " .
             "a.centrale = '" . $this->fld_filtro_for->getNewValue() . "' ";
+
         if ( $this->fld_filtro_cat->getNewValue() != "00" ) {
             $strwhere .= " AND a.tipo = '" . $this->fld_filtro_cat->getNewValue() . "'";
             if ( $this->fld_filtro_sottocat->getNewValue() != "000" )
                 $strwhere .= " AND a.catmerce = '" . $this->fld_filtro_sottocat->getNewValue() . "'";
         }
 
+        // Luogo consegna
+        if ( ( $p4a->e3g_azienda_gestione_luoghi_cons ) and ( $this->fld_filtro_luogo_cons->getNewValue() != 0 ) )
+            $strwhere .= " AND anag.id_luogo_cons = " . $this->fld_filtro_luogo_cons->getNewValue();
+ 
         $this->ds_doc_righe->setWhere( $strwhere ); 
         $this->ds_doc_righe->load();
         $this->ds_doc_righe->firstRow();
         
+        if ( $this->ds_doc_righe->getNumRows() > 0 )
+            $this->bu2_esegui_modifica_singolo->enable();
+        else
+            $this->bu2_esegui_modifica_singolo->disable();
+        
         $this->tab_doc_righe->syncPageWithSource();
         
-        //$this->update_valori_1();
         $this->tab_doc_righe_AfterClick();
     }
 
@@ -451,6 +410,7 @@ $this->ck2_art_non_dispo->setInvisible();
         $this->fld_filtro_for->setNewValue( $this->ds_filtro_for->fields->codice->getNewValue() );
         $this->fld_filtro_cat->setNewValue( "00" );
         $this->fld_filtro_sottocat->setNewValue( "000" );
+        $this->fld_filtro_luogo_cons->setNewValue( 0 );
 
         $this->bu_filtra_click();
     }
@@ -482,30 +442,37 @@ $this->ck2_art_non_dispo->setInvisible();
     }
 
 
-    /*
-     
     // -------------------------------------------------------------------------
     function tab_doc_righe_BeforeDisplay( $obj, $rows ) 
     // -------------------------------------------------------------------------
     {  			
+        // array( "desc_utente", "data", "desc_articolo", "qta_originale", "quantita", "cartoni") 
         for( $i=0; $i<count($rows); $i++ ) {
             // Evidenzia la riga selezionata
-            if ( $rows[$i]["descrizione"] == $this->ds_doc_righe->fields->descrizione->getNewValue() and 
-                 $rows[$i]["um_qta_um"] == $this->ds_doc_righe->fields->um_qta_um->getNewValue() ) 
-                $rows[$i]["descrizione"] = "<span style='color:black;font-weight:bold;'>" . $rows[$i]["descrizione"] . "</span>";
-
+            if ( $rows[$i]["desc_utente"] == $this->ds_doc_righe->fields->desc_utente->getNewValue() and 
+                 $rows[$i]["desc_articolo"] == $this->ds_doc_righe->fields->desc_articolo->getNewValue() ) 
+                $rows[$i]["desc_articolo"] = "<span style='color:black;font-weight:bold;'>" . $rows[$i]["desc_articolo"] . "</span>";
+/*            
+TODO Purtroppo non funziona, i valori vengono inspiegabilmente visualizzati come zero
+  Succede perch√® il campo "quantita" √® un double; non succede quando c'√® la possibilit√† di usare la funzione FORMAT() che converte in stringa 
+  (vedere infatti altrove con i campi prezzo)
             // Evidenzia le righe con variazione applicata
-            if ( $rows[$i]["prezzo_unitario_originale"] <> $rows[$i]["nuovo_prezzo_unitario"] ) {
-                $rows[$i]["prezzo_unitario_originale"] = "<span style='color:blue;'>" . $rows[$i]["prezzo_unitario_originale"] . "</span>";
-                $rows[$i]["nuovo_prezzo_unitario"] = "<span style='color:purple;'>" . $rows[$i]["nuovo_prezzo_unitario"] . "</span>";
+            if ( $rows[$i]["qta_originale"] <> $rows[$i]["quantita"] ) {
+                $rows[$i]["qta_originale"] = "<span style='color:blue;'>" . $rows[$i]["qta_originale"] . "</span>";
+                $rows[$i]["quantita"] = "<span style='color:purple;'>" . $rows[$i]["quantita"] . "</span>";
             }
-        }  
+rimediamo mostrando con un diverso colore la descrizione dell'articolo
+*/            
+            else
+            if ( $rows[$i]["qta_originale"] <> $rows[$i]["quantita"] ) 
+                $rows[$i]["desc_articolo"] = "<span style='color:purple;'>" . $rows[$i]["desc_articolo"] . "</span>";
+        }
+
         return $rows;  
     }  
-*/
  
 
-    /*
+/*
     // -------------------------------------------------------------------------
     function update_valori_1()
     // -------------------------------------------------------------------------
@@ -541,7 +508,8 @@ $this->ck2_art_non_dispo->setInvisible();
         else
             $this->fld1_variazione->setNewValue( "0 euro" ); 
     }
-	*/
+*/
+    
     
     // 2) Modifica quantita dell'articolo selezionato
     // -------------------------------------------------------------------------
@@ -563,34 +531,32 @@ $this->ck2_art_non_dispo->setInvisible();
         else
             $this->fld2_nuova_qta->setStyleProperty( "border", "1px solid black" );
 
-        //$this->fields->quantita->getNewValue() // QTA ORIGINALE 
-        
-        // Aggiorna la riga dettaglio selezionata
-        // rimpiazzo la virgola con il punto per consentire INSERT INTO  
-		$qta_cons = str_replace(",", ".", $this->fld2_nuova_qta->getUnformattedNewValue());
+        // Rimpiazzo la virgola con il punto per consentire la query  
+        $qta_originale = str_replace( ",", ".", $this->fields->quantita->getNewValue() ); 
+		$nuova_qta     = str_replace( ",", ".", $this->fld2_nuova_qta->getUnformattedNewValue() );
 
-		if (is_numeric($qta_cons))
+        // Aggiorna la riga dettaglio selezionata   
+		if ( is_numeric($nuova_qta) )
 		{
 			$sql_txt =
 	            "UPDATE " . $p4a->e3g_prefix . "docr " . 
-	            "   SET quantita = ".$qta_cons .
-	            " WHERE idriga = ".$this->fields->idriga->getUnformattedNewValue();                        
-        							// usare getUnformattedNewValue() perchË se ci sono migliaia di righe
-        							// l'IDRIGA viene visualizzato con il separatore delle migliaia 
-        							// che manda in errore la query AP 02.07.10
+	            "   SET quantita  = $nuova_qta, " .
+                "       quantita2 = $nuova_qta - $qta_originale + quantita2 " .
+	            " WHERE idriga = " . $this->fields->idriga->getUnformattedNewValue();
+        			// usare getUnformattedNewValue() perch√® se il valore supera il migliaio, l'IDRIGA viene visualizzato 
+                    // con il separatore delle migliaia che manda in errore la query AP 02.07.10
         							
-			$this->fld2_nuova_qta->setNewValue("");
+			$this->fld2_nuova_qta->setNewValue( "" );
         
-    	    // FARE UPDATE DELLE RIGHE VISIBILI 
-        	// --> OVVERO ORDINE A FORNITORE ???
-	        // oppure tenerlo cosÏ per avere una traccia dell'ordine originale? 
+    	    // FARE UPDATE DELLE RIGHE VISIBILI --> OVVERO ORDINE A FORNITORE ???
+	        // oppure tenerlo cos√¨ per avere una traccia dell'ordine originale? 
                     
 	        $db->query( $sql_txt );
 		
 	        // Aggiorna anche i totali di testata (doct.imponibile e doct.totdoc)
 	        $sql_txt =
 	            "UPDATE " . $p4a->e3g_prefix . "doct AS t " . 
-	            "   SET t.imponibile = ( SELECT SUM( (r.prezzo+r.delta_prezzo) * (r.quantita+r.quantita2) ) " .
+	            "   SET t.imponibile = ( SELECT SUM( (r.prezzo+r.delta_prezzo) * r.quantita ) " .
 	            "                          FROM " . $p4a->e3g_prefix . "docr AS r " .
 	            "                         WHERE r.iddocr = t.iddoc " .
 	            "                           AND r.visibile = 'N' AND r.codtipodoc = '" . $p4a->e3g_azienda_gg_cod_doc_ordine . "' " .
@@ -604,14 +570,11 @@ $this->ck2_art_non_dispo->setInvisible();
 	        $this->message->setIcon( "info" );
 	        $this->message->setValue( "Elaborazione eseguita: la quantita' dell'articolo e' stata aggiornata." );
 		}
-		else
-		{
+		else {
 	        $this->message->setIcon( "info" );
 	        $this->message->setValue( "Elaborazione fallita: inserire un valore numerico per la nuova quantita'" );
 		}
-        
 	}
-
 
 }
 ?>

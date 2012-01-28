@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2012
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -46,32 +46,32 @@ class invio_email extends P4A_Mask
 		
         
         // Toolbar con: invia, annulla, chiudi
-        $toolbar =& $this->build("p4a_actions_toolbar", "toolbar");
-        $toolbar->buttons->save->setIcon( "mail_send" );
-        $toolbar->buttons->save->setLabel( "Invia messaggio" );
-        $toolbar->buttons->save->requireConfirmation( "onClick", "Confermi l'invio del messaggio ?" );
-        $toolbar->buttons->cancel->setInvisible();
-        $toolbar->setMask($this);
+        $this->build("p4a_actions_toolbar", "toolbar");
+        $this->toolbar->buttons->save->setIcon( "mail_send" );
+        $this->toolbar->buttons->save->setLabel( "Invia messaggio" );
+        $this->toolbar->buttons->save->requireConfirmation( "onClick", "Confermi l'invio del messaggio ?" );
+        $this->toolbar->buttons->cancel->setInvisible();
+        $this->toolbar->setMask($this);
 
         // Eventuale warning
-        $msg_info =& $this->build( "p4a_message", "msg_info" );
-        $msg_info->setWidth( 700 );
+        $this->build( "p4a_message", "msg_info" );
+        $this->msg_info->setWidth( 700 );
 
         // Mittente
         $values_mit = array();
         $values_mit[] = array("id" => "1", "desc" => MAIL_FROM_NAME . ' <' . MAIL_FROM . '>');
         $values_mit[] = array("id" => "2", "desc" => $p4a->e3g_utente_desc . ' <' . $p4a->e3g_utente_email . '>');
-        $array_source_mit =& $this->build("p4a_array_source", "array_source"); 
-        $array_source_mit->load( $values_mit ); 
-        $array_source_mit->setPk( "id" ); 
+        $this->build("p4a_array_source", "array_source_mit"); 
+        $this->array_source_mit->load( $values_mit ); 
+        $this->array_source_mit->setPk( "id" ); 
 
         $this->build("p4a_field", "fld_mittente");
         $this->fld_mittente->setLabel( "Mittente" );
         $this->fld_mittente->setWidth( 550 );
         $this->fld_mittente->setType( "select" );
-        $this->fld_mittente->setSource( $array_source_mit ); 
+        $this->fld_mittente->setSource( $this->array_source_mit ); 
         $this->fld_mittente->setSourceDescriptionField( "desc" );
-        $this->fld_mittente->setValue( "1" );
+        $this->fld_mittente->setValue( "2" );
 
         $this->fld_mittente->addAction( "onChange" );
         $this->intercept( $this->fld_mittente, "onChange", "fld_mittenteChange" );
@@ -128,17 +128,17 @@ class invio_email extends P4A_Mask
         	$values_dst[] = array("id" => "6", "desc" => "Cliente:");			
             $values_dst[] = array("id" => "7", "desc" => "Fornitore:");
 		}
-        $array_source_dst =& $this->build("p4a_array_source", "array_source"); 
-        $array_source_dst->load( $values_dst ); 
-        $array_source_dst->setPk( "id" ); 
+        $this->build("p4a_array_source", "array_source_dst"); 
+        $this->array_source_dst->load( $values_dst ); 
+        $this->array_source_dst->setPk( "id" ); 
         
-        $fld_destinatario =& $this->build("p4a_field", "fld_destinatario");
-        $fld_destinatario->setLabel( "Destinatario" );
-        $fld_destinatario->setWidth( 550 );
-        $fld_destinatario->setType( "radio" );
-        $fld_destinatario->setSource( $array_source_dst ); 
-        $fld_destinatario->setValue( "3" );
-        $fld_destinatario->addAction( "onChange" );
+        $this->build("p4a_field", "fld_destinatario");
+        $this->fld_destinatario->setLabel( "Destinatario" );
+        $this->fld_destinatario->setWidth( 550 );
+        $this->fld_destinatario->setType( "radio" );
+        $this->fld_destinatario->setSource( $this->array_source_dst ); 
+        $this->fld_destinatario->setValue( "3" );
+        $this->fld_destinatario->addAction( "onChange" );
         $this->intercept( $this->fld_destinatario, "onChange", "fld_destinatarioChange" );
         
 
@@ -153,29 +153,44 @@ class invio_email extends P4A_Mask
 
 
         // Oggetto
-        $fld_oggetto =& $this->build("p4a_field", "fld_oggetto");
-        $fld_oggetto->setLabel( "Oggetto" );
-        $fld_oggetto->setWidth( 550 );
+        $this->build("p4a_field", "fld_oggetto");
+        $this->fld_oggetto->setLabel( "Oggetto" );
+        $this->fld_oggetto->setWidth( 550 );
         
         // Corpo del messaggio
-        $fld_messaggio =& $this->build("p4a_field", "fld_messaggio");
-        $fld_messaggio->setLabel( "Messaggio" );
-        $fld_messaggio->setType( "textarea" );
-        $fld_messaggio->setWidth( 550 );
-        $fld_messaggio->setHeight( 200 );
+        $this->build("p4a_field", "fld_messaggio");
+        $this->fld_messaggio->setLabel( "Messaggio" );
+        $this->fld_messaggio->setType( "textarea" );
+        $this->fld_messaggio->setWidth( 550 );
+        $this->fld_messaggio->setHeight( 200 );
+        
+        // Check "Invia copia a me stesso"        
+        $this->build( "p4a_field", "ck_invia_copia_a_me_stesso" );
+        $this->ck_invia_copia_a_me_stesso->setType( "checkbox" );
+        $this->ck_invia_copia_a_me_stesso->setLabel( "Invia ANCHE a me stesso" );
+        $this->ck_invia_copia_a_me_stesso->label->setWidth( 250 );
+        $this->ck_invia_copia_a_me_stesso->setNewValue( 1 );
+        
+        // Check "Invia solo a me stesso (test invio)"        
+        $this->build( "p4a_field", "ck_invia_solo_a_me_stesso" );
+        $this->ck_invia_solo_a_me_stesso->setType( "checkbox" );
+        $this->ck_invia_solo_a_me_stesso->setLabel( "Invia SOLO a me stesso (test invio)" );
+        $this->ck_invia_solo_a_me_stesso->label->setWidth( 250 );
         
   
         // ---------------------------------------------------- Frame principale
         $frm=& $this->build( "p4a_frame", "frm" );
         $frm->setWidth( 730 );
 
-        $frm->anchor( $msg_info );
+        $frm->anchor( $this->msg_info );
         $frm->anchor( $this->fld_mittente );
         $frm->anchor( $this->fld_rispondi );
-        $frm->anchor( $fld_destinatario );
+        $frm->anchor( $this->fld_destinatario );
         $frm->anchor( $this->fld_clifor, "80px" );
-        $frm->anchor( $fld_oggetto );
-        $frm->anchor( $fld_messaggio, "130px" );
+        $frm->anchor( $this->fld_oggetto );
+        $frm->anchor( $this->fld_messaggio, "130px" );
+        $frm->anchor( $this->ck_invia_copia_a_me_stesso, "130px", "left" );
+        $frm->anchor( $this->ck_invia_solo_a_me_stesso, "130px", "left" );
 
         e3g_scrivi_footer( $this, $frm );
 
@@ -232,6 +247,16 @@ class invio_email extends P4A_Mask
         
         $oggetto = "[" . $p4a->e3g_nome_sw . "] " . $this->fld_oggetto->getNewValue();
 
+        // Invio solo a me stesso (a scopo di test)
+        if ( $this->ck_invia_solo_a_me_stesso->getNewValue() != 0 ) {
+            e3g_invia_email( $oggetto, $this->fld_messaggio->getNewValue(), $p4a->e3g_utente_email, $p4a->e3g_utente_desc,
+                    $this->fld_mittente->getNewValue() );
+            $this->msg_info->setIcon( "info" );
+            $this->msg_info->setValue( "Invio effettuato." );
+            return;
+        }
+
+        // Invio normale secondo le scelte dell'utente
         switch ( $this->fld_destinatario->getNewValue() ) {
                 case "1":  // Tutti gli amministratori (delle varie gestioni)
                 case "2":  // Tutti gli amministratori ed i referenti
@@ -269,6 +294,12 @@ class invio_email extends P4A_Mask
                     else {
                         $this->msg_info->setIcon( "warning" );
                         $this->msg_info->setValue( "Si sono verificati errori: $n_invii invii effettuati per $n_admin amministratori." );
+                    }
+
+                    // Invio opzionale all'operatore
+                    if ( $this->ck_invia_copia_a_me_stesso->getNewValue() != 0 ) {
+                        e3g_invia_email( $oggetto, $this->fld_messaggio->getNewValue(), $p4a->e3g_utente_email, $p4a->e3g_utente_desc,
+                                $this->fld_mittente->getNewValue() );
                     }
                     
                     break;
@@ -309,6 +340,12 @@ class invio_email extends P4A_Mask
                         $this->msg_info->setValue( "Si sono verificati errori: $n_invii invii effettuati per $n_utenti utenti attivi." );
                     }
                     
+                    // Invio opzionale all'operatore
+                    if ( $this->ck_invia_copia_a_me_stesso->getNewValue() != 0 ) {
+                        e3g_invia_email( $oggetto, $this->fld_messaggio->getNewValue(), $p4a->e3g_utente_email, $p4a->e3g_utente_desc,
+                                $this->fld_mittente->getNewValue() );
+                    }
+                    
                     break;
 
                 case "5":  // Tutti i fornitori
@@ -343,6 +380,12 @@ class invio_email extends P4A_Mask
                         $this->msg_info->setValue( "Si sono verificati errori: $n_invii invii effettuati per $n_utenti fornitori attivi." );
                     }
                     
+                    // Invio opzionale all'operatore
+                    if ( $this->ck_invia_copia_a_me_stesso->getNewValue() != 0 ) {
+                        e3g_invia_email( $oggetto, $this->fld_messaggio->getNewValue(), $p4a->e3g_utente_email, $p4a->e3g_utente_desc,
+                                $this->fld_mittente->getNewValue() );
+                    }
+                    
                     break;
 
                 case "6":  // Singolo utente selezionato
@@ -359,6 +402,12 @@ class invio_email extends P4A_Mask
                         $this->msg_info->setValue( "Si sono verificati errori durante l'invio." );
                     }
 
+                    // Invio opzionale all'operatore
+                    if ( $this->ck_invia_copia_a_me_stesso->getNewValue() != 0 ) {
+                        e3g_invia_email( $oggetto, $this->fld_messaggio->getNewValue(), $p4a->e3g_utente_email, $p4a->e3g_utente_desc,
+                                $this->fld_mittente->getNewValue() );
+                    }
+                    
                     break;
                     
                 case "7":  // Singolo fornitore selezionato
@@ -375,6 +424,12 @@ class invio_email extends P4A_Mask
                         $this->msg_info->setValue( "Si sono verificati errori durante l'invio." );
                     }
 
+                    // Invio opzionale all'operatore
+                    if ( $this->ck_invia_copia_a_me_stesso->getNewValue() != 0 ) {
+                        e3g_invia_email( $oggetto, $this->fld_messaggio->getNewValue(), $p4a->e3g_utente_email, $p4a->e3g_utente_desc,
+                                $this->fld_mittente->getNewValue() );
+                    }
+                    
                     break;
             }           
     }

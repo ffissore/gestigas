@@ -1,7 +1,5 @@
 /equogest_db_init_cond.sql/1.4/Thu May 14 16:44:59 2009//
 /equogest_db_init_multi.sql/1.14/Mon May 12 09:35:24 2008//
-/gestigas_db_init_cond.sql/1.4/Thu May 14 16:44:59 2009//
-/gestigas_db_init_multi.sql/1.20/Fri Nov 13 16:18:48 2009/-kk/
 /index.html/1.1/Thu Jan 12 14:28:29 2006//
 /update_cond_0003.sql/1.1/Wed Oct 18 13:50:05 2006//
 /update_cond_0004.sql/1.4/Sun Nov 26 15:07:44 2006//
@@ -21,4 +19,8 @@
 /update_multi_0017.sql/1.4/Fri Oct 10 22:44:00 2008//
 /update_multi_0018.sql/1.4/Sun May  3 22:37:56 2009//
 /update_multi_0019.sql/1.8/Thu Jan  7 15:48:06 2010//
+/gestigas_db_init_cond.sql/1.5/Sat Jan 28 07:10:40 2012//
+/gestigas_db_init_multi.sql/1.21/Sat Jan 28 07:10:40 2012/-kk/
+/update_cond_0011.sql/1.3/Tue Dec 20 18:26:01 2011//
+/update_multi_0020.sql/1.4/Thu Jan 26 17:44:39 2012//
 D
