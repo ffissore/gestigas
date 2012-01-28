@@ -671,13 +671,6 @@ function genera_stampa_pdf( $numerodoc, $iddoc, $codtipodoc, $codclifor, $codtip
 
         if ( E3G_TIPO_GESTIONE == 'G' )  // GestiGAS, con [art.um_qta] 
         {
-<<<<<<< e3g_doc_routines.php
-        	if ( E3G_TIPO_GESTIONE == 'G' ) 
-            {
-            	// Gestigas con [art.um_qta]
-          		$p4a->ds_docr->setSelect("d.codice, ROUND(d.prezzo + d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo, d.quantita, ROUND(d.totale,".$p4a->e3g_azienda_n_decimali_prezzi.") as totale, d.codiva, CONCAT_WS(' ', d.descrizione, '[', art.um_qta, art.um, ']') AS descrizione, d.visibile, d.nriga, d.iddocr, ana.descrizione as fornitore, d.quantita2, d.sconto, IF(d.visibile='N',ana2.descrizione,'') as utente, ROUND(d.prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo_originale, ROUND(d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as delta_prezzo");
-            }
-=======
             $sql_select = 
                     "d.iddocr, d.codice, d.quantita, d.codiva, d.visibile, d.nriga, d.quantita2, d.sconto, " .
                     "CONCAT_WS( ' ', d.descrizione, '[', art.um_qta, art.um, ']' ) AS descrizione, " .
@@ -690,7 +683,6 @@ function genera_stampa_pdf( $numerodoc, $iddoc, $codtipodoc, $codclifor, $codtip
                     "ROUND( d.prezzo + d.delta_prezzo," . $p4a->e3g_azienda_n_decimali_prezzi . " ) AS prezzo, " .
                     "IF ( d.quantita = 0, 0, ROUND( d.totale," . $p4a->e3g_azienda_n_decimali_prezzi . " ) ) AS totale, " .
                     "IF ( d.visibile = 'N' , anag_ute.descrizione, '-' ) AS utente ";
->>>>>>> 1.23
             else
                 $sql_select .=
                     "ROUND( d.prezzo + d.delta_prezzo, " . $p4a->e3g_azienda_n_decimali_prezzi . " ) AS prezzo, " .
@@ -1054,18 +1046,10 @@ function genera_stampa_csv( $numerodoc, $iddoc, $codtipodoc, $codclifor, $codtip
         $p4a->ds_docr->setTable($p4a->e3g_prefix."docr d");
         if ( E3G_TIPO_GESTIONE == 'G' ) {
             //$p4a->ds_docr->setSelect("d.codice,ROUND(d.prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo, d.quantita,ROUND(d.totale,".$p4a->e3g_azienda_n_decimali_prezzi.") as totale, d.codiva, CONCAT_WS(' ', d.descrizione, '[', art.um_qta, art.um, ']') AS descrizione, d.visibile, d.nriga, d.iddocr, ana.descrizione as fornitore, d.quantita2, d.sconto");
-<<<<<<< e3g_doc_routines.php
-	        if ( $righe_det_per_utente == 1 )
-	        {
-	          	$p4a->ds_docr->setSelect("d.idriga, d.codice, CONCAT_WS(' ', d.descrizione, '[', art.um_qta, art.um, ']') AS descrizione, ROUND(d.prezzo + d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo, ROUND(d.prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as prezzo_originale, ROUND(d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.") as delta_prezzo, d.quantita, ROUND(d.totale,".$p4a->e3g_azienda_n_decimali_prezzi.") as totale, IF(d.visibile='N',ana2.descrizione,'') as utente");
-              $p4a->ds_docr->addJoin( $p4a->e3g_prefix . "articoli art", "d.codice = art.codice", "LEFT" );        
-              $p4a->ds_docr->addJoin( $p4a->e3g_prefix . "anagrafiche ana2", "ana2.codice = d.codutente", "LEFT" );
-=======
 	        if ( $righe_det_per_utente == 1 ) {
 	          	$p4a->ds_docr->setSelect("d.idriga, d.codice, CONCAT_WS(' ', d.descrizione, '[', art.um_qta, art.um, ']') AS descrizione, IF(d.visibile='N','',ROUND(d.prezzo + d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.")) as prezzo, IF(d.visibile='N','',ROUND(d.prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.")) as prezzo_originale, IF(d.visibile='N','',ROUND(d.delta_prezzo,".$p4a->e3g_azienda_n_decimali_prezzi.")) as delta_prezzo, d.quantita, IF(d.visibile='N','',ROUND(d.totale,".$p4a->e3g_azienda_n_decimali_prezzi.")) as totale, IF(d.visibile='N',ana2.descrizione,'') as utente");
                 $p4a->ds_docr->addJoin( $p4a->e3g_prefix . "articoli art", "d.codice = art.codice", "LEFT" );        
                 $p4a->ds_docr->addJoin( $p4a->e3g_prefix . "anagrafiche ana2", "ana2.codice = d.codutente", "LEFT" );
->>>>>>> 1.23
 	        }
 	        else {
             	$p4a->ds_docr->setSelect($stringa_select);
@@ -1115,12 +1099,6 @@ function genera_stampa_csv( $numerodoc, $iddoc, $codtipodoc, $codclifor, $codtip
         //$p4a->ds_docr->firstRow();
     
         
-<<<<<<< e3g_doc_routines.php
-        // Modello: "NomeGasBottega_DocTipoXXX_DataDoc_NumDoc.ext"
-        //   (mantenerlo uguale a quello dell'esportazione PDF pi� sopra)
-        $nome_file = P4A_Get_Valid_File_Name( $p4a->e3g_azienda_rag_soc . 
-            "_DOC_Tipo" . $codtipodoc . "_Data" . $p4a->ds_doct->fields->data->getValue() . "_N" . $numerodoc );
-=======
         $result = $db->queryRow( 
             "SELECT descrizione " .
             "  FROM " . $p4a->e3g_prefix . "anagrafiche WHERE codice = '" . $codclifor . "' " );
@@ -1135,7 +1113,6 @@ function genera_stampa_csv( $numerodoc, $iddoc, $codtipodoc, $codclifor, $codtip
             $codtipodoc . "_" .
             $p4a->ds_doct->fields->data->getValue() . "_" .
             $desc_clifor );
->>>>>>> 1.23
 
                 
         //$p4a->ds_docr->exportToCsv( $nome_file . ".csv", ";", $arr );

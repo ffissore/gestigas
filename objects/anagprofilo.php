@@ -80,12 +80,8 @@ class anagprofilo extends P4A_Mask
  		$this->fields->codice->disable(); 
 
 		$this->fields->localita->setLabel( "Localita'" );
-<<<<<<< anagprofilo.php
-                $this->fields->fax->setLabel( "Telefono cellulare" );
-=======
         $this->fields->cap->setLabel( "CAP" );
         $this->fields->telefono2->setLabel( "Telefono alternativo" );
->>>>>>> 1.37
 		
         $this->fields->descrizione->setWidth( 250 );
         $this->fields->indirizzo->setWidth( 250 );

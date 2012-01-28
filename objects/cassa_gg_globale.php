@@ -792,11 +792,6 @@ class cassa_gg_globale extends P4A_Mask
 
 		$this->tab_pane->pages->tabframe1->anchor( $this->tab_spesa_utente);		 
 		$this->tab_pane->pages->tabframe2->anchor( $this->tab_spesa_forn);		 
-<<<<<<< cassa_gg_globale.php
-        $this->tab_pane->pages->tabframe2->anchor( $this->sh_lista_spesa );
-=======
-
->>>>>>> 1.46
 		$this->tab_pane->pages->tabframe3->anchor( $this->tab_spesa_articolo );		 
         $this->tab_pane->pages->tabframe3->anchor( $this->sh_lista_spesa );      
         $this->tab_pane->pages->tabframe3->anchor( $this->fld_utenti_assegna_qta );      
