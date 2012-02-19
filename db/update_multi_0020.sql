@@ -1,5 +1,6 @@
 UPDATE [PREFIX]anagrafiche SET id_luogo_cons = 0 WHERE id_luogo_cons IS NULL;
 
+ALTER TABLE [PREFIX]anagrafiche CHANGE id_luogo_cons id_luogo_cons INT( 11 ) NULL DEFAULT '0';
 ALTER TABLE [PREFIX]anagrafiche ADD cellulare VARCHAR( 20 ) NULL AFTER fax;
 ALTER TABLE [PREFIX]anagrafiche ADD comune VARCHAR( 20 ) NULL AFTER cap; 
 

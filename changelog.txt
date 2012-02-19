@@ -41,7 +41,12 @@ MM -> Marco Munari (http://www.marcomunari.it)
 
 Inizio change-log:
 
+# 09/02/12 MM Ordine corrente, lista della spesa: visualizzava la qtà dopo eventuali modifiche dei referenti, anzichè solo quella originaria
+# 06/02/12 MM Anagrafica utenti: l'admin poteva cambiare il prpprio accesso in superadmin
 
+-- 0.21.1_rc/0011/0020 -- 31/01/2012 -------------------------------------------
+
+^ 27/01/12 MM Database: accorpati gli updates fino al 0011/0020 negli script di creazione db
 ^ 27/01/12 MM Aggiornamento anno finale di copyright in 2012
 ^ 27/01/12 MM Aggiornamento manuali installazione e d'uso
 # 26/01/12 MM Aggiornamento db 0020: ricreati record in [PREFIX]doccampireport causa presenza di alcuni duplicati
@@ -382,7 +387,7 @@ Inizio change-log:
 # 19/03/08 MM Invio email a tutti gli utenti attivi o ai referenti: spediva anche ai fornitori
 ^ 05/05/08 MM Spostamento variabile $e3g_consegna_famiglie_fornitore (ora non più globale) direttamente in consegna_utente.php 
 - 05/05/08 MM Rimozione consegna_utente_totale.php e consegna_utente_parziale_det.php e 
-							ridenominazione consegna_utente_parziale.php in consegna_utente.php
+              ridenominazione consegna_utente_parziale.php in consegna_utente.php
 - 05/05/08 MM about_admin e e3g_main, richiamo della consegna ad utente: rimossi i controlli di presenza articoli ancora 
               da ordinare ai fornitori in quanto ora vengono eseguiti direttamente nella consegna_utente.php
 ^ 05/05/08 MM Consegna ad utente: warning se ci sono ancora articoli da ordinare ai fornitori

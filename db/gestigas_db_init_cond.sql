@@ -64,7 +64,9 @@ INSERT INTO _anagrafiche_stato VALUES("1","Abilitato");
 INSERT INTO _anagrafiche_stato VALUES("2","Disabilitato");
 
 CREATE TABLE IF NOT EXISTS _luoghi_cons ( 
-	id_luogo_cons INT UNSIGNED NOT NULL , prefix VARCHAR( 20 ) NOT NULL , descrizione VARCHAR( 50 ) NOT NULL,
+	id_luogo_cons INT UNSIGNED NOT NULL , 
+	prefix VARCHAR( 20 ) NOT NULL , 
+	descrizione VARCHAR( 50 ) NOT NULL,
 	PRIMARY KEY ( id_luogo_cons ) , INDEX ( prefix ) );
 DELETE FROM _luoghi_cons;
 INSERT INTO _luoghi_cons ( id_luogo_cons, prefix, descrizione ) VALUES ( '0', '', ' Non indicato' );

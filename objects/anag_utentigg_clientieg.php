@@ -88,7 +88,10 @@ class anag_utentigg_clientieg extends P4A_Mask
 		// Altri db source -----------------------------------------------------
 		$this->build("p4a_db_source", "ds_tipo");
 		$this->ds_tipo->setTable("_login_tipo_utente");
-		$this->ds_tipo->setWhere("codice IN ('AS', 'R', 'U', 'A')");
+        if ( $p4a->e3g_utente_tipo == "A" )  // Solo il super-admin può vedere e impostare anche il tipo "super-admin"
+            $this->ds_tipo->setWhere( "codice IN ('A', 'AS', 'R', 'U')" );
+        else
+            $this->ds_tipo->setWhere( "codice IN      ('AS', 'R', 'U')" );
 		$this->ds_tipo->setPk("codice");
 		$this->ds_tipo->load();
 		

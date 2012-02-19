@@ -31,7 +31,7 @@
 //----------------------------------------------------------------------
 
 // Numero di versione del software e3g (unico sia per Equogest che per GestiGAS)
-define('E3G_VERSIONE', '0.21.0_beta');
+define('E3G_VERSIONE', '0.21.1_rc');
 
 // Numero di versione atteso per il database
 define('E3G_DB_COND_VERSIONE_ATTESA', '0011');

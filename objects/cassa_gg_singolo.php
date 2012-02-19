@@ -87,7 +87,7 @@ class cassa_gg_singolo extends P4A_Mask
         $this->SPE_ds_lista_spesa->setSelect(
             "c.idriga, c.data, " .
             "c.codfornitore, f.descrizione AS desc_fornitore, " .
-            "( c.qta + c.qta_agg ) AS qta, " .
+            "c.qta, " .
             "art.bio, art.codice AS cod_articolo, art.descrizione, " .
             "CONCAT_WS( ' ', art.um_qta, art.um ) AS um_qta_um, " .  // CONCAT_WS non è vuoto se manca l'UM 
             "c.codcaumov, c.carscar, c.codiva, c.idsessione, c.stato, " .
@@ -1825,7 +1825,7 @@ class cassa_gg_singolo extends P4A_Mask
 
         $qu_spesa = $db->getAll( 
             "SELECT CONCAT_WS( ' / ', f.descrizione, f.desc_agg ) AS desc_fornitore, " . 
-            "       ( c.qta + c.qta_agg ) AS qta, art.bio, art.descrizione, " . 
+            "       c.qta, art.bio, art.descrizione, " . 
             "       art.um_qta, art.um, " .  
             "       ROUND( c.prezzoven, $p4a->e3g_azienda_n_decimali_prezzi ) AS prezzoven, " .  
             "       ROUND( c.prezzoven * c.qta, $p4a->e3g_azienda_n_decimali_prezzi ) AS importo " .  
