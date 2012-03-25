@@ -67,7 +67,7 @@ class anagarticoli extends P4A_Mask
 				"codiva", "tipo", "giacenza", "progetto", "sconto1", "sconto2", "sconto3",
 				"catmerce", "tipoarticolo", "paese", "contovendita", "contoacquisto",
 				"posizione", "periodo","um" ,"scortaminima", "stato", "data_ins", "data_agg", "ingredienti", "data_agg_ing",
-                "desc_agg", "gestione_a_peso" ) );
+                "desc_agg", "gestione_a_peso", "prezzo_mag_perc_libera" ) );
 		}
 		else {
 			$this->ds_articoli->setFields( array(
@@ -456,6 +456,7 @@ class anagarticoli extends P4A_Mask
         $fields->centrale->setLabel( "Fornitore" );
         $fields->catmerce->setLabel( "Categoria merceol." );  // Sottocategoria
         $fields->prezzoacq->setLabel( "Prezzo acquisto [euro]" );
+        $fields->prezzo_mag_perc_libera->setLabel( "Percentuale ricarico [%]" );
         $fields->prezzoven->setLabel( "Prezzo vendita [euro]" );
         $fields->gestione_a_peso->setLabel( "Gestione a peso" );
         $fields->um_qta->setLabel( "Peso/Volume" );
@@ -489,6 +490,7 @@ class anagarticoli extends P4A_Mask
         $fields->bio->setType( "checkbox" );
         $fields->desc_agg->setType( "textarea" );
         $fields->prezzoacq->data_field->setType( "float" );
+        $fields->prezzo_mag_perc_libera->data_field->setType( "float" );
         $fields->prezzoven->data_field->setType( "float" );
         $fields->gestione_a_peso->setType( "checkbox" );
         $fields->sconto1->data_field->setType( "decimal" );
@@ -511,7 +513,9 @@ class anagarticoli extends P4A_Mask
         $fields->desc_agg->setHeight( 30 );  // 2 righe
 
         $fields->prezzoacq->setWidth(100);
+        $fields->prezzo_mag_perc_libera->setWidth(100);
         $fields->prezzoven->setWidth(100);
+        
         $fields->um->setWidth(100);
         $fields->barcode->setWidth(100);
         $fields->pzperconf->setWidth(100);
@@ -536,7 +540,8 @@ class anagarticoli extends P4A_Mask
         $fields->descrizione->label->setFontColor( "black" );
 
 		// Allineamento
-		$fields->prezzoacq->setStyleProperty('text-align', 'right');
+        $fields->prezzoacq->setStyleProperty('text-align', 'right');
+        $fields->prezzo_mag_perc_libera->setStyleProperty('text-align', 'right');
 		$fields->prezzoven->setStyleProperty('text-align', 'right');
 
 		// Select "stato"
@@ -607,10 +612,13 @@ class anagarticoli extends P4A_Mask
 			$fs_gg_dettaglio->anchor( $fields->centrale );
 			$fs_gg_dettaglio->anchor( $fields->catmerce );
 
-			$fs_gg_dettaglio->anchor( $fields->prezzoacq );  
+			$fs_gg_dettaglio->anchor( $fields->prezzoacq );
+            if ( $p4a->e3g_azienda_tipo_gestione_prezzi == 3 )  // Maggiorazione percentuale LIBERA (per ogni articolo)
+                $fs_gg_dettaglio->anchorLeft( $fields->prezzo_mag_perc_libera );
 			if ( $p4a->e3g_azienda_mostra_prezzo_sorgente )
 				$fs_gg_dettaglio->anchorLeft( $fields->prezzoven );
-            $fs_gg_dettaglio->anchorLeft( $fields->gestione_a_peso );  
+                
+            $fs_gg_dettaglio->anchor( $fields->gestione_a_peso );  
 
 			$fs_gg_dettaglio->anchor( $fields->um_qta );
 			$fs_gg_dettaglio->anchorLeft( $fields->um );
@@ -951,8 +959,9 @@ class anagarticoli extends P4A_Mask
 		// Memorizza alcuni campi per riproporli
 		$prec_centrale = $this->fields->centrale->getNewValue();
    		$prec_catmerce = $this->fields->catmerce->getNewValue();
-        $prec_bio = $this->fields->bio->getNewValue();
-        $prec_a_peso = $this->fields->gestione_a_peso->getNewValue();
+        $prec_bio      = $this->fields->bio->getNewValue();
+        $prec_a_peso   = $this->fields->gestione_a_peso->getNewValue();
+        $prec_prezzo_mag_perc_libera = $this->fields->prezzo_mag_perc_libera->getNewValue();
 		
 		
 		parent::newRow();
@@ -968,6 +977,10 @@ class anagarticoli extends P4A_Mask
             $this->fields->gestione_a_peso->setNewValue( $prec_a_peso );
         else 
             $this->fields->gestione_a_peso->setNewValue( 0 );
+        if ( isset($prec_prezzo_mag_perc_libera) )
+            $this->fields->prezzo_mag_perc_libera->setNewValue( $prec_prezzo_mag_perc_libera );
+        else 
+            $this->fields->prezzo_mag_perc_libera->setNewValue( 0 );
 
 		$this->fields->pzperconf->setNewValue( 1 );
 		$this->fields->qtaminordine->setNewValue( 1 );
@@ -1088,10 +1101,14 @@ class anagarticoli extends P4A_Mask
 						$nuovo_prezzoven = $this->fields->prezzoacq->getUnformattedNewValue();
 						$this->fields->prezzoven->setValue( $nuovo_prezzoven );
 						break;
-					case 2:  // Maggiorazione percentuale sul prezzo d'acquisto									
+					case 2:  // Maggiorazione percentuale COSTANTE sul prezzo d'acquisto									
 						$nuovo_prezzoven = $this->fields->prezzoacq->getUnformattedNewValue() * ( 1 + $p4a->e3g_azienda_prezzi_mag_perc/100 );
 						$this->fields->prezzoven->setValue( $nuovo_prezzoven );
 						break;
+                    case 3:  // Maggiorazione percentuale LIBERA sul prezzo d'acquisto (specificata per ogni articolo)                                    
+                        $nuovo_prezzoven = $this->fields->prezzoacq->getUnformattedNewValue() * ( 1 + $this->fields->prezzo_mag_perc_libera->getUnformattedNewValue()/100 );
+                        $this->fields->prezzoven->setValue( $nuovo_prezzoven );
+                        break;
 				}
 			}
 			

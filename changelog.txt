@@ -41,8 +41,16 @@ MM -> Marco Munari (http://www.marcomunari.it)
 
 Inizio change-log:
 
+
++ 16/03/12 MM Multigestione: duplicazione listino
++ 16/03/12 MM Gestione prezzi listino: possibilità di specificare una percentuale di ricarico diversa per ogni articolo 
+
+-- 0.21.1/0011/0020 -- 09/03/2012 ----------------------------------------------
+
+# 05/03/12 MM Query: sostituito ovunque "TYPE=MyISAM" con "ENGINE=MyISAM" per compatibilità con recenti MySQL
+# 05/03/12 MM gestigas_db_init_multi.sql: rimesse query una per riga per incompatibilità con $db->query() usato in nuova_gestione.php
 # 09/02/12 MM Ordine corrente, lista della spesa: visualizzava la qtà dopo eventuali modifiche dei referenti, anzichè solo quella originaria
-# 06/02/12 MM Anagrafica utenti: l'admin poteva cambiare il prpprio accesso in superadmin
+# 06/02/12 MM Anagrafica utenti: l'admin poteva cambiare il proprio accesso in superadmin
 
 -- 0.21.1_rc/0011/0020 -- 31/01/2012 -------------------------------------------
 

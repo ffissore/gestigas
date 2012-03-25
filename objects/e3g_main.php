@@ -180,6 +180,7 @@ class e3g_main extends P4A
 		while ( $sottomenu =& $this->menu->items->documenti->items->nextItem() ) 
 			$sottomenu->setInvisible();
 		
+        $this->menu->items->articoli->items->duplica_listino->setInvisible();
 		$this->menu->items->articoli->items->anagtipiarticoli->setInvisible();
 		$this->menu->items->articoli->items->anagcatmerce->setInvisible();
 		
@@ -237,6 +238,7 @@ class e3g_main extends P4A
 				$this->menu->items->strumenti->items->azienda->setVisible();
                 $this->menu->items->strumenti->items->mailing_list_admin->setVisible();
 				if ( $p4a->e3g_utente_tipo == "A" ) {  // Solo per il super-admin
+                    $this->menu->items->articoli->items->duplica_listino->setVisible();
                 	$this->menu->items->strumenti->items->sqlexecute->setVisible();
 					$this->menu->items->strumenti->items->nuova_gestione->setVisible();
 					$this->menu->items->strumenti->items->multigestione->setVisible();
@@ -377,6 +379,9 @@ class e3g_main extends P4A
 			$this->menu->items->articoli->addItem("esporta_listino", "Esporta listino...");
     		$this->intercept($this->menu->items->articoli->items->esporta_listino,"onClick", "esporta_listino_menuClick");
 			$this->menu->items->articoli->items->esporta_listino->setIcon( "pdf" );
+
+            $this->menu->items->articoli->addItem("duplica_listino", "Duplica listino...");
+            $this->intercept($this->menu->items->articoli->items->duplica_listino,"onClick", "duplica_listinoClick");
 
     		$this->menu->items->articoli->addItem("anagtipiarticoli", "Categorie");
     		$this->intercept($this->menu->items->articoli->items->anagtipiarticoli,"onClick", "anagtipiarticoliClick");
@@ -847,7 +852,12 @@ class e3g_main extends P4A
     	$p4a->openMask( "esporta_listino" );
 	}
 
-	
+    function duplica_listinoClick()
+    {
+        $p4a =& p4a::singleton();
+        $p4a->openMask( "duplica_listino" );
+    }
+
 	function nuova_gestioneClick()
     {
     	$p4a =& p4a::singleton();

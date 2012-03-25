@@ -183,8 +183,7 @@ class nuova_gestione extends P4A_Mask
 		if ( $prefix <> "" and $prefix[ strlen($prefix)-1 ] <> '_' )
 			$prefix .= '_'; 
 		
-		// Verifica correttezza campo prefisso
-		// (solo lettere, numeri e _
+		// Verifica correttezza campo prefisso (solo lettere, numeri e _)
 		if ( $error_text == '' and !ereg( "^[a-zA-Z0-9_]+$", $prefix ) )
 		{
 			$this->fld_prefix->setStyleProperty( "border", "1px solid red" );
@@ -199,7 +198,7 @@ class nuova_gestione extends P4A_Mask
 			if ( $result > 0 )
 			{
 				$this->fld_prefix->setStyleProperty( "border", "1px solid red" );
-				$error_text = "Nome prefisso non univoco: sceglierne uno diverso";
+				$error_text = "Nome prefisso gia' presente: sceglierne uno diverso";
 			}
 		}
 
@@ -226,8 +225,7 @@ class nuova_gestione extends P4A_Mask
 		// --------------------------------------------------- Creazione tabelle
 		if ( $error_text == '' )
 		{
-			$idfile = fopen( $nome_file, "r" )
-				or exit( "Impossibile leggere il file ($nome_file)" );
+			$idfile = fopen( $nome_file, "r" ) or exit( "Impossibile leggere il file ($nome_file)" );
 			$dati = file( $nome_file );
 
 			foreach ( $dati as $riga ) {

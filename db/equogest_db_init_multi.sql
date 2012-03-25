@@ -10,7 +10,7 @@ CREATE TABLE [PREFIX]aliquoteiva (
   PRIMARY KEY  (codice),
   UNIQUE KEY codice (codice),
   KEY aliquoteivaiva (iva)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]aliquoteiva'
@@ -69,7 +69,7 @@ CREATE TABLE [PREFIX]anagrafiche (
   PRIMARY KEY  (codice),
   UNIQUE KEY id (idanag),
   KEY codice (codice)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]anagrafiche'
@@ -172,7 +172,7 @@ CREATE TABLE [PREFIX]articoli (
   data_agg timestamp NOT NULL,
   PRIMARY KEY  (codice),
   UNIQUE KEY idarticolo (idarticolo)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]articoli'
@@ -190,7 +190,7 @@ CREATE TABLE [PREFIX]articoloperiodo (
   codice varchar(20) default NULL,
   dalmese int(3) unsigned default '0',
   almese int(3) unsigned default '0'
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]articoloperiodo'
@@ -223,7 +223,7 @@ CREATE TABLE [PREFIX]carrello (
   codutente varchar(15) default NULL,
   qta_agg int(11) default '0',
   PRIMARY KEY  (idriga)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]carrello'
@@ -242,7 +242,7 @@ CREATE TABLE [PREFIX]catmerceologica (
   tipo char(2) default NULL,
   PRIMARY KEY  (codice),
   UNIQUE KEY codice (codice)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]catmerceologica'
@@ -266,7 +266,7 @@ CREATE TABLE [PREFIX]contconti (
   codice varchar(4) default NULL,
   descrizione varchar(50) default NULL,
   mastro char(1) default NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]contconti'
@@ -308,7 +308,7 @@ INSERT INTO [PREFIX]contconti (codice, descrizione, mastro) VALUES
 CREATE TABLE [PREFIX]contmastri (
   codice char(1) default NULL,
   descrizione varchar(50) default NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]contmastri'
@@ -330,7 +330,7 @@ INSERT INTO [PREFIX]contmastri (codice, descrizione) VALUES
 CREATE TABLE [PREFIX]contsegno (
   codice char(1) default NULL,
   descrizione varchar(5) default NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]contsegno'
@@ -354,7 +354,7 @@ CREATE TABLE [PREFIX]doccampi (
   visible char(1) NOT NULL default '',
   PRIMARY KEY  (idtable),
   UNIQUE KEY univoca (codtipodoc,nomecampo,testatarighe)
-) TYPE=MyISAM ;
+) ENGINE=MyISAM ;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]doccampi'
@@ -421,7 +421,7 @@ CREATE TABLE [PREFIX]doccampireport (
   campo varchar(30) default '0',
   nomecampo varchar(30) default NULL,
   ordine int(10) unsigned default NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]doccampireport'
@@ -490,7 +490,7 @@ CREATE TABLE [PREFIX]docr (
   KEY numdocum (numdocum),
   KEY idtabella (iddocr),
   KEY iddocumento (iddocr)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]docr'
@@ -509,7 +509,7 @@ CREATE TABLE [PREFIX]docregistri (
   seriale int(11) default '0',
   PRIMARY KEY  (codice),
   UNIQUE KEY codice (codice)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]docregistri'
@@ -544,7 +544,7 @@ CREATE TABLE [PREFIX]docr_temp (
   sconto double default NULL,
   PRIMARY KEY  (idriga),
   KEY idriga (idriga)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]docr_temp'
@@ -598,7 +598,7 @@ CREATE TABLE [PREFIX]doct (
   KEY numscontrino (numeroscontrino),
   KEY rifestrnum (rifestrnum),
   KEY iddoc (iddoc)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]doct'
@@ -692,7 +692,7 @@ CREATE TABLE [PREFIX]doctipidoc (
   campireport varchar(255) default NULL,
   PRIMARY KEY  (codice),
   KEY MovMagCausaliDocTipiDoc (codcaumag)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]doctipidoc'
@@ -738,7 +738,7 @@ CREATE TABLE [PREFIX]doctscad (
   tipo char(1) NOT NULL default '',
   descrizione varchar(50) default NULL,
   KEY numdocum (numdocum)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]doctscad'
@@ -760,7 +760,7 @@ CREATE TABLE [PREFIX]fornitoreperiodo (
   eseguito char(1) default NULL,
   ricorsivo char(1) default NULL,
   PRIMARY KEY  (idtable)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]fornitoreperiodo'
@@ -776,7 +776,7 @@ CREATE TABLE [PREFIX]fornitoreperiodo (
 CREATE TABLE [PREFIX]giacenza (
   codice varchar(20) NOT NULL default '',
   descrizione varchar(100) default NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]giacenza'
@@ -803,7 +803,7 @@ CREATE TABLE [PREFIX]movconr (
   flagcorrisp char(1) default NULL,
   codcauscontind varchar(5) default NULL,
   PRIMARY KEY  (codice,nriga)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]movconr'
@@ -842,7 +842,7 @@ CREATE TABLE [PREFIX]movcont (
   congelato char(1) default NULL,
   tipomovcon varchar(8) default NULL,
   PRIMARY KEY  (codice)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]movcont'
@@ -861,7 +861,7 @@ CREATE TABLE [PREFIX]movmagcausali (
   carscar char(1) default NULL,
   PRIMARY KEY  (codice),
   KEY codice (codice)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]movmagcausali'
@@ -904,7 +904,7 @@ CREATE TABLE [PREFIX]movmagr (
   codanag varchar(15) default NULL,
   idtable bigint(20) NOT NULL default '0',
   PRIMARY KEY  (idriga)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]movmagr'
@@ -921,7 +921,7 @@ CREATE TABLE [PREFIX]pagamenti (
   codice varchar(15) NOT NULL default '0',
   descrizione varchar(40) default NULL,
   PRIMARY KEY  (codice)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]pagamenti'
@@ -943,7 +943,7 @@ CREATE TABLE [PREFIX]progetti (
   descrizione varchar(50) default NULL,
   centrale varchar(15) default NULL,
   ordine int(11) default '10'
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]progetti'
@@ -962,7 +962,7 @@ CREATE TABLE [PREFIX]referenti (
   idtable int(3) default NULL,
   codanag varchar(5) default NULL,
   codfornitore varchar(5) default NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]referenti'
@@ -980,7 +980,7 @@ CREATE TABLE [PREFIX]tipiarticoli (
   descrizione varchar(50) default NULL,
   PRIMARY KEY  (codice),
   UNIQUE KEY codice (codice)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]tipiarticoli'
@@ -1003,7 +1003,7 @@ CREATE TABLE [PREFIX]tipimovcon (
   descrizione char(15) default NULL,
   UNIQUE KEY descrizione (descrizione),
   UNIQUE KEY idtipo (idtipo)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]tipimovcon'
@@ -1034,7 +1034,7 @@ CREATE TABLE [PREFIX]tipoanagrafiche (
   codice char(1) NOT NULL default '',
   descrizione varchar(20) default NULL,
   UNIQUE KEY codice (codice)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]tipoanagrafiche'
@@ -1056,7 +1056,7 @@ CREATE TABLE [PREFIX]tipofatnac (
   codice char(1) NOT NULL default '',
   descrizione varchar(15) default NULL,
   PRIMARY KEY  (codice)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]tipofatnac'
@@ -1075,7 +1075,7 @@ INSERT INTO [PREFIX]tipofatnac (codice, descrizione) VALUES
 CREATE TABLE [PREFIX]tipostato (
   codice char(1) default NULL,
   descrizione varchar(15) default NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]tipostato'
@@ -1099,7 +1099,7 @@ CREATE TABLE [PREFIX]um (
   genere varchar(30) NOT NULL,
   ordine int(11) default NULL,
   UNIQUE KEY codice (codice)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 -- 
 -- Dump dei dati per la tabella '[PREFIX]um'

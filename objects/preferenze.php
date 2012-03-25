@@ -138,7 +138,8 @@ class preferenze extends P4A_Mask
         $a_tipo_gest_prezzi = array(); 
         $a_tipo_gest_prezzi[] = array("id" => "0", "desc" => "Prezzo vendita utente = prezzo acquisto fornitore");
         $a_tipo_gest_prezzi[] = array("id" => "1", "desc" => "Maggiorazione fissa per ogni ordine");
-        $a_tipo_gest_prezzi[] = array("id" => "2", "desc" => "Maggiorazione percentuale sul prezzo d'acquisto");
+        $a_tipo_gest_prezzi[] = array("id" => "2", "desc" => "Maggiorazione percentuale COSTANTE sul prezzo d'acquisto");
+        $a_tipo_gest_prezzi[] = array("id" => "3", "desc" => "Maggiorazione percentuale LIBERA sul prezzo d'acquisto");
         $as_tipo_gest_prezzi =& $this->build("p4a_array_source", "as_tipo_gest_prezzi"); 
         $as_tipo_gest_prezzi->load($a_tipo_gest_prezzi); 
         $as_tipo_gest_prezzi->setPk("id"); 
@@ -146,31 +147,36 @@ class preferenze extends P4A_Mask
         $fields->tipo_gestione_prezzi->setSourceDescriptionField('desc');
         $fields->tipo_gestione_prezzi->setSource($as_tipo_gest_prezzi);
 
-        $fields->mostra_prezzo_sorgente->setLabel("Mostra prezzo sorgente");
-		$fields->mostra_prezzo_sorgente->label->setWidth( 180 );
-        $fields->mostra_prezzo_sorgente->setType("checkbox");
-
         $fields->prezzi_mag_fissa->setLabel("Maggiorazione fissa [euro]");
 		$fields->prezzi_mag_fissa->label->setWidth( 180 );
         $fields->prezzi_mag_fissa->setWidth(100);
         $fields->prezzi_mag_fissa->data_field->setType("decimal");
 
-        $fields->prezzi_mag_perc->setLabel("Maggiorazione percentuale [%]");
-		$fields->prezzi_mag_perc->label->setWidth( 180 );
+        $fields->prezzi_mag_perc->setLabel("Maggiorazione percentuale COSTANTE [%]");
+		$fields->prezzi_mag_perc->label->setWidth( 300 );
         $fields->prezzi_mag_perc->setWidth(100);
-        $fields->prezzi_mag_perc->data_field->setType("decimal");
+        $fields->prezzi_mag_perc->data_field->setType( "decimal" );
+
+        $fields->mostra_prezzo_sorgente->setLabel( "Mostra prezzo sorgente" );
+        $fields->mostra_prezzo_sorgente->label->setWidth( 180 );
+        $fields->mostra_prezzo_sorgente->setType( "checkbox" );
+
+        $fields->prezzo_vendita_modificabile->setLabel( "Prezzo di vendita modificabile" );
+        $fields->prezzo_vendita_modificabile->label->setWidth( 180 );
+        $fields->prezzo_vendita_modificabile->setType( "checkbox" );
 
 
 		// Fieldset
-		$this->build("p4a_fieldset", "fs_gg_prezzi");
+		$this->build( "p4a_fieldset", "fs_gg_prezzi" );
 		$this->fs_gg_prezzi->setWidth( E3G_FIELDSET_DATI_WIDTH );
-		$this->fs_gg_prezzi->setTitle("Prezzi");
-		$this->fs_gg_prezzi->anchor( $fields->n_decimali_prezzi);
-		$this->fs_gg_prezzi->anchor( $fields->ordine_minimo);
-		$this->fs_gg_prezzi->anchor( $fields->tipo_gestione_prezzi);
-		$this->fs_gg_prezzi->anchor( $fields->mostra_prezzo_sorgente);
+		$this->fs_gg_prezzi->setTitle( "Prezzi" );
+		$this->fs_gg_prezzi->anchor( $fields->n_decimali_prezzi );
+		$this->fs_gg_prezzi->anchor( $fields->ordine_minimo );
+		$this->fs_gg_prezzi->anchor( $fields->tipo_gestione_prezzi );
 		$this->fs_gg_prezzi->anchor( $fields->prezzi_mag_fissa );
-		$this->fs_gg_prezzi->anchorLeft( $fields->prezzi_mag_perc);
+		$this->fs_gg_prezzi->anchorLeft( $fields->prezzi_mag_perc );
+        $this->fs_gg_prezzi->anchor( $fields->mostra_prezzo_sorgente );
+        $this->fs_gg_prezzi->anchor( $fields->prezzo_vendita_modificabile );
 
 		
 		// ----------------------------------------------------- Dati anagrafici 

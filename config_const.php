@@ -31,11 +31,11 @@
 //----------------------------------------------------------------------
 
 // Numero di versione del software e3g (unico sia per Equogest che per GestiGAS)
-define('E3G_VERSIONE', '0.21.1_rc');
+define('E3G_VERSIONE', '0.21.1');
 
 // Numero di versione atteso per il database
-define('E3G_DB_COND_VERSIONE_ATTESA', '0011');
-define('E3G_DB_MULTI_VERSIONE_ATTESA', '0020');
+define('E3G_DB_COND_VERSIONE_ATTESA', '0012');
+define('E3G_DB_MULTI_VERSIONE_ATTESA', '0021');
 
 // Configurazione icone
 define('P4A_ICONS_NAME', '' );
