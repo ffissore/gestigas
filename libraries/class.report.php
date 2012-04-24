@@ -84,7 +84,9 @@ class Creport extends Cezpdf {
 			$logo = "./images/equogest_02.jpg";
 		// TODO In futuro fare in modo di poter usare anche un logo indicato 
 		// dall'admin e specificato in ..._azienda.logopath (o altro modo)
-		
+
+		$logo = $p4a->e3g_azienda_path_logo;
+
 		if ( file_exists($logo) )
 			$this->addJpegFromFile( $logo, 50, $this->y-100, 200, 0 );
         else {
