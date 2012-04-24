@@ -113,16 +113,12 @@ class Creport extends Cezpdf {
 	//--------------------------------------------------------------------------
 	function set_pdf_footer()
 	{
-//		$this->ezText( "", 8, array('justification'=>'centre', 'left'=>'1' ));
-//		$this->ezText( e3g_get_text_footer(), 8, array('justification'=>'centre', 'left'=>'1' ) );
-
-        $this->addText( 30, 28, 8, e3g_get_text_footer() );
+		$this->ezText( "", 8, array('justification'=>'centre', 'left'=>'1' ));
+		$this->ezText( e3g_get_text_footer(), 8, array('justification'=>'centre', 'left'=>'1' ) );
 	}
 
 		
-    //--------------------------------------------------------------------------
 	function stampareport( $corpo, $colonne, $titolo, $nomefile )
-    //--------------------------------------------------------------------------
 	{
 		$this-> ezSetMargins(200,70,50,50);
 
@@ -133,12 +129,16 @@ class Creport extends Cezpdf {
 		$this->line(20,40,578,40);
 		$this->line(20,822,578,822);
 
-        // select a font
-		$mainFont = dirname(__FILE__) . '/fonts/Times-Roman.afm';		
-		$this->selectFont( $mainFont );
+		//$mainFont = './fonts/Helvetica.afm';
+		//$mainFont = './fonts/Times-Roman.afm';
+		$mainFont = dirname(__FILE__).'/fonts/Times-Roman.afm';		
+		//$codeFont = './fonts/Courier.afm';
+		$codeFont = dirname(__FILE__).'/fonts/Courier.afm';
+ 
+		// select a font
+		$this->selectFont($mainFont);
 
-        // Numerazione pagine
-        $this->ezStartPageNumbers( 535, 28, 9, 'right', '<i>Pag. {PAGENUM} di {TOTALPAGENUM}</i>', 1 );  // x, y, size, [pos], [pattern], [num]
+		$this->ezStartPageNumbers(500,28,10,'','',1);
 		
 		$this->set_pdf_header( $titolo );
 
@@ -146,42 +146,14 @@ class Creport extends Cezpdf {
 		// or 'even'.
 		$this->addObject($all,'all');
 
-
 		// CORPO
-        $this->ezTable( $corpo, $colonne, '', 
-            array(
-                'showLines' => 2,  // 0:no bordi, 1:mostra solo bordi esterni, 2:mostra bordi e linee interne tra le righe  
-                
-                'shaded' => 1,     // 0:no, 1:alterna ombreggio righe (si/no), 2: tutte le righe ombreggiate (due tonalità)
-                'shadeCol'  => array(0.9,0.9,0.9),
-                'shadeCol2' => array(0.8,0.8,0.8),
-                
-                'fontSize' => 9,
-
-                'rowGap' => 1,  // spazio tra testo e linee di ogni riga
-                'colGap' => 2,  // spazio tra testo e linee di ogni colonna
-
-                'xPos' => 'center',
-                'width' => 558,
-                
-                'innerLineThickness' => 0.3, 
-                'outerLineThickness' => 1,
-                
-                'cols' => array(  // Allineamento valori nelle colonne
-                    //TODO così non andrebbe bene, le colonne non sono sempre e solo queste...
-                    'qta'               => array('justification'=>'right'),
-                    'um_qta_um'         => array('justification'=>'right'),
-                    'prezzo_ven_um'     => array('justification'=>'right'),
-                    'prezzoven'         => array('justification'=>'right'),
-                    'importo'           => array('justification'=>'right'),
-                    'qtaminperfamiglia' => array('justification'=>'right')
-                    ) 
-                ) );
-
-        
+		$this->ezTable( $corpo,$colonne,'',array('width'=>'500'));
+		
 		$this->set_pdf_footer();
 
-//		$this->ezStopPageNumbers(1,1);
+		//$this->openHere('Fit');
+
+		$this->ezStopPageNumbers(1,1);
 		
 		//if (isset($d) && $d){
 		//  $pdfcode = $this->ezOutput(1);
@@ -297,31 +269,27 @@ class Creport extends Cezpdf {
 	}
 	
 
-    //--------------------------------------------------------------------------
-	function stampadoc( $data, $desdoc, $numdoc, $clifor, $piva, $indirizzo, $cap, $localita, 
-        $corpo, $colonne, $tot1, $tot2, $stampaprezzi, $nomefile, $stampaiva, $pagamento, $coda, $coltot1, $cf, $note)
-    //--------------------------------------------------------------------------
+	function stampadoc( $data, $desdoc, $clifor, $piva, $indirizzo, $localita, $corpo, $colonne, $tot1, $tot2, $stampaprezzi, $nomefile, $stampaiva, $pagamento, $coda, $coltot1, $cf, $note)
 	{
 		$p4a =& p4a::singleton();
-        $db =& p4a_db::singleton();
-
 		$myline = "";
-		$myline = str_pad( "", 80, "_", STR_PAD_LEFT );  
+		$myline = str_pad("", 80, "_", STR_PAD_LEFT);  
 
-		$this-> ezSetMargins( 200, 58, 50, 50 );  // top, bottom, left, right
+		$this-> ezSetMargins(200,58,50,50);
 
 
 		// put a line top and bottom on all the pages
 		$all = $this->openObject();
 		$this->saveState();
-		$this->setStrokeColor( 0, 0, 0, 1 );
-		$this->line( 20, 50, 578, 50 );
-		$this->line( 20, 822, 578, 822 );
+		$this->setStrokeColor(0,0,0,1);
+		$this->line(20,50,578,50);
+		$this->line(20,822,578,822);
 
-        // Select a font
-		//$mainFont = dirname(__FILE__) . '/fonts/Helvetica.afm';
-		$mainFont = dirname(__FILE__) . '/fonts/Times-Roman.afm';
-		$this->selectFont( $mainFont );
+		//$mainFont = './fonts/Helvetica.afm';
+		$mainFont = dirname(__FILE__).'/fonts/Times-Roman.afm';
+		$codeFont = dirname(__FILE__).'/fonts/Courier.afm';
+		// select a font
+		$this->selectFont($mainFont);
 
 
 		$this->ezSetDy(180);
@@ -336,56 +304,64 @@ class Creport extends Cezpdf {
 		// In futuro fare in modo di poter usare anche un logo indicato 
 		// dall'admin e specificato in ..._azienda.logopath (o altro modo)
 		
-       	if ( file_exists($logo) )
-          $this->addJpegFromFile( $logo, 50, $this->y-120 );  // immagine, x, y, [larghezza], [altezza]
+       	if (file_exists($logo))
+        {
+          $this->addJpegFromFile($logo,20,$this->y-120,300);
+        } 
         else 
         {
 			if ( E3G_TIPO_GESTIONE == 'G' )
-				$logo = "./images/gestigas_03.jpg";
+				$logo = "./images/gestigas_02.jpg";
 			else
-				$logo = "./images/equogest_03.jpg";
+				$logo = "./images/equogest_02.jpg";
 				
-			if ( file_exists($logo) )
-              $this->addJpegFromFile( $logo, 50, $this->y-120 );  // immagine, x, y, [larghezza], [altezza]
+			if (file_exists($logo))
+        	{
+          		$this->addJpegFromFile($logo,20,$this->y-120,300);
+        	} 
+        
 		}
 
-
-		// Numerazione pagine
-        $this->ezStartPageNumbers( 535, 28, 9, 'right', '<i>Pag. {PAGENUM} di {TOTALPAGENUM}</i>', 1 );  // x, y, size, [pos], [pattern], [num]
+		
+		$this->ezStartPageNumbers(500,28,10,'','',1);
 		
 		
-        // Intestazione azienda
-        //   riga 0: nome GAS/bottega
-        //   riga 1: indirizzo fisico
-        //   riga 2: recapiti telefono, email, partita IVA
-        $intest_riga1 = $p4a->e3g_azienda_indirizzo . " - " . $p4a->e3g_azienda_cap . " " . $p4a->e3g_azienda_localita . " (" . $p4a->e3g_azienda_provincia . ")";
-        $intest_riga2 = "<i>Telefono " . $p4a->e3g_azienda_telefono . " - Email " . $p4a->e3g_azienda_email . " - P.IVA: " . $p4a->e3g_azienda_piva . "</i>";
-        $this->ezText( "<b>$p4a->e3g_azienda_rag_soc</b>", 12 );
-        $this->ezText( $intest_riga1, 10 );
-        $this->ezText( $intest_riga2, 10 );
-
-		// Estremi del documento 
-		$this->ezText( "<b>$desdoc</b>",       12, array('justification'=>'right') );
-		$this->ezText( "n. $numdoc del $data", 12, array('justification'=>'right') );
+		// DATI TESTA 
+		//$this->ezText("", 14,array('justification'=>'center','left'=>'1' ));
+		$this->ezText($desdoc, 14,array('justification'=>'right','left'=>'1' ));
+		$this->ezText("del ".$data, 14,array('justification'=>'right','left'=>'1' ));
+		$this->ezText("", 14,array('justification'=>'center','left'=>'1' ));
 		
-        $this->ezText( "", 10 );  // Riga vuota
-
-        // Intestatario documento
-		$this->ezText( "<b>$clifor</b>",              12, array('justification'=>'right') );
-		$this->ezText( "$indirizzo - $cap $localita", 10, array('justification'=>'right') );
-
-		if ( $piva != "" )
-        	$this->ezText( "<i>P.IVA: $piva</i>", 10, array('justification'=>'right') );
+		$this->ezText("", 14,array('justification'=>'center','left'=>'1' ));
+		$this->ezText($clifor, 12,array('justification'=>'right','left'=>'1' ));
+		$this->ezText($indirizzo, 12,array('justification'=>'right','left'=>'1' ));
+		$this->ezText($localita, 12,array('justification'=>'right','left'=>'1' ));
+		if ($piva!="")
+		{
+        	$this->ezText("P.IVA: ".$piva, 12,array('justification'=>'right','left'=>'1' ));
+		} 
 		else
-        	$this->ezText( "", 10, array('justification'=>'right') );
+		{
+        	$this->ezText("", 12,array('justification'=>'right','left'=>'1' ));
+		} 
 		
-		if ( $cf != "" )
-        	$this->ezText( "<i>Cod.fisc.: $cf</i>", 10, array('justification'=>'right') );
+		if ($cf!="")
+		{
+        	$this->ezText("Cod.Fisc.: ".$cf, 12,array('justification'=>'right','left'=>'1' ));
+		} 
 		else
-        	$this->ezText( "", 10, array('justification'=>'right') );
+		{
+        	$this->ezText("", 12,array('justification'=>'right','left'=>'1' ));
+		} 
         
-		if ( $note != "" )
-        	$this->ezText( "Note: ".$note, 10, array('justification'=>'right') );
+		if ($note!="")
+		{
+        	$this->ezText("Note: ".$note, 12,array('justification'=>'right','left'=>'1' ));
+		} 
+		else
+		{
+        	//$this->ezText("", 12,array('justification'=>'right','left'=>'1' ));
+		} 
 		
 		// Intestazione azienda
 		/*
@@ -404,64 +380,49 @@ class Creport extends Cezpdf {
 		*/
 		
 			
-		$this->ezSetDy( -12 );
-//		$this->line( 20, $this->y, 578, $this->y );
-//		$this->ezSetDy( -10 );
+		//$this->ezSetDy(-100);
+		$this->ezSetDy(-10);
+		$this->line(45,$this->y,540,$this->y);
+		$this->ezSetDy(-10);
 		
 		//$this-> ezSetMargins(50,70,50,50);
-		$this->addText( 30, 44, 7, "<i>Ai sensi del Dlgs. 196/2003 si informa che, in base ai rapporti commerciali in essere, deteniamo i Vs. dati anagrafici e fiscali strettamente necessari</i>" );
-		$this->addText( 30, 38, 7, "<i>ai fini dell'espletamento degli adempimenti di legge e per esclusiva finalita' commerciale</i>" );
-		$this->addText( 30, 28, 8, e3g_get_text_footer() );
+		$privacy = "Ai sensi del Dlgs. 196/2003 si informa che, in base ai rapporti commerciali in essere, deteniamo i Vs. dati anagrafici e fiscali strettamente necessari"; 
+		$privacy2 = "ai fini dell'espletamento degli adempimenti di legge e per esclusiva finalita' commerciale";
+		$this->addText(30,44,7,$privacy);
+		$this->addText(30,38,7,$privacy2);
+		$this->addText(30,28,8,e3g_get_text_footer());
 
 		
 		$this->restoreState();
 		$this->closeObject();
 		// note that object can be told to appear on just odd or even pages by changing 'all' to 'odd'
 		// or 'even'.
-		$this->addObject( $all, 'all' );
+		$this->addObject($all,'all');
 
 
-		// ------------------------------------------------------------- TABELLA
-        
-		$this->ezTable( $corpo, $colonne, '', 
-            array(
-                'showLines' => 2,  // 0:no bordi, 1:mostra solo bordi esterni, 2:mostra bordi e linee interne tra le righe  
-                
-                'shaded' => 1,     // 0:no, 1:alterna ombreggio righe (si/no), 2: tutte le righe ombreggiate (due tonalità)
-                'shadeCol'  => array(0.9,0.9,0.9),
-                'shadeCol2' => array(0.8,0.8,0.8),
-                
-                'fontSize' => 9,
+		
+		// CORPO
+		$this->ezTable( $corpo,$colonne,'',array('width'=>'500', 'shaded'=>'0', 'showLines'=>'2', 'fontSize'=>'9'));
+		//array('descrizione'=>'descrizione','dataLancio'=>'dataLancio','Ritorno'=>'Ritorno','dataRitorno'=>'dataRitorno','dataRitorno'=>'dataRitorno','note'=>'note')
 
-                'rowGap' => 1,  // spazio tra testo e linee di ogni riga
-                'colGap' => 2,  // spazio tra testo e linee di ogni colonna
+		//$this->ezSetDy(-100);
+		// modified to use the local file if it can
 
-                'xPos' => 'center',
-                'width' => 558,
-                
-                'innerLineThickness' => 0.3, 
-                'outerLineThickness' => 1,
-                
-                'cols' => array(  // Allineamento valori nelle colonne
-                    //TODO così non andrebbe bene, le colonne non sono sempre e solo queste...
-                    'quantita' => array('justification'=>'right'),
-                    'quantita2' => array('justification'=>'right'),
-                    'prezzo' => array('justification'=>'right'),
-                    'totale' => array('justification'=>'right')
-                    ) 
-                ) );
+		//$this->openHere('Fit');
 
-
-	   	$this->ezText( "", 10 );
-        
+			
+	   	$this->ezText("", 10,array('justification'=>'right','left'=>'1' ));
 		// Totali e Banca
 		//$this->ezText("TOTALI DOCUMENTO", 12,array('justification'=>'left','left'=>'1' ));
-		$this->ezText( "", 12 );
+		$this->ezText("", 12,array('justification'=>'right','left'=>'1' ));
 		$YPagamenti = $this->y;
-		$this->ezTable( $coda, '', '', array('xPos'=>'left', 'xOrientation'=>'right','showHeadings'=>'0', 'shaded'=>'0', 'showLines'=>'1', 'fontSize'=>'9') );
+		$this->ezTable( $coda,'','',array('xPos'=>'left', 'xOrientation'=>'right','showHeadings'=>'0', 'shaded'=>'0', 'showLines'=>'1', 'fontSize'=>'9'));
 		//$this->ezTable( $coda,'','',array('xPos'=>'right', 'xOrientation'=>'left','showHeadings'=>'0'));
 
-	 	if ( $stampaprezzi == "S" )
+		//$this->ezText("", 12,array('justification'=>'right','left'=>'1' ));
+		//$this->line(45,$this->y,540,$this->y);
+		
+	 	if ($stampaprezzi == "S")
 		{
     		//$this->ezText("", 12,array('justification'=>'right','left'=>'1' ));
     	
@@ -471,7 +432,7 @@ class Creport extends Cezpdf {
     		//$this->ezTable( $tot2,'','',array('width'=>'500'));
 			//$this->ezSetY($myY);
 			$this->ezSetY($YPagamenti);
-			$this->ezTable( $tot2,'','', array('xPos'=>'right', 'xOrientation'=>'left', 'shaded'=>'0', 'showLines'=>'1', 'showHeadings'=>'0', 'fontSize'=>'9'));
+			$this->ezTable( $tot2,'','',array('xPos'=>'right', 'xOrientation'=>'left', 'shaded'=>'0', 'showLines'=>'1', 'showHeadings'=>'0', 'fontSize'=>'9'));
 			
 	      	if ($stampaiva =="S")
 			{	
@@ -486,7 +447,10 @@ class Creport extends Cezpdf {
 				$this->ezTable( $tot1,$coltot1,'',array('xPos'=>'right', 'xOrientation'=>'left', 'shaded'=>'0', 'showLines'=>'1'));
 			}
 			else
+			{	
 				$myY = $this->y;
+			}	
+
 		}
 		
 		

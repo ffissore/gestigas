@@ -2,3 +2,5 @@ Entries
 *.iml
 .idea
 .settings
+cache
+config.php

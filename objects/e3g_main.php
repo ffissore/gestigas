@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2012
+ * Copyright (C) 2003-2009
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -180,7 +180,6 @@ class e3g_main extends P4A
 		while ( $sottomenu =& $this->menu->items->documenti->items->nextItem() ) 
 			$sottomenu->setInvisible();
 		
-        $this->menu->items->articoli->items->duplica_listino->setInvisible();
 		$this->menu->items->articoli->items->anagtipiarticoli->setInvisible();
 		$this->menu->items->articoli->items->anagcatmerce->setInvisible();
 		
@@ -238,7 +237,6 @@ class e3g_main extends P4A
 				$this->menu->items->strumenti->items->azienda->setVisible();
                 $this->menu->items->strumenti->items->mailing_list_admin->setVisible();
 				if ( $p4a->e3g_utente_tipo == "A" ) {  // Solo per il super-admin
-                    $this->menu->items->articoli->items->duplica_listino->setVisible();
                 	$this->menu->items->strumenti->items->sqlexecute->setVisible();
 					$this->menu->items->strumenti->items->nuova_gestione->setVisible();
 					$this->menu->items->strumenti->items->multigestione->setVisible();
@@ -252,9 +250,8 @@ class e3g_main extends P4A
 				
 				$this->menu->items->documenti->setVisible();
 				$this->menu->items->documenti->items->gesdocumenti1->setVisible();
-				$this->menu->items->documenti->items->estraz_ordini_fornitore->setVisible();
+				$this->menu->items->documenti->items->doc_estrazione_gg->setVisible();
                 $this->menu->items->documenti->items->modifica_prezzi_art->setVisible();
-                $this->menu->items->documenti->items->modifica_qta_art->setVisible();
 				//$this->menu->items->documenti->items->consegna_utente_totale->setVisible();
 				$this->menu->items->documenti->items->consegna_utente->setVisible();
 				
@@ -338,31 +335,28 @@ class e3g_main extends P4A
 			$this->menu->items->documenti->addItem( "gesdocumenti1", "Gestione doc." );
 			$this->intercept( $this->menu->items->documenti->items->gesdocumenti1,"onClick", "gesdocumenti1Click" );
 	
-            $this->menu->items->documenti->addItem( "estraz_ordini_fornitore", "Estrai ordine fornitore" );
-       		$this->intercept( $this->menu->items->documenti->items->estraz_ordini_fornitore,"onClick", "estraz_ordini_fornitoreClick" );                    
+            $this->menu->items->documenti->addItem( "doc_estrazione_gg", "Estrazione ordine fornitore" );
+       		$this->intercept( $this->menu->items->documenti->items->doc_estrazione_gg,"onClick", "doc_estrazione_ggClick" );                    
 	    		
             $this->menu->items->documenti->addItem( "modifica_prezzi_art", "Modifica prezzi articoli in consegna" );
             $this->intercept( $this->menu->items->documenti->items->modifica_prezzi_art,"onClick", "modifica_prezzi_art_click" );                    
                 
-            $this->menu->items->documenti->addItem( "modifica_qta_art", "Modifica quantita' articoli in consegna" );
-            $this->intercept( $this->menu->items->documenti->items->modifica_qta_art,"onClick", "modifica_qta_art_click" );                    
-
 //          $this->menu->items->documenti->addItem( "consegna_utente_totale", "Consegna articoli ad Utenti - TOT" );
 //          $this->intercept( $this->menu->items->documenti->items->consegna_utente_totale,"onClick", "consegna_utente_totaleClick");                    
              
-            $this->menu->items->documenti->addItem( "consegna_utente", "Consegna articoli all'utente" );
+            $this->menu->items->documenti->addItem( "consegna_utente", "Consegna articoli ad Utenti" );
             $this->intercept( $this->menu->items->documenti->items->consegna_utente,"onClick", "consegna_utenteClick" );                    
 
-            $this->menu->items->documenti->addItem( "consegna_utente_chiusura", "Chiusura ordini aperti" );
+            $this->menu->items->documenti->addItem( "consegna_utente_chiusura", "Chiusura Ordini Aperti" );
             $this->intercept( $this->menu->items->documenti->items->consegna_utente_chiusura,"onClick", "consegna_utente_chiusuraClick" );                    
             
             //$this->menu->items->documenti->addItem( "documentiestratti", "Ordini estratti" );
     		//$this->intercept( $this->menu->items->documenti->items->documentiestratti,"onClick", "documentiestrattiClick" );                    
 			// sostituito da 
-			$this->menu->items->documenti->addItem( "documenti_righe_estratte", "Modifica estratti" );
+			$this->menu->items->documenti->addItem( "documenti_righe_estratte", "Modifica Estratti" );
     		$this->intercept( $this->menu->items->documenti->items->documenti_righe_estratte,"onClick", "documenti_righe_estratteClick" );                    
 				            		
-	    	$this->menu->items->documenti->addItem( "doctipidoc", "Tipi documento" );
+	    	$this->menu->items->documenti->addItem( "doctipidoc", "Tipi Documento" );
     		$this->intercept( $this->menu->items->documenti->items->doctipidoc,"onClick", "doctipidocClick" );
 	    		        
     		$this->menu->items->documenti->addItem( "doccampireport", "Opzioni PDF" );
@@ -380,16 +374,13 @@ class e3g_main extends P4A
     		$this->intercept($this->menu->items->articoli->items->esporta_listino,"onClick", "esporta_listino_menuClick");
 			$this->menu->items->articoli->items->esporta_listino->setIcon( "pdf" );
 
-            $this->menu->items->articoli->addItem("duplica_listino", "Duplica listino...");
-            $this->intercept($this->menu->items->articoli->items->duplica_listino,"onClick", "duplica_listinoClick");
-
     		$this->menu->items->articoli->addItem("anagtipiarticoli", "Categorie");
     		$this->intercept($this->menu->items->articoli->items->anagtipiarticoli,"onClick", "anagtipiarticoliClick");
 				
     		$this->menu->items->articoli->addItem("anagcatmerce", "Sotto-categorie");
     		$this->intercept($this->menu->items->articoli->items->anagcatmerce,"onClick", "anagcatmerceClick");
 	    		
-    		$this->menu->items->articoli->addItem("periodoarticoli", "Disponibilita' stagionale");
+    		$this->menu->items->articoli->addItem("periodoarticoli", "Dispon. stagionale");
     		$this->intercept($this->menu->items->articoli->items->periodoarticoli,"onClick", "periodoarticoliClick");
 	
     		$this->menu->items->articoli->addItem("anagum", "Unita' di Misura");
@@ -431,7 +422,7 @@ class e3g_main extends P4A
             $this->intercept( $this->menu->items->strumenti->items->invio_email, "onClick", "invio_emailClick" );
             $this->menu->items->strumenti->items->invio_email->setIcon( "mail_new" );
     
-            $this->menu->items->strumenti->addItem("azienda", "Preferenze");
+            $this->menu->items->strumenti->addItem("azienda", "Opzioni");
             $this->intercept($this->menu->items->strumenti->items->azienda,"onClick", "azienda_menuclick");
             $this->menu->items->strumenti->items->azienda->setIcon( "misc" );
     
@@ -450,7 +441,7 @@ class e3g_main extends P4A
             $this->menu->items->strumenti->addItem("nuova_gestione", "Nuova gestione");
             $this->intercept($this->menu->items->strumenti->items->nuova_gestione,"onClick", "nuova_gestioneClick");
     
-            $this->menu->items->strumenti->addItem("cron", "Operazioni periodiche");
+            $this->menu->items->strumenti->addItem("cron", "Esegui cron");
             $this->intercept($this->menu->items->strumenti->items->cron,"onClick", "cronClick");
     
 			// PERICOLOSO
@@ -849,59 +840,54 @@ class e3g_main extends P4A
 	function esporta_listino_menuClick()
 	{
 		$p4a =& p4a::singleton();
-    	$p4a->openMask( "esporta_listino" );
+    	$p4a->openMask("esporta_listino");
 	}
 
-    function duplica_listinoClick()
-    {
-        $p4a =& p4a::singleton();
-        $p4a->openMask( "duplica_listino" );
-    }
-
+	
 	function nuova_gestioneClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "nuova_gestione" );    
+    	$p4a->openMask("nuova_gestione");    
     }
 
 	function esporta_datiClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "esporta_dati" );    
+    	$p4a->openMask("esporta_dati");    
     }
 
     function sqlnewforClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "sqlnewfor" );
+    	$p4a->openMask("sqlnewfor");
     }
 
 	
 	function sqlnewcliClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "sqlnewcli" );
+    	$p4a->openMask("sqlnewcli");
     }
 
 	
     function sqlnewcodeClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "sqlnewcode" );
+    	$p4a->openMask("sqlnewcode");
     }
 
 
 	function sqlexecuteClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "sqlexecute" );
+    	$p4a->openMask("sqlexecute");
     }
 
 	
 	function azienda_menuclick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "preferenze" );
+    	$p4a->openMask("azienda");
     }
 	
 
@@ -971,10 +957,10 @@ class e3g_main extends P4A
     }            		
 
 	
-	function estraz_ordini_fornitoreClick()                    
+	function doc_estrazione_ggClick()                    
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask("estraz_ordini_fornitore");
+    	$p4a->openMask("doc_estrazione_gg");
     }            		
     
 	
@@ -982,13 +968,6 @@ class e3g_main extends P4A
     {
         $p4a =& p4a::singleton();
         $p4a->openMask("modifica_prezzi_articoli");
-    }                   
-
-
-    function modifica_qta_art_click()                    
-    {
-        $p4a =& p4a::singleton();
-        $p4a->openMask("modifica_quantita_articoli");
     }                   
 
 
@@ -1170,49 +1149,49 @@ class e3g_main extends P4A
 	function referenti_fornitori_menuClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "referenti_fornitori" );
+    	$p4a->openMask("referenti_fornitori");
     }
 	
     
 	function stampaetichetteClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "stampaetichette" );
+    	$p4a->openMask("stampaetichette");
     }
 	
 	
 	function anag_utenti_egClick()
 	{
 		$p4a =& p4a::singleton();
-    	$p4a->openMask( "anag_utenti_eg" );
+    	$p4a->openMask("anag_utenti_eg");
 	}	    
     
 	
 	function anagfornitoriClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "anag_fornitori" );
+    	$p4a->openMask("anagfornitori");
     }
                 		
     
 	function periodo_ordiniClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "periodo_ordini" );
+    	$p4a->openMask("periodo_ordini");
     }
 
     
 	function informazioni_menuClick()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "informazioni" );
+    	$p4a->openMask("informazioni");
     }
 	
     
 	function luoghi_consegna_click()
     {
     	$p4a =& p4a::singleton();
-    	$p4a->openMask( "luoghi_consegna" );
+    	$p4a->openMask("luoghi_consegna");
     }
 	
     
@@ -1221,7 +1200,7 @@ class e3g_main extends P4A
 		$p4a =& p4a::singleton();
 		
 		$this->set_menu_avanzato(); 	
-		$p4a->openMask( "about_admin" );	
+		$p4a->openMask("about_admin");	
     }
 	
     

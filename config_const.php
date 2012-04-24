@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2012
+ * Copyright (C) 2003-2009
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -31,11 +31,11 @@
 //----------------------------------------------------------------------
 
 // Numero di versione del software e3g (unico sia per Equogest che per GestiGAS)
-define('E3G_VERSIONE', '0.21.1');
+define('E3G_VERSIONE', '0.20.1');
 
 // Numero di versione atteso per il database
-define('E3G_DB_COND_VERSIONE_ATTESA', '0012');
-define('E3G_DB_MULTI_VERSIONE_ATTESA', '0021');
+define('E3G_DB_COND_VERSIONE_ATTESA', '0010');
+define('E3G_DB_MULTI_VERSIONE_ATTESA', '0019');
 
 // Configurazione icone
 define('P4A_ICONS_NAME', '' );

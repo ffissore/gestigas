@@ -2,7 +2,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2012
+ * Copyright (C) 2003-2009
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -41,94 +41,6 @@ MM -> Marco Munari (http://www.marcomunari.it)
 
 Inizio change-log:
 
-
-+ 16/03/12 MM Multigestione: duplicazione listino
-+ 16/03/12 MM Gestione prezzi listino: possibilità di specificare una percentuale di ricarico diversa per ogni articolo 
-
--- 0.21.1/0011/0020 -- 09/03/2012 ----------------------------------------------
-
-# 05/03/12 MM Query: sostituito ovunque "TYPE=MyISAM" con "ENGINE=MyISAM" per compatibilità con recenti MySQL
-# 05/03/12 MM gestigas_db_init_multi.sql: rimesse query una per riga per incompatibilità con $db->query() usato in nuova_gestione.php
-# 09/02/12 MM Ordine corrente, lista della spesa: visualizzava la qtà dopo eventuali modifiche dei referenti, anzichè solo quella originaria
-# 06/02/12 MM Anagrafica utenti: l'admin poteva cambiare il proprio accesso in superadmin
-
--- 0.21.1_rc/0011/0020 -- 31/01/2012 -------------------------------------------
-
-^ 27/01/12 MM Database: accorpati gli updates fino al 0011/0020 negli script di creazione db
-^ 27/01/12 MM Aggiornamento anno finale di copyright in 2012
-^ 27/01/12 MM Aggiornamento manuali installazione e d'uso
-# 26/01/12 MM Aggiornamento db 0020: ricreati record in [PREFIX]doccampireport causa presenza di alcuni duplicati
-# 26/01/12 MM Query creazione db GestiGAS (multi): inseriva due record doppi in [PREFIX]doccampireport
-^ 26/01/12 MM Opzioni esport. PDF: ottimizzazioni, pulizia codice 
-^ 26/01/12 MM Consegna a utente e opzioni esport. PDF: diversa e più efficiente attribuzione ID durante inserimenti
-^ 26/01/12 MM Gestione documenti: oltre a quelli dei propri fornitori, il referente vede anche i documenti da lui creati
-# 26/01/12 MM Menu principale per referenti: mancava voce per "modifica q.tà articoli in consegna"
-# 26/01/12 MM Consegna ad utente: il referente poteva agire su tutto anzichè solo sui propri fornitori
-^ 17/01/12 MM Esportazione doc. e listino articoli come PDF: miglioramenti estetici vari 
-^ 17/01/12 MM Modifica nomi documenti; ora 'Consegna a utente' e 'Ordine a fornitore'
-^ 17/01/12 MM Aggiornamento manuali installazione e d'uso
-^ 11/01/12 MM Esportazione doc. come PDF: alcuni miglioramenti estetici nell'intestazione 
-+ 11/01/12 MM Esportazione doc. come PDF: aggiunti riferimenti GAS/bottega che emette il documento 
-# 11/01/12 MM Esportazione doc. come PDF: mancava l'intestazione (ancora dopo precedente correzione del 23/12)
-- 11/01/12 MM Gestione documenti, rimozione funzione non più usata estrai_click()  
-# 05/01/12 MM Home aministratori: errore nel richiamo finestra "Anagrafica fornitori"
-
--- 0.21.0_beta/0011/0020 -- 27/12/2011 -- RILASCIO INTERNO ---------------------
-
-+ 27/12/11 MM Multigestione: possibilità per il superadmin di aggiornare i singoli db
-# 23/12/11 MM Gest. doc., esp. consegna come PDF: non sempre teneva conto della scelta "dettaglio per utente"
-# 23/12/11 MM Modifica prezzi e qtà art. in consegna: era sbagliato il ricalcolo dell'importo totale di testata
-# 23/12/11 MM Esportazione doc. come PDF: mancava l'intestazione 
-# 23/12/11 MM Estraz. ordine fornitore: eliminazione ordine con selezione luogo di consegna
-- 23/12/11 MM Cassa comune: disattivati controlli corrispondenza segno causale e tipo riferimento
-# 22/12/11 MM Estraz. ordine fornitore: eliminazione ordine
-# 22/12/11 MM Estraz. ordine fornitore: errata interpretazione dell'importo minimo d'ordine
-# 22/12/11 MM Doc. PDF ordine a fornitore con righe dettaglio: correzione ordinamento righe (ora è alfabetico per utente)
-^ 22/12/11 MM Doc. PDF ordine a fornitore con righe dettaglio: visualizzazione anche degli importi e spostata colonna utente all'inizio 
-^ 22/12/11 MM e3g_doc_routines: leggera pulizia e ottimizzazione del codice
-+ 21/12/11 MM Cassa comune: possibilità di assegnare un fornitore di riferimento, al posto dell'utente
-+ 20/12/11 MM Cassa comune: gestione segno contabile della causale (entrata/uscita del movimento)
-^ 19/12/11 MM Disponibilità articoli (periodoarticoli): ottimizzazione del codice sorgente, ma rimangono warning
-^ 19/12/11 MM Voce di menu "Strumenti |  Esegui cron" ridenominata in "Operazioni periodiche"
-+ 19/12/11 MM Notifica ordine in chiusura: aggiunge una nota se l'importo non raggiunge il minimo preimpostato
-+ 19/12/11 MM Ordine corrente: mostra la descrizione dell'operazione appena eseguita (aggiunta, modifica, inserimento articolo)
-# 13/12/11 MM Anag. fornitori: non funzionava l'evento tab_fornitori_click() indispensabile all'abilitazione campi per referenti
-+ 07/12/11 MM Invio notifica apertura ordini ai referenti (per invitarli ad aggiornare i listini) 
-^ 07/12/11 MM Configurazione EG/GG: ridenominazione file da "azienda.php" a "preferenze.php"
-+ 06/12/11 MM Cassa comune: nuova pagina con riassunto per fornitore 
-^ 06/12/11 MM Cassa comune: la pagina con riassunto per utente è ora visibile solo agli utenti autorizzati
-^ 06/12/11 MM Anag. fornitori: ridenominazione file in "anag_fornitori.php" 
-# 06/12/11 MM Anag. fornitori: dopo l'apertura di questa finestra, un normale utente diventava amministratore
-# 06/12/11 MM Anag. fornitori: dopo una ricerca con risultato nullo, mostrava anche gli utenti
-+ 15/11/11 MM Ordine globale, dettaglio articoli per utente: possibilità di assegnare surplus a utente non ordinante
-+ 20/10/11 MM Menu generale admin: aggiunta voce per "modifica q.tà articoli in consegna" 
-^ 20/10/11 MM Consegna ad utente: ottimizzazioni e miglioramento layout
-# 19/10/11 MM Ordine globale, modifica quantità in "spesa per articolo": ora è possibile inserire anche valori con decimali 
-# 19/10/11 MM Corretto tipo del campo "carrello.qta_agg" da INTEGER a DOUBLE (come qta)
-^ 19/10/11 MM Esportazione doc. come PDF/CSV: usa il nome utente/fornitore nel nome file 
-^ 19/10/11 MM Esportazione doc. come PDF: ottimizzazione query
-+ 18/10/11 MM Ordine corrente: visualizzazione totali qta e importo degli articoli in consegna 
-+ 17/10/11 MM Consegna ad utente: visualizz. pezzi e importo direttamente nel combo utente
-+ 17/10/11 MM Estraz. ordine per fornitore: visualizz. pezzi e importo direttamente nel combo fornitore
-+ 14/10/11 MM Estraz. ordine per fornitore: possibilità di eliminare un ordine 
-+ 14/10/11 MM Ordine corrente: nuova pagina con griglia articoli in consegna
-+ 14/10/11 MM Modifica qtà articoli in consegna: evidenziazione riga corrente e con qtà modificata  
-# 14/10/11 MM Modifica qtà articoli in consegna: non aggiornava la quantità aggiunta rispetto all'originale
-# 13/10/11 MM Ordine corrente: non compilava etichetta pagina nel caso di ordine chiuso
-^ 12/10/11 MM Estraz. ordine per fornitore: ottimizzazione query 
-+ 07/10/11 MM Estraz. ordine per fornitore: filtro anche per luogo consegna 
-^ 07/10/11 MM Estraz. ordine per fornitore: reimpostazione estetica
-+ 06/10/11 MM Invio email: possibilità di spedire una copia SOLO a sè stessi (a scopo di test) 
-+ 05/10/11 MM Invio email: possibilità di spedire una copia ANCHE a sè stessi
-+ 30/09/11 MM Estraz. ordine per fornitore: nuova pagina con spesa raggruppata per luogo consegna
-+ 30/09/11 MM Modifica q.tà articoli in consegna: colonna numero cartoni
-+ 30/09/11 MM Modifica q.tà articoli in consegna: filtro luoghi di consegna
-^ 30/09/11 MM Modifica q.tà articoli in consegna: disabilitazione bottone se non ci sono righe
-+ 30/09/11 MM Anagrafica utente, nuovi campi per: telefono secondario, cellulare, comune di residenza
-+ 30/09/11 MM Ordine globale: filtro luoghi di consegna
-+ 29/09/11 MM Gestione documenti: filtro luoghi di consegna
-^ 29/09/11 MM Anagrafica utenti e profilo personale: adeguamento per luogo di consegna non indicato
-+ 29/09/11 MM Database, tabella luoghi di consegna: record per "Non indicato"
 + 06/12/10 AP about_admin, inserito pulsante per richiamare la maschera modifica_quantita_articoli   
 + 06/12/10 AP inserita maschera modifica_quantita_articoli per consentire la modifica multipla delle qta in consegna  
 + 06/12/10 AP esporta_listino, inserito controllo per gestione ck_solo_ordini_aperti solo su Gestigas 
@@ -395,7 +307,7 @@ Inizio change-log:
 # 19/03/08 MM Invio email a tutti gli utenti attivi o ai referenti: spediva anche ai fornitori
 ^ 05/05/08 MM Spostamento variabile $e3g_consegna_famiglie_fornitore (ora non più globale) direttamente in consegna_utente.php 
 - 05/05/08 MM Rimozione consegna_utente_totale.php e consegna_utente_parziale_det.php e 
-              ridenominazione consegna_utente_parziale.php in consegna_utente.php
+							ridenominazione consegna_utente_parziale.php in consegna_utente.php
 - 05/05/08 MM about_admin e e3g_main, richiamo della consegna ad utente: rimossi i controlli di presenza articoli ancora 
               da ordinare ai fornitori in quanto ora vengono eseguiti direttamente nella consegna_utente.php
 ^ 05/05/08 MM Consegna ad utente: warning se ci sono ancora articoli da ordinare ai fornitori

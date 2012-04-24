@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2012
+ * Copyright (C) 2003-2009
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -53,9 +53,6 @@ class cassa_comune extends P4A_Mask
         $this->ds_mov_cassa->setFields( array( 
             "_cassa.*", 
             "_causali_mov_cassa.causale_mov_cassa", 
-            "_causali_mov_cassa.segno", 
-            "_causali_mov_cassa.tipo_rif", 
-            "ur.tipocfa",
             "ur.descrizione AS utente_rif",
             "uc.descrizione AS utente_crea" ) ); 
         $this->ds_mov_cassa->setTable( "_cassa" );
@@ -83,34 +80,25 @@ class cassa_comune extends P4A_Mask
 
 
         //------------------------------------------------------ Altri db source
-        // Causali
-        $this->build( "p4a_db_source", "ds_causali_mov_cassa" );
-        $this->ds_causali_mov_cassa->setFields( array( 
-            "*",
-            "CASE segno WHEN  1 THEN CONCAT( '[Entrata] ', causale_mov_cassa ) " .
-            "           WHEN -1 THEN CONCAT( '[Uscita] ', causale_mov_cassa ) " .
-            "           ELSE causale_mov_cassa END AS descrizione" ) );
-        $this->ds_causali_mov_cassa->setTable( "_causali_mov_cassa" );
-        $this->ds_causali_mov_cassa->addOrder( "segno" );
-        $this->ds_causali_mov_cassa->setPk( "id_causale_mov_cassa" );
-        $this->ds_causali_mov_cassa->load();
-
-        // Utenti e Fornitori
-        $this->build( "p4a_db_source", "ds_ute_for" );
-        $this->ds_ute_for->setFields( array( 
+        // Utenti
+        $this->build( "p4a_db_source", "ds_utenti" );
+        $this->ds_utenti->setFields( array( 
             "idanag", 
             "stato", 
-            "tipocfa",
-            "CASE tipocfa WHEN 'C' THEN CONCAT( '[Utente] ',    descrizione, IF( stato <> 1, ' (NON attivo)', '' ) ) " .
-            "             WHEN 'F' THEN CONCAT( '[Fornitore] ', descrizione, IF( stato <> 1, ' (NON attivo)', '' ) ) " .
-            "             ELSE descrizione END AS descrizione" ) );
-        $this->ds_ute_for->setTable( $p4a->e3g_prefix . "anagrafiche" );
-        $this->ds_ute_for->setWhere( "( tipocfa = 'C' AND tipoutente <> 'A' ) OR ( tipocfa = 'F' ) OR ( idanag = 0 )" );
-        $this->ds_ute_for->addOrder( "tipocfa", "DESC" );
-        $this->ds_ute_for->addOrder( "stato" );
-        $this->ds_ute_for->addOrder( "descrizione" );
-        $this->ds_ute_for->setPk( "idanag" );
-        $this->ds_ute_for->load();
+            "IF( stato = 1, descrizione, CONCAT( descrizione, ' (NON attivo)' ) ) AS descrizione" ) );
+        $this->ds_utenti->setTable( $p4a->e3g_prefix . "anagrafiche" );
+        $this->ds_utenti->setWhere( "( tipocfa = 'C' AND tipoutente <> 'A' ) OR idanag = 0" );
+        $this->ds_utenti->addOrder( "stato" );
+        $this->ds_utenti->addOrder( "descrizione" );
+        $this->ds_utenti->setPk( "idanag" );
+        $this->ds_utenti->load();
+
+        // Causali
+        $this->build( "p4a_db_source", "ds_causali_mov_cassa" );
+        $this->ds_causali_mov_cassa->setTable( "_causali_mov_cassa" );
+        $this->ds_causali_mov_cassa->addOrder( "causale_mov_cassa" );
+        $this->ds_causali_mov_cassa->setPk( "id_causale_mov_cassa" );
+        $this->ds_causali_mov_cassa->load();
 
 
         //-------------------------------------------------------------- Toolbar
@@ -136,24 +124,13 @@ class cassa_comune extends P4A_Mask
         $this->fld_ck_solo_da_validare->setLabel( "Da validare" );
         $this->fld_ck_solo_da_validare->setTooltip( "Visualizza solo i movimenti da validare" );
         
-        // Causale      
-        $this->build( "p4a_field", "fld_causale_mov_cassa" );
-        $this->fld_causale_mov_cassa->setLabel( "Causale" );
-        $this->fld_causale_mov_cassa->setWidth( 250 );
-        $this->fld_causale_mov_cassa->setType( "select" );
-        $this->fld_causale_mov_cassa->setSource( $this->ds_causali_mov_cassa );
-        $this->fld_causale_mov_cassa->setSourceValueField( "id_causale_mov_cassa" );
-        $this->fld_causale_mov_cassa->setSourceDescriptionField( "descrizione" );
-        $this->fld_causale_mov_cassa->setNewValue( 0 );
-
         // Utente di riferimento      
         $this->build( "p4a_field", "fld_utente_rif" );
-        $this->fld_utente_rif->setLabel( "Utente/Fornitore rif." );
-        $this->fld_utente_rif->label->setWidth( 150 );
-        $this->fld_utente_rif->setTooltip( "Visualizza solo movimenti riferiti a questo utente (o fornitore)" );
+        $this->fld_utente_rif->setLabel( "Utente rif." );
+        $this->fld_utente_rif->setTooltip( "Visualizza solo movimenti riferiti a questo utente" );
         $this->fld_utente_rif->setWidth( 250 );
         $this->fld_utente_rif->setType( "select" );
-        $this->fld_utente_rif->setSource( $this->ds_ute_for );
+        $this->fld_utente_rif->setSource( $this->ds_utenti );
         $this->fld_utente_rif->setSourceValueField( "idanag" );
         $this->fld_utente_rif->setSourceDescriptionField( "descrizione" );
         if ( $this->utente_abilitato() ) {
@@ -163,6 +140,16 @@ class cassa_comune extends P4A_Mask
             $this->fld_utente_rif->setNewValue( $p4a->e3g_utente_idanag );
             $this->fld_utente_rif->disable();
         }
+
+        // Causale      
+        $this->build( "p4a_field", "fld_causale_mov_cassa" );
+        $this->fld_causale_mov_cassa->setLabel( "Causale" );
+        $this->fld_causale_mov_cassa->setWidth( 250 );
+        $this->fld_causale_mov_cassa->setType( "select" );
+        $this->fld_causale_mov_cassa->setSource( $this->ds_causali_mov_cassa );
+        $this->fld_causale_mov_cassa->setSourceValueField( "id_causale_mov_cassa" );
+        $this->fld_causale_mov_cassa->setSourceDescriptionField( "causale_mov_cassa" );
+        $this->fld_causale_mov_cassa->setNewValue( 0 );
 
         // Bottone "Filtro"      
         $this->build( "p4a_button", "bu_filtro" );
@@ -188,11 +175,12 @@ class cassa_comune extends P4A_Mask
 
         $this->fs_search->anchor( $this->fld_dalla_data );
         $this->fs_search->anchorLeft( $this->fld_alla_data );
+        $this->fs_search->anchor( $this->fld_ck_solo_da_validare );
+        $this->fs_search->anchor( $this->fld_utente_rif );
+        $this->fs_search->anchor( $this->fld_causale_mov_cassa );
+
         $this->fs_search->anchorRight( $this->bu_annulla_filtro );
         $this->fs_search->anchorRight( $this->bu_filtro );
-        $this->fs_search->anchor( $this->fld_ck_solo_da_validare );
-        $this->fs_search->anchor( $this->fld_causale_mov_cassa );
-        $this->fs_search->anchorRight( $this->fld_utente_rif );
 
 
         //---------------------------------------------------- Eventuale warning
@@ -206,20 +194,18 @@ class cassa_comune extends P4A_Mask
         $this->tab_mov_cassa->setWidth( E3G_TABLE_IN_TAB_PANE_WIDTH );
         $this->tab_mov_cassa->setTitle( "Movimenti di cassa" );
         $this->tab_mov_cassa->setSource( $this->ds_mov_cassa );
-        $this->tab_mov_cassa->setVisibleCols( array( "data_mov", "importo", "causale_mov_cassa", "tipocfa", "utente_rif", "validato" ) );
+        $this->tab_mov_cassa->setVisibleCols( array( "data_mov", "importo", "causale_mov_cassa", "utente_rif", "validato" ) );
         $this->intercept( $this->tab_mov_cassa->rows, "beforeDisplay", "tab_mov_cassa_BeforeDisplay" );  
         
         $this->tab_mov_cassa->cols->data_mov->setLabel( "Data mov." );
         $this->tab_mov_cassa->cols->importo->setLabel( "Importo" );
         $this->tab_mov_cassa->cols->causale_mov_cassa->setLabel( "Causale" );
-        $this->tab_mov_cassa->cols->tipocfa->setLabel( "Tipo rif." );
-        $this->tab_mov_cassa->cols->utente_rif->setLabel( "Utente/Fornitore rif." );
+        $this->tab_mov_cassa->cols->utente_rif->setLabel( "Utente rif." );
         $this->tab_mov_cassa->cols->validato->setLabel( "Validato" );
 
         $this->tab_mov_cassa->cols->data_mov->setWidth( 80 );
         $this->tab_mov_cassa->cols->importo->setWidth( 80 );
         //$this->tab_mov_cassa->cols->causale_mov_cassa->setWidth();  Per differenza
-        $this->tab_mov_cassa->cols->tipocfa->setWidth( 80 );
         $this->tab_mov_cassa->cols->utente_rif->setWidth( 250 );
         $this->tab_mov_cassa->cols->validato->setWidth( 50 );
         
@@ -234,28 +220,26 @@ class cassa_comune extends P4A_Mask
         if ( !$this->utente_abilitato() ) 
             $fields->validato->disable();
 
-        $fields->id_causale_mov_cassa->setLabel( "Causale" );
-        $fields->id_causale_mov_cassa->setWidth( 250 );
-        $fields->id_causale_mov_cassa->setType( "select" );
-        $fields->id_causale_mov_cassa->setSource( $this->ds_causali_mov_cassa );
-        $fields->id_causale_mov_cassa->setSourceValueField( "id_causale_mov_cassa" );
-        $fields->id_causale_mov_cassa->setSourceDescriptionField( "descrizione" );
+        $fields->importo->setLabel( "Importo [euro]" );
+        $fields->importo->setWidth( 200 );
+        $fields->importo->data_field->setType( "float" );
 
-        // Utente di riferimento
-        $fields->id_utente_rif->setLabel( "Utente/Fornitore rif." );
-        $fields->id_utente_rif->label->setWidth( 150 );
-        $fields->id_utente_rif->setTooltip( "Utente (o fornitore) a cui si riferisce il movimento" );
+        $fields->id_utente_rif->setLabel( "Utente rif." );
+        $fields->id_utente_rif->setTooltip( "Utente a cui si riferisce il movimento" );
         $fields->id_utente_rif->setWidth( 250 );
         $fields->id_utente_rif->setType( "select" );
-        $fields->id_utente_rif->setSource( $this->ds_ute_for );
+        $fields->id_utente_rif->setSource( $this->ds_utenti );
         $fields->id_utente_rif->setSourceValueField( "idanag" );
         $fields->id_utente_rif->setSourceDescriptionField( "descrizione" );
         if ( !$this->utente_abilitato() ) 
             $fields->id_utente_rif->disable();
 
-        $fields->importo->setLabel( "Importo [euro]" );
-        $fields->importo->setWidth( 200 );
-        $fields->importo->data_field->setType( "float" );
+        $fields->id_causale_mov_cassa->setLabel( "Causale" );
+        $fields->id_causale_mov_cassa->setWidth( 250 );
+        $fields->id_causale_mov_cassa->setType( "select" );
+        $fields->id_causale_mov_cassa->setSource( $this->ds_causali_mov_cassa );
+        $fields->id_causale_mov_cassa->setSourceValueField( "id_causale_mov_cassa" );
+        $fields->id_causale_mov_cassa->setSourceDescriptionField( "causale_mov_cassa" );
 
         $fields->note->setLabel( "Note" );
         $fields->note->setType( "textarea" );
@@ -281,9 +265,9 @@ class cassa_comune extends P4A_Mask
 
         $this->fs_mov_cassa->anchor( $fields->data_mov );
         $this->fs_mov_cassa->anchor( $fields->validato );
-        $this->fs_mov_cassa->anchor( $fields->id_causale_mov_cassa );
-        $this->fs_mov_cassa->anchorRight( $fields->id_utente_rif );
         $this->fs_mov_cassa->anchor( $fields->importo );
+        $this->fs_mov_cassa->anchorLeft( $fields->id_utente_rif );
+        $this->fs_mov_cassa->anchor( $fields->id_causale_mov_cassa );
         $this->fs_mov_cassa->anchor( $fields->note, "130px" );
         
 
@@ -297,105 +281,56 @@ class cassa_comune extends P4A_Mask
         $this->fs_crea_mod->anchorLeft( $fields->data_agg );
 
 
-        // -------------------------------- Sorgente dati "Riassunto per utente"
-        $this->build( "p4a_db_source", "ds_riassunto_ute" );
+        //-------------------------------------------- Sorgente dati "Riassunto"
+        $this->build( "p4a_db_source", "ds_riassunto" );
 
-        $this->ds_riassunto_ute->setSelect(
+        $this->ds_riassunto->setSelect(
             "id_utente_rif, " .
             "ur.stato, " .
             "IF( ur.stato = 1, ur.descrizione, CONCAT( ur.descrizione, ' (NON attivo)' ) ) AS desc_utente, " .
             "ur.email, " .
             "COUNT( * ) AS n_movimenti, " .
             "SUM( importo ) AS saldo" ); 
-        $this->ds_riassunto_ute->setTable( "_cassa" );
-        $this->ds_riassunto_ute->addJoin( $p4a->e3g_prefix . "anagrafiche AS ur", "ur.idanag = _cassa.id_utente_rif AND ur.tipocfa = 'C'" );
-        $this->ds_riassunto_ute->setWhere( "_cassa.prefix = '" . $p4a->e3g_prefix . "' AND validato = 1" );
-        $this->ds_riassunto_ute->addGroup( "id_utente_rif" );
-        $this->ds_riassunto_ute->addOrder( "ur.stato" );  // Per ultimi gli utenti NON attivi
-        $this->ds_riassunto_ute->addOrder( "desc_utente" );
+        $this->ds_riassunto->setTable( "_cassa" );
+        $this->ds_riassunto->addJoin( $p4a->e3g_prefix . "anagrafiche AS ur", "ur.idanag = _cassa.id_utente_rif" );
+        $this->ds_riassunto->setWhere( "_cassa.prefix = '" . $p4a->e3g_prefix . "' AND validato = 1" );
+        $this->ds_riassunto->addGroup( "id_utente_rif" );
+        $this->ds_riassunto->addOrder( "ur.stato" );  // Per ultimi gli utenti NON attivi
+        $this->ds_riassunto->addOrder( "ur.desc_utente" );
 
-        $this->ds_riassunto_ute->setPk( "ur.email" );
-        $this->ds_riassunto_ute->setPageLimit( $p4a->e3g_utente_db_source_page_limit );
-        $this->ds_riassunto_ute->load();
-        $this->ds_riassunto_ute->firstRow(); 
+        $this->ds_riassunto->setPk( "ur.email" );
+        $this->ds_riassunto->setPageLimit( $p4a->e3g_utente_db_source_page_limit );
+        $this->ds_riassunto->load();
+        $this->ds_riassunto->firstRow(); 
 
 
-        // -------------------------------------- Tabella "riassunto per utente"
-        $this->build( "p4a_table", "tab_riassunto_ute" );
-        $this->tab_riassunto_ute->setWidth( E3G_TABLE_IN_TAB_PANE_WIDTH );
-        $this->tab_riassunto_ute->setSource( $this->ds_riassunto_ute );
-        $this->tab_riassunto_ute->setVisibleCols( array("id_utente_rif", "desc_utente", "email", "n_movimenti", "saldo") );
-        $this->tab_riassunto_ute->showNavigationBar();
-        $this->intercept( $this->tab_riassunto_ute->rows, "beforeDisplay", "tab_riassunto_ute_beforeDisplay" );  
+        // ------------------------------------------------- Tabella "riassunto"
+        $this->build( "p4a_table", "tab_riassunto" );
+        $this->tab_riassunto->setWidth( E3G_TABLE_IN_TAB_PANE_WIDTH );
+        $this->tab_riassunto->setSource( $this->ds_riassunto );
+        $this->tab_riassunto->setVisibleCols( array("id_utente_rif", "desc_utente", "email", "n_movimenti", "saldo") );
+        $this->tab_riassunto->showNavigationBar();
+        $this->intercept( $this->tab_riassunto->rows, "beforeDisplay", "tab_riassunto_beforeDisplay" );  
         
-        $this->tab_riassunto_ute->cols->id_utente_rif->setVisible( false );
+        $this->tab_riassunto->cols->id_utente_rif->setVisible( false );
         
-        $this->tab_riassunto_ute->cols->desc_utente->setLabel( "Utente" );
-        $this->tab_riassunto_ute->cols->email->setLabel( "e-mail" );
-        $this->tab_riassunto_ute->cols->n_movimenti->setLabel( "N. movimenti" );
-        $this->tab_riassunto_ute->cols->saldo->setLabel( "Saldo" );
+        $this->tab_riassunto->cols->desc_utente->setLabel( "Utente" );
+        $this->tab_riassunto->cols->email->setLabel( "e-mail" );
+        $this->tab_riassunto->cols->n_movimenti->setLabel( "N. movimenti" );
+        $this->tab_riassunto->cols->saldo->setLabel( "Saldo" );
 
-//      $this->tab_riassunto_ute->cols->desc_utente->setWidth();  Per differenza
-        $this->tab_riassunto_ute->cols->email->setWidth( 200 );
-        $this->tab_riassunto_ute->cols->n_movimenti->setWidth( 100 );  
-        $this->tab_riassunto_ute->cols->saldo->setWidth( 100 );
+//      $this->tab_riassunto->cols->desc_utente->setWidth();  Per differenza
+        $this->tab_riassunto->cols->email->setWidth( 200 );
+        $this->tab_riassunto->cols->n_movimenti->setWidth( 100 );  
+        $this->tab_riassunto->cols->saldo->setWidth( 100 );
 
-        $this->tab_riassunto_ute->data->fields->saldo->setType("float");
-
-
-        // ------------------------------ Sorgente dati "Riassunto per ornitore"
-        $this->build( "p4a_db_source", "ds_riassunto_for" );
-
-        $this->ds_riassunto_for->setSelect(
-            "id_utente_rif, " .
-            "ur.stato, " .
-            "IF( ur.stato = 1, ur.descrizione, CONCAT( ur.descrizione, ' (NON attivo)' ) ) AS desc_fornitore, " .
-            "ur.email, " .
-            "COUNT( * ) AS n_movimenti, " .
-            "SUM( importo ) AS saldo" ); 
-        $this->ds_riassunto_for->setTable( "_cassa" );
-        $this->ds_riassunto_for->addJoin( $p4a->e3g_prefix . "anagrafiche AS ur", "ur.idanag = _cassa.id_utente_rif AND ur.tipocfa = 'F'" );
-        $this->ds_riassunto_for->setWhere( "_cassa.prefix = '" . $p4a->e3g_prefix . "' AND validato = 1" );
-        $this->ds_riassunto_for->addGroup( "id_utente_rif" );
-        $this->ds_riassunto_for->addOrder( "ur.stato" );  // Per ultimi i fornitori NON attivi
-        $this->ds_riassunto_for->addOrder( "desc_fornitore" );
-
-        $this->ds_riassunto_for->setPk( "ur.email" );
-        $this->ds_riassunto_for->setPageLimit( $p4a->e3g_utente_db_source_page_limit );
-        $this->ds_riassunto_for->load();
-        $this->ds_riassunto_for->firstRow(); 
-
-
-        // ----------------------------------- Tabella "riassunto per fornitore"
-        $this->build( "p4a_table", "tab_riassunto_for" );
-        $this->tab_riassunto_for->setWidth( E3G_TABLE_IN_TAB_PANE_WIDTH );
-        $this->tab_riassunto_for->setSource( $this->ds_riassunto_for );
-        $this->tab_riassunto_for->setVisibleCols( array("id_utente_rif", "desc_fornitore", "email", "n_movimenti", "saldo") );
-        $this->tab_riassunto_for->showNavigationBar();
-        $this->intercept( $this->tab_riassunto_for->rows, "beforeDisplay", "tab_riassunto_for_beforeDisplay" );  
-        
-        $this->tab_riassunto_for->cols->id_utente_rif->setVisible( false );
-        
-        $this->tab_riassunto_for->cols->desc_fornitore->setLabel( "Fornitore" );
-        $this->tab_riassunto_for->cols->email->setLabel( "e-mail" );
-        $this->tab_riassunto_for->cols->n_movimenti->setLabel( "N. movimenti" );
-        $this->tab_riassunto_for->cols->saldo->setLabel( "Saldo" );
-
-//      $this->tab_riassunto_for->cols->desc_fornitore->setWidth();  Per differenza
-        $this->tab_riassunto_for->cols->email->setWidth( 200 );
-        $this->tab_riassunto_for->cols->n_movimenti->setWidth( 100 );  
-        $this->tab_riassunto_for->cols->saldo->setWidth( 100 );
-
-        $this->tab_riassunto_for->data->fields->saldo->setType("float");
+        $this->tab_riassunto->data->fields->saldo->setType("float");
 
 
         // ------------------------------------------------- Pannello principale
         $this->build( "p4a_tab_pane", "tab_pane" );      
         $this->tab_pane->pages->build( "p4a_frame", "tpf_movimenti" );
-        if ( $this->utente_abilitato() ) {
-            $this->tab_pane->pages->build( "p4a_frame", "tbf_riassunto_ute" );
-            $this->tab_pane->pages->build( "p4a_frame", "tbf_riassunto_for" );
-        }
+        $this->tab_pane->pages->build( "p4a_frame", "tbf_riassunto" );
 
         $this->tab_pane->pages->tpf_movimenti->setLabel( "Elenco movimenti" ); 
         $this->tab_pane->pages->tpf_movimenti->anchor( $this->fs_search );        
@@ -404,12 +339,8 @@ class cassa_comune extends P4A_Mask
         $this->tab_pane->pages->tpf_movimenti->anchor( $this->fs_mov_cassa );        
         $this->tab_pane->pages->tpf_movimenti->anchor( $this->fs_crea_mod );        
 
-        if ( $this->utente_abilitato() ) {
-            $this->tab_pane->pages->tbf_riassunto_ute->setLabel( "Riassunto per utente" );
-            $this->tab_pane->pages->tbf_riassunto_ute->anchor( $this->tab_riassunto_ute );        
-            $this->tab_pane->pages->tbf_riassunto_for->setLabel( "Riassunto per fornitore" );
-            $this->tab_pane->pages->tbf_riassunto_for->anchor( $this->tab_riassunto_for );        
-        }
+        $this->tab_pane->pages->tbf_riassunto->setLabel( "Riassunto per utente" );
+        $this->tab_pane->pages->tbf_riassunto->anchor( $this->tab_riassunto );        
 
 
         // ---------------------------------------------------- Frame principale
@@ -477,7 +408,7 @@ class cassa_comune extends P4A_Mask
 
         $saldo_finale = (double) $db->queryOne(
             "SELECT SUM( importo ) FROM _cassa " .
-            " WHERE _cassa.prefix = " . $p4a->e3g_prefix . " AND _cassa.validato = 1" );
+            " WHERE _cassa.prefix = '$p4a->e3g_prefix' AND _cassa.validato = 1" );
 
         $str_title = $this->data->getNumRows() . " moviment" . ( $this->data->getNumRows()==1 ? "o" : "i" );
 
@@ -488,7 +419,7 @@ class cassa_comune extends P4A_Mask
         else {
             $saldo_del_periodo = $db->queryOne(
                 "SELECT SUM( importo ) AS saldo FROM _cassa " .
-                " WHERE _cassa.prefix = " . $p4a->e3g_prefix . " AND _cassa.validato = 1 AND " . $this->ds_mov_cassa_where_periodo );
+                " WHERE _cassa.prefix = '$p4a->e3g_prefix' AND _cassa.validato = 1 AND $this->ds_mov_cassa_where_periodo" );
         
             if ( $this->fld_dalla_data->getNewValue() != "" and $this->fld_alla_data->getNewValue() == "" ) {       
                 // 2) Periodo dalla data ...
@@ -570,28 +501,6 @@ class cassa_comune extends P4A_Mask
             $this->fields->id_causale_mov_cassa->setStyleProperty( "border", "1px solid red" );
             $error_text = "Compilare la causale del movimento.";
         }
-/* TODO Questi controlli sembrano non funzionare correttamente...        
-        // Verifica corrispondenza segno importo/causale (entrata)
-        elseif ( $this->fields->segno->getNewValue() == 1 and $this->fields->importo->getNewValue() < 0 ) {
-            $this->fields->importo->setStyleProperty( "border", "1px solid red" );
-            $error_text = "La causale scelta prevede un movimento di entrata (positivo).";
-        }
-        // Verifica corrispondenza segno importo/causale (uscita)
-        elseif ( $this->fields->segno->getNewValue() == -1 and $this->fields->importo->getNewValue() > 0 ) {
-            $this->fields->importo->setStyleProperty( "border", "1px solid red" );
-            $error_text = "La causale scelta prevede un movimento di uscita (negativo).";
-        }
-        // Verifica corrispondenza tipo riferimento: FORNITORE
-        elseif ( $this->fields->tipo_rif->getNewValue() == "F" and $this->fields->tipocfa->getNewValue() <> "F" ) {
-            $this->fields->id_utente_rif->setStyleProperty( "border", "1px solid red" );
-            $error_text = "La causale scelta prevede un fornitore come riferimento.";
-        }
-        // Verifica corrispondenza tipo riferimento: UTENTE
-        elseif ( $this->fields->tipo_rif->getNewValue() == "C" and $this->fields->tipocfa->getNewValue() <> "C" ) {
-            $this->fields->id_utente_rif->setStyleProperty( "border", "1px solid red" );
-            $error_text = "La causale scelta prevede un utente come riferimento.";
-        }
-*/        
         else {
             // Verifica campi obbligatori
             foreach ( $this->mf as $mf ) {
@@ -604,7 +513,7 @@ class cassa_comune extends P4A_Mask
         }
 
         if ( $error_text == "" ) {
-            $this->fields->data_agg->setNewValue( date ("Y-m-d H:i:s") );  // Questo dovrebbe essere automatico a cura del db, invece non funziona...
+            $this->fields->data_agg->setNewValue( date ("Y-m-d H:i:s") );  // Questo dovrebbe essere automatico a cura del db, invece non funziona
   
             parent::saveRow();      
 
@@ -666,16 +575,15 @@ class cassa_comune extends P4A_Mask
         if ( $this->fld_ck_solo_da_validare->getNewValue() != 0 )
             $this->ds_mov_cassa_where_altro .= " AND _cassa.validato = 0";
 
+        // Utente di riferimento
+        if ( $this->fld_utente_rif->getNewValue() != 0 )
+            $this->ds_mov_cassa_where_altro .= " AND _cassa.id_utente_rif = " . $this->fld_utente_rif->getNewValue();
+
         // Causale movimenti
         if ( $this->fld_causale_mov_cassa->getNewValue() != 0 )
             $this->ds_mov_cassa_where_altro .= " AND _cassa.id_causale_mov_cassa = " . $this->fld_causale_mov_cassa->getNewValue();
 
-        // Utente (o fornitore) di riferimento
-        if ( $this->fld_utente_rif->getNewValue() != 0 )
-            $this->ds_mov_cassa_where_altro .= " AND _cassa.id_utente_rif = " . $this->fld_utente_rif->getNewValue();
-
-
-        $this->ds_mov_cassa->setWhere( $this->ds_mov_cassa_where_periodo . " AND " . $this->ds_mov_cassa_where_altro );
+        $this->ds_mov_cassa->setWhere( "$this->ds_mov_cassa_where_periodo AND $this->ds_mov_cassa_where_altro" );
 
         if ( $this->data->getNumRows() == 0 ) 
             $this->msg_info->setValue( "Nessun movimento trovato." );
@@ -706,53 +614,29 @@ class cassa_comune extends P4A_Mask
     function tab_mov_cassa_BeforeDisplay( $obj, $rows ) 
     // -------------------------------------------------------------------------
     {  
-        // Campi visualizzati: array( "data_mov", "importo", "causale_mov_cassa", "tipocfa", "utente_rif", "validato" ) 
+        // Campi visualizzati: array( "data_mov", "importo", "causale_mov_cassa", "utente_rif", "validato" ) 
         for( $i=0; $i<count($rows); $i++ ) {
             $rows[$i]["validato"] = ( $rows[$i]["validato"] == 1 ? "Si" : "NO" );
-            if ( $rows[$i]["tipocfa"] == "C" )
-                $rows[$i]["tipocfa"] = "[Utente]";
-            elseif ( $rows[$i]["tipocfa"] == "F" )
-                $rows[$i]["tipocfa"] = "[Fornitore]";
-            else
-                $rows[$i]["tipocfa"] = "-";
         }  
         return $rows;  
     }  
 
 
     // -------------------------------------------------------------------------
-    function tab_riassunto_ute_BeforeDisplay( $obj, $rows ) 
+    function tab_riassunto_BeforeDisplay( $obj, $rows ) 
     // -------------------------------------------------------------------------
     {  
         // Campi visualizzati: array( "id_utente_rif", "desc_utente", "email", "n_movimenti", "saldo" ) 
         for( $i=0; $i<count($rows); $i++ ) {
-            // Cambia la descrizione dei movimenti non riferiti ad un singolo utente
+            // Cambia la descrizione dei mvimenti non riferiti ad un singolo utente
             if ( $rows[$i]["id_utente_rif"] == 0 )
                 $rows[$i]["desc_utente"] = "Altri movimenti";
-            // Evidenzia gli utenti in debito (credito negativo)
+            // Evidenzai gli utenti in debito (credito negativo)
             if ( $rows[$i]["saldo"] < 0 )
                 $rows[$i]["desc_utente"] = "<span style='color:red;'>" . $rows[$i]["desc_utente"] . "</span>";
         }  
         return $rows;  
     }  
-
-
-    // -------------------------------------------------------------------------
-    function tab_riassunto_for_BeforeDisplay( $obj, $rows ) 
-    // -------------------------------------------------------------------------
-    {  
-        // Campi visualizzati: array( "id_utente_rif", "desc_fornitore", "email", "n_movimenti", "saldo" ) 
-        for( $i=0; $i<count($rows); $i++ ) {
-            // Cambia la descrizione dei movimenti non riferiti ad un singolo utente
-            if ( $rows[$i]["id_utente_rif"] == 0 )
-                $rows[$i]["desc_fornitore"] = "Altri movimenti";
-            // Evidenzia gli utenti in debito (credito negativo)
-            if ( $rows[$i]["saldo"] < 0 )
-                $rows[$i]["desc_fornitore"] = "<span style='color:red;'>" . $rows[$i]["desc_fornitore"] . "</span>";
-        }  
-        return $rows;  
-    }  
-
 
 }
 

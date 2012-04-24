@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2012
+ * Copyright (C) 2003-2009
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -40,19 +40,15 @@ function e3g_cron() {
 
     $sql_text = 
         "SELECT mailing_list, " .
-        "       notifica_apertura_ref, ( notifica_apertura_ref_data = CURDATE() ) AS notifica_apertura_ref_inviata_oggi, " .
-        "       notifica_apertura,     ( notifica_apertura_data = CURDATE() )     AS notifica_apertura_inviata_oggi, " .
-        "       notifica_chiusura,     ( notifica_chiusura_data = CURDATE() )     AS notifica_chiusura_inviata_oggi, " .
-        "       notifica_lista_spesa,  ( notifica_lista_spesa_data = CURDATE() )  AS notifica_lista_spesa_inviata_oggi, " .
-        "       notifica_mov_cassa,    ( notifica_mov_cassa_data = CURDATE() )    AS notifica_mov_cassa_inviata_oggi " .
+        "       notifica_apertura,    ( notifica_apertura_data = CURDATE() )    AS notifica_apertura_inviata_oggi, " .
+        "       notifica_chiusura,    ( notifica_chiusura_data = CURDATE() )    AS notifica_chiusura_inviata_oggi, " .
+        "       notifica_lista_spesa, ( notifica_lista_spesa_data = CURDATE() ) AS notifica_lista_spesa_inviata_oggi, " .
+        "       notifica_mov_cassa,   ( notifica_mov_cassa_data = CURDATE() )   AS notifica_mov_cassa_inviata_oggi " .
         "  FROM _aziende" .
         " WHERE prefix = '" . $p4a->e3g_prefix . "'";
     $query = $db->getRow( $sql_text );
 
 //  if ( $query["mailing_list"] )      e3g_mailing_list();
-
-    if ( $query["notifica_apertura_ref"] and !$query["notifica_apertura_ref_inviata_oggi"] ) 
-        e3g_notifica_apertura_ref();
 
     if ( $query["notifica_apertura"] and !$query["notifica_apertura_inviata_oggi"] ) 
         e3g_notifica_apertura();
@@ -64,7 +60,8 @@ function e3g_cron() {
 //        e3g_notifica_lista_spesa();   
 
     if ( $query["notifica_mov_cassa"] and !$query["notifica_mov_cassa_inviata_oggi"] ) 
-        e3g_notifica_mov_cassa();           
+        e3g_notifica_mov_cassa();
+           
 }
 
 
@@ -287,98 +284,7 @@ function e3g_mailing_list() {
 
 
 //------------------------------------------------------------------------------
-// Notifiche anticipate apertura ordine (REFERENTI)
-//------------------------------------------------------------------------------
-function e3g_notifica_apertura_ref() {
-    $p4a =& p4a::singleton();
-    $db =& p4a_db::singleton();
-
-    // Se tra (notifica_apertura_ref_gg) giorni si APRE almeno un ordine...
-    $qu_referenti = $db->getAll( 
-        "SELECT ar.descrizione, ar.email, ar.codice, az.notifica_apertura_ref_gg, fp.datainizio " .
-        "  FROM " . $p4a->e3g_prefix . "fornitoreperiodo fp " . 
-        "       JOIN _aziende AS az ON az.prefix = '" . $p4a->e3g_prefix . "' " .
-        "       JOIN " . $p4a->e3g_prefix . "anagrafiche f ON f.codice = fp.fornitore AND f.stato = 1 " .
-        "       JOIN " . $p4a->e3g_prefix . "referenti r ON r.codfornitore = fp.fornitore " .
-        "       JOIN " . $p4a->e3g_prefix . "anagrafiche ar ON ar.codice = r.codanag AND ar.stato = 1 " .
-        "  WHERE ( DATE_SUB( fp.datainizio, INTERVAL az.notifica_apertura_ref_gg DAY ) = CURDATE() OR " .
-        "          ( DATE_SUB( fp.datainizio, INTERVAL az.notifica_apertura_ref_gg DAY ) = MAKEDATE( EXTRACT(YEAR FROM CURDATE()), DAYOFYEAR(fp.datainizio) ) AND " .
-        "            fp.ricorsivo = 'S' ) ) " .
-      " GROUP BY ar.descrizione, ar.email, ar.codice, az.notifica_apertura_ref_gg, fp.datainizio " . 
-      " ORDER BY ar.descrizione " );
-    
-    if ( $qu_referenti ) {
-        /* OGGETTO: Manto-GAS, apertura ordine tra 14 giorni
-         * 
-         * Salve Mario Rossi,
-         * 
-         * il 21/12/2011 si aprira' il periodo d'ordine nei confronti dei fornitori di cui risulti referente:
-         * 
-         * - Az. Agr. Erba Madre / cosmesi naturale (1 articolo)
-         * - Eugea / Ecologia Urbana (6 articoli)
-         * 
-         * Sei invitato a controllare i listini aggiornando prezzo e disponibilita' degli articoli.
-         * Per collegarti vai a: http://www.gestigas.org/e3g/?prefix=mantogas
-         */        
-
-        // Parte di messaggio finale
-        $msg_fine = "\nSei invitato a controllare i listini aggiornando prezzo e disponibilita' degli articoli.\n" .
-            "Per collegarti vai a: " . P4A_APPLICATION_URL . "?prefix=$p4a->e3g_prefix";
-                
-        // Per ogni referente determina i fornitori interessati (possono essere più di uno)
-        $n_invii = 0;
-        foreach ( $qu_referenti as $qu_referente ) {
-            $qu_fornitori = $db->getAll( 
-                "SELECT f.descrizione, COUNT( a.codice ) AS n_articoli " .
-                "  FROM " . $p4a->e3g_prefix . "fornitoreperiodo fp " . 
-                "       JOIN _aziende AS az ON az.prefix = '" . $p4a->e3g_prefix . "' " .
-                "       JOIN " . $p4a->e3g_prefix . "anagrafiche f ON f.codice = fp.fornitore AND f.stato = 1 " .
-                "       JOIN " . $p4a->e3g_prefix . "referenti r ON r.codfornitore = fp.fornitore " .
-                "       LEFT JOIN " . $p4a->e3g_prefix . "articoli AS a ON a.centrale = f.codice AND a.stato = 1 " . 
-                "  WHERE ( DATE_SUB( fp.datainizio, INTERVAL az.notifica_apertura_ref_gg DAY ) = CURDATE() OR " .
-                "          ( DATE_SUB( fp.datainizio, INTERVAL az.notifica_apertura_ref_gg DAY ) = MAKEDATE( EXTRACT(YEAR FROM CURDATE()), DAYOFYEAR(fp.datainizio) ) AND " .
-                "    fp.ricorsivo = 'S' ) ) AND " .
-                "        r.codanag = '" . $qu_referente["codice"] . "' " .
-              " GROUP BY f.descrizione " .
-              " ORDER BY f.descrizione " );
-
-            // Prepara parte di messaggio centrale con elenco fornitori
-            $msg_centro = "";
-            foreach ( $qu_fornitori as $qu_fornitore ) {
-                // Esempio: "- Eugea / Ecologia Urbana (6 articoli)"
-                $msg_centro .=
-                    "- " . $qu_fornitore["descrizione"] . " (" . $qu_fornitore["n_articoli"] . " articol" . ( $qu_fornitore["n_articoli"]==1 ? "o" : "i" ) . ")\n";
-            }
-
-            $oggetto = $p4a->e3g_azienda_rag_soc . ", apertura ordine tra " . $qu_referente["notifica_apertura_ref_gg"] . " giorn" . ( $qu_referente["notifica_apertura_ref_gg"]==1 ? "o" : "i" );
-
-            // Parte di messaggio iniziale
-            $msg_inizio = 
-                "Salve " . $qu_referente["descrizione"] . ",\n\n" .
-                "il " . e3g_format_mysql_data( $qu_referente["datainizio"] ) . " si aprira' il periodo d'ordine nei confronti dei fornitori di cui risulti referente:\n\n";
-                
-            if ( !e3g_invia_email( $oggetto, 
-                                   $msg_inizio . $msg_centro . $msg_fine, 
-                                   $qu_referente["email"], $qu_referente["descrizione"] ) ) 
-                e3g_debug( "Si sono verificati errori durante l'invio a: " . $qu_referente["descrizione"] );
-
-            $n_invii++; 
-        }
-        
-        // Aggiorna _aziende con la data odierna per evitare ulteriore spedizione
-        $db->query( "UPDATE _aziende " .
-            "   SET notifica_apertura_ref_data = CURDATE() " .
-            " WHERE prefix = '" . $p4a->e3g_prefix . "'" );
-            
-        return $n_invii;  // TODO Però potrebbero essersi verificati degli errori
-    }
-    else
-        return false;  // Niente da notificare
-}
-
-
-//------------------------------------------------------------------------------
-// Notifiche apertura ordine (UTENTI)
+// Notifiche apertura ordine
 //------------------------------------------------------------------------------
 function e3g_notifica_apertura() {
     $p4a =& p4a::singleton();
@@ -460,7 +366,7 @@ function e3g_notifica_chiusura() {
     $p4a =& p4a::singleton();
     $db =& p4a_db::singleton();
 
-    // Se tra (notifica_chiusura_gg) giorni si CHIUDE almeno un ordine...
+    // Se alla data di (oggi+notifica_chiusura_gg) si CHIUDE almeno un ordine...
     $qu_fornitori = $db->getAll( 
         "SELECT f.descrizione, fp.datafine, az.notifica_chiusura_gg, " .
         "       COUNT( a.codice ) AS n_articoli " .
@@ -488,8 +394,6 @@ function e3g_notifica_chiusura() {
          * 
          * La tua attuale lista della spesa è vuota.
          * La tua attuale lista della spesa è composta da 45 articoli per un importo totale di 123 euro.
-         * 
-         * ATTENZIONE: l'importo del tuo ordine NON raggiunge il minimo richiesto pari a 123 euro.
          * 
          * Per ordinare, collegarsi a: http://www.gestigas.org/e3g/?prefix=mantogas
          */        
@@ -526,12 +430,9 @@ function e3g_notifica_chiusura() {
      
             if ( $qta == 0 )
                 $msg_spesa = "\nLa tua attuale lista della spesa e' vuota.\n";
-            else {
+            else 
                 $msg_spesa = "\nLa tua attuale lista della spesa e' composta da $qta articol" . ( $qta==1 ? "o" : "i" ) . 
                     " per un importo totale di " . $importo . " euro.\n";
-                if ( $p4a->e3g_azienda_ordine_minimo > 0 and $importo < $p4a->e3g_azienda_ordine_minimo ) 
-                    $msg_spesa .= "\nATTENZIONE: l'importo del tuo ordine NON raggiunge il minimo richiesto pari a $p4a->e3g_azienda_ordine_minimo euro.\n" ;
-            }
 
             if ( !e3g_invia_email( $oggetto, 
                                    $msg_inizio . $msg_centro . $msg_spesa . $msg_fine, 

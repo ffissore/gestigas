@@ -27,31 +27,32 @@
 
 require_once( dirname(__FILE__) . '/../libraries/e3g_utils.php' );
 
-class login_database extends P4A_Mask
+class rptdoct extends P4A_Mask
 {
-	function &login_database ()
+	function &rptdoct()
 	{
 		$this->p4a_mask();
 		$this->addCss(E3G_TEMPLATE_DIR . 'css/style.css');
 		$p4a =& p4a::singleton();
 
-		// data sources
-		$this->build("p4a_db_source", "ds_log");
-		$this->ds_log->setTable("login_database");
-		$this->ds_log->setPk("idtable");
-		$this->ds_log->setWhere("prefix='".$p4a->e3g_prefix."'");
-		
-		$this->ds_log->addOrder("idutente");
-		$this->ds_log->load();
 
-		$this->setSource($this->ds_log);
-		$this->ds_log->firstRow();
+		//Sorgente dati principale
+		// data sources
+		$this->build("p4a_db_source", "ds_campi");
+		$this->ds_campi->setTable($p4a->e3g_prefix."rptdoc");
+		$this->ds_campi->setWhere("tipo='T'");
+		$this->ds_campi->setPk("idtable");
+		
+		$this->ds_campi->load();
+		$this->setSource($this->ds_campi);
+		$this->ds_campi->firstRow();
+		$this->ds_campi->fields->idtable->setSequence("rptdoc_id");
 
 		// Fields properties
 		$fields =& $this->fields;
 
 		// Campi Obbligatori Fields
-	    $this->mf = array("idutente","prefix");
+	    $this->mf = array("codtipodoc");
 		foreach($this->mf as $mf){
 			$fields->$mf->label->setFontWeight("bold");
 		}
@@ -59,53 +60,42 @@ class login_database extends P4A_Mask
 
 		// Aggiungo i campi della maschera
 		//Campo codice
-		$this->fields->idutente->setLabel('Utente');
-		$this->fields->prefix->setLabel('database');
+		$this->build("p4a_db_source", "ds_tipo");
+		$this->ds_tipo->setTable($p4a->e3g_prefix."doctipidoc");
+		$this->ds_tipo->setPk("codice");
+		$this->ds_tipo->load();
 
-		$this->build("p4a_db_source", "ds_anag");
-		$this->ds_anag->setTable("login");
-		$this->ds_anag->setPk("idutente");
-		$this->ds_anag->load();
-
+		$fields->codtipodoc->setLabel('tipo Doc.');
+		$fields->codtipodoc->setType('select');
+		$fields->codtipodoc->setSource($this->ds_tipo);
+		$fields->codtipodoc->setSourceValueField("codice");
+		$fields->codtipodoc->setSourceDescriptionField("descrizione");
+	
+		$this->fields->campo->setLabel('Campo');
+		$this->fields->campostampa->setLabel('nome in Stampa');
 
 		
-		//Campo descrizione
-		$this->fields->idutente->setLabel('Utente');
-		$this->fields->idutente->setWidth(250);
-		$this->fields->idutente->setType('select');
-		$this->fields->idutente->setSourceValueField('idutente');
-		$this->fields->idutente->setSourceDescriptionField('descrizione');
-		$this->fields->idutente->setSource($this->ds_anag);
-		
-		$this->fields->prefix->setLabel('database');
-				
-
 		$table =& $this->build("p4a_table", "table");
-		$table->setWidth(730);
-		$table->setSource($this->ds_log);
-		$table->setVisibleCols(array("idutente", "prefix"));
+ 		$table->setWidth(730);
+		$table->setSource($this->ds_campi);
+		$table->setVisibleCols(array('codtipodoc', 'campo', 'campostampa'));
 		
-		$table->cols->idutente->setLabel('Utente');
-		$table->cols->idutente->setSource($this->ds_anag);
-		$table->cols->idutente->setSourceValueField("idutente");
-		$table->cols->idutente->setSourceDescriptionField("descrizione");
-
-		$table->cols->prefix->setLabel('database');
+		$table->cols->campo->setLabel('Campo');
+		$table->cols->campostampa->setLabel('nome in Stampa');
 		
-		while ($col =& $table->cols->nextItem()) {
-			$col->setWidth(160);
-		}
-		$table->showNavigationBar();
-
-
-
+		$table->cols->codtipodoc->setLabel('tipo Doc.');
+		$table->cols->codtipodoc->setSource($this->ds_tipo);
+		$table->cols->codtipodoc->setSourceValueField("codice");
+		$table->cols->codtipodoc->setSourceDescriptionField("descrizione");
+		
+			
 		// Toolbar
 		$this->build("p4a_standard_toolbar", "toolbar");
 		$this->toolbar->setMask($this);
 
 
 		//Setto il titolo della maschera
-		$this->SetTitle('Accesso database');
+		$this->SetTitle('impostazione Stampa Corpo Doc.');
 
 
 		// Message
@@ -117,18 +107,18 @@ class login_database extends P4A_Mask
 		//Fieldset con l'elenco dei campi
 		$fset=& $this->build("p4a_fieldset", "frame");
 
- 		$fset->anchor($this->table);
- 		$fset->anchor($this->fields->idutente);
- 		$fset->anchor($this->fields->prefix);
- 		
- 		
-
+ 		$fset->anchor($this->fields->codtipodoc);
+ 		$fset->anchor($this->fields->campo);
+		$fset->anchor($this->fields->campostampa);
+		$fset->anchor($this->table);
+		
 		$fset->setWidth(730);
 
 
 		// Frame
 		$frm=& $this->build("p4a_frame", "frm");
 		$frm->setWidth(730);
+
 		$frm->anchor($message);
 		$frm->anchor($fset);
 
@@ -139,6 +129,35 @@ class login_database extends P4A_Mask
 		$this->display("menu", $p4a->menu);
 		$this->display("top", $this->toolbar);
 	}
+	
+	
+function saveRow()
+	{
+		$valid = true;
+
+		foreach($this->mf as $mf){
+			$value = $this->fields->$mf->getNewValue();
+			if(trim($value) === ""){
+				$this->fields->$mf->setStyleProperty("border", "1px solid red");
+				$valid = false;
+			}
+		}
+
+	
+		if ($valid) {
+			$this->fields->tipo->setNewValue("T");
+
+
+			
+			parent::saveRow();
+		}
+		else
+		{
+			$this->message->setValue("Compilare i campi obbligatori");
+		}
+	}
+	
+	
 
 	function main()
 	{
@@ -147,29 +166,6 @@ class login_database extends P4A_Mask
 		foreach($this->mf as $mf){
 			$this->fields->$mf->unsetStyleProperty("border");
 		}
-	}
-
-	function newRow()
-	{	
-		$db =& p4a_db::singleton();
-
-		$idtabella = $db->queryOne("SELECT MAX(idtable) as idtable FROM login_database");
-		if (is_numeric($idtabella))
-		{
-			$idtabella++;
-		}
-		else
-		{
-			$idtabella = 1 ;
-		}
-		
-		
-		parent::newRow();
-
-		$this->fields->prefix->setNewValue($p4a->e3g_prefix);
-				
-		$this->fields->idtable->setnewValue($idtabella);
-		
 	}
 
 

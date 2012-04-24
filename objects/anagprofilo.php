@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2012
+ * Copyright (C) 2003-2009
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -39,19 +39,19 @@ class anagprofilo extends P4A_Mask
     // -------------------------------------------------------------------------
 	{
 		$this->p4a_mask();
-		$this->addCss( E3G_TEMPLATE_DIR . 'css/style.css' );
+		$this->addCss(E3G_TEMPLATE_DIR . 'css/style.css');
 		$p4a =& p4a::singleton();
 
-		$this->setTitle( "Profilo personale" );
+		$this->setTitle("Profilo personale");
 		$this->setIcon( "personal" );
 	
 		// Sorgente dati principale
-		$this->build( "p4a_db_source", "ds_anagr" );
-		$this->ds_anagr->setTable( $p4a->e3g_prefix."anagrafiche" );
-		$this->ds_anagr->setWhere( "codice = '$p4a->e3g_utente_codice'" );
-		$this->ds_anagr->setPk( "idanag" );
+		$this->build("p4a_db_source", "ds_anagr");
+		$this->ds_anagr->setTable($p4a->e3g_prefix."anagrafiche");
+		$this->ds_anagr->setWhere("codice ='$p4a->e3g_utente_codice'");
+		$this->ds_anagr->setPk("idanag");
 		$this->ds_anagr->load();
-		$this->setSource( $this->ds_anagr );
+		$this->setSource($this->ds_anagr);
 		$this->ds_anagr->firstRow();
 				
 		// Fields properties
@@ -78,40 +78,30 @@ class anagprofilo extends P4A_Mask
 
 		// ------------------------------------------------- Campi di anagrafica
  		$this->fields->codice->disable(); 
-
 		$this->fields->localita->setLabel( "Localita'" );
-        $this->fields->cap->setLabel( "CAP" );
-        $this->fields->telefono2->setLabel( "Telefono alternativo" );
+                $this->fields->fax->setLabel( "Telefono cellulare" );
 		
         $this->fields->descrizione->setWidth( 250 );
         $this->fields->indirizzo->setWidth( 250 );
-        $this->fields->cap->setWidth( 50 );
 
 		//Fieldset con l'elenco dei campi ANAGRAFICA
 		$fs_anagrafica =& $this->build( "p4a_fieldset", "fs_anagrafica" );
 		$fs_anagrafica->setTitle( "Dati anagrafici" );
-        $fs_anagrafica->setWidth( E3G_FIELDSET_DATI_WIDTH );
 
  		$fs_anagrafica->anchor( $this->fields->codice );
 		$fs_anagrafica->anchor( $this->fields->Titolo );
-
 		$fs_anagrafica->anchor( $this->fields->nome );
 		$fs_anagrafica->anchorLeft( $this->fields->cognome );
 		$fs_anagrafica->anchor( $this->fields->descrizione );
-
 		$fs_anagrafica->anchor( $this->fields->indirizzo );
-        $fs_anagrafica->anchorLeft( $this->fields->localita );
-		
-        $fs_anagrafica->anchor( $this->fields->cap );
-        $fs_anagrafica->anchorLeft( $this->fields->comune );
+		$fs_anagrafica->anchor( $this->fields->cap );
+ 		$fs_anagrafica->anchorLeft( $this->fields->localita );
  		$fs_anagrafica->anchorLeft( $this->fields->provincia );
-
-        $fs_anagrafica->anchor( $this->fields->telefono );
-        $fs_anagrafica->anchorLeft( $this->fields->telefono2 );
-        $fs_anagrafica->anchorLeft( $this->fields->cellulare );
-
- 		$fs_anagrafica->anchor( $this->fields->fax );
+ 		$fs_anagrafica->anchor( $this->fields->telefono );
+ 		$fs_anagrafica->anchorLeft( $this->fields->fax );
 		
+		$fs_anagrafica->setWidth( E3G_FIELDSET_DATI_WIDTH );
+
 
         // ----------------------------------------------- Dati fiscali GestiGAS
         $this->fields->data_nascita->setLabel("Data di nascita");
@@ -131,7 +121,7 @@ class anagprofilo extends P4A_Mask
         // ---------------------------------------------------------- Altri dati
 		$this->build( "p4a_db_source", "ds_luoghi_cons" );
 		$this->ds_luoghi_cons->setTable( "_luoghi_cons" );
-		$this->ds_luoghi_cons->setWhere( "prefix = '" . $p4a->e3g_prefix . "' or id_luogo_cons = 0" );
+		$this->ds_luoghi_cons->setWhere( "prefix = '" . $p4a->e3g_prefix . "'" );
 		$this->ds_luoghi_cons->setPk( "id_luogo_cons" );
 		$this->ds_luoghi_cons->load();
 		

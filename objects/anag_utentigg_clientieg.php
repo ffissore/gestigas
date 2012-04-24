@@ -4,7 +4,7 @@
  *   Software gestionali per l'economia solidale
  *   <http://www.progettoe3g.org>
  *
- * Copyright (C) 2003-2012
+ * Copyright (C) 2003-2009
  *   Andrea Piazza <http://www.andreapiazza.it>
  *   Marco Munari  <http://www.marcomunari.it>
  *
@@ -88,10 +88,7 @@ class anag_utentigg_clientieg extends P4A_Mask
 		// Altri db source -----------------------------------------------------
 		$this->build("p4a_db_source", "ds_tipo");
 		$this->ds_tipo->setTable("_login_tipo_utente");
-        if ( $p4a->e3g_utente_tipo == "A" )  // Solo il super-admin può vedere e impostare anche il tipo "super-admin"
-            $this->ds_tipo->setWhere( "codice IN ('A', 'AS', 'R', 'U')" );
-        else
-            $this->ds_tipo->setWhere( "codice IN      ('AS', 'R', 'U')" );
+		$this->ds_tipo->setWhere("codice IN ('AS', 'R', 'U', 'A')");
 		$this->ds_tipo->setPk("codice");
 		$this->ds_tipo->load();
 		
@@ -243,14 +240,12 @@ class anag_utentigg_clientieg extends P4A_Mask
 		//------------------------------------------------------ Dati anagrafici
 		$this->fields->codice->disable();
 
-        $this->fields->localita->setLabel( "Localita'" );
-        $this->fields->cap->setLabel( "CAP" );
-        $this->fields->telefono2->setLabel( "Telefono alternativo" );
-
         $this->fields->descrizione->setWidth( 250 );
         $this->fields->indirizzo->setWidth( 250 );
-        $this->fields->cap->setWidth( 50 );
         
+		$this->fields->cap->setLabel( "CAP" );
+		$this->fields->localita->setLabel( "Localita'" );
+
 		//Fieldset con l'elenco dei campi
 		$fs_anagrafica =& $this->build("p4a_fieldset", "fs_anagrafica");
 		$fs_anagrafica->setTitle("Dati anagrafici");
@@ -258,23 +253,15 @@ class anag_utentigg_clientieg extends P4A_Mask
 
  		$fs_anagrafica->anchor($this->fields->codice);
 		$fs_anagrafica->anchor($this->fields->Titolo);
-
-		$fs_anagrafica->anchor( $this->fields->nome );
-		$fs_anagrafica->anchorLeft( $this->fields->cognome );
-		$fs_anagrafica->anchor( $this->fields->descrizione );
-
-		$fs_anagrafica->anchor( $this->fields->indirizzo );
-        $fs_anagrafica->anchorLeft( $this->fields->localita );
-
-		$fs_anagrafica->anchor( $this->fields->cap );
-        $fs_anagrafica->anchorLeft( $this->fields->comune );
- 		$fs_anagrafica->anchorLeft( $this->fields->provincia );
-
-        $fs_anagrafica->anchor( $this->fields->telefono );
-        $fs_anagrafica->anchorLeft( $this->fields->telefono2 );
-        $fs_anagrafica->anchorLeft( $this->fields->cellulare );
-
- 		$fs_anagrafica->anchorLeft( $this->fields->fax );
+		$fs_anagrafica->anchor($this->fields->nome);
+		$fs_anagrafica->anchorLeft($this->fields->cognome);
+		$fs_anagrafica->anchor($this->fields->descrizione);
+		$fs_anagrafica->anchor($this->fields->indirizzo);
+		$fs_anagrafica->anchor($this->fields->cap);
+ 		$fs_anagrafica->anchorLeft($this->fields->localita);
+ 		$fs_anagrafica->anchorLeft($this->fields->provincia);
+ 		$fs_anagrafica->anchor($this->fields->telefono);
+ 		$fs_anagrafica->anchorLeft($this->fields->fax);
 		
 		if ( E3G_TIPO_GESTIONE == 'G' ) {
             ;			
@@ -308,7 +295,7 @@ class anag_utentigg_clientieg extends P4A_Mask
 		// ---------------------------------------------------------- Altri dati
         $this->build( "p4a_db_source", "ds_luoghi_cons" );
         $this->ds_luoghi_cons->setTable( "_luoghi_cons" );
-        $this->ds_luoghi_cons->setWhere( "prefix = '" . $p4a->e3g_prefix . "' OR id_luogo_cons = 0" );
+        $this->ds_luoghi_cons->setWhere( "prefix = '" . $p4a->e3g_prefix . "'" );
         $this->ds_luoghi_cons->setPk( "id_luogo_cons" );
         $this->ds_luoghi_cons->load();
         
