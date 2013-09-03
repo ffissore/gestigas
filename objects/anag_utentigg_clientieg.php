@@ -785,7 +785,7 @@ class anag_utentigg_clientieg extends P4A_Mask
 		  				$this->message->setValue( "Si e' verificato un errore durante la spedizione della notifica di abilitazione." );
 		  			}
 		  			else {
-						function inviaNotificaAttivazioneAgliAdmin($db, $oggetto, $corpo, $email, $nomecognome) {
+						function inviaNotificaAttivazioneAgliAdmin($db, $oggetto, $email, $nomecognome) {
 							$aziende = $db->getAll( "SELECT prefix FROM _aziende " ); 
 							foreach ( $aziende as $azienda ) {
 								$sql_text = 
@@ -803,10 +803,34 @@ class anag_utentigg_clientieg extends P4A_Mask
 						}
 
 
-						inviaNotificaAttivazioneAgliAdmin($db, "$p4a->e3g_nome_sw: conferma abilitazione accesso", $corpo, $email, "$nome $cognome");
+						inviaNotificaAttivazioneAgliAdmin($db, "$p4a->e3g_nome_sw: conferma abilitazione accesso", $email, "$nome $cognome");
 						$this->message->setIcon( "info" );
 						$this->message->setValue( "Notifica di abilitazione inviata all'utente $nome $cognome." );
 		  			}
+				} elseif ( !$this->newrecord and ( $this->fields->stato->getValue() == 1 ) and ( $this->fields->stato->getNewValue() == 2 ) ) {   // da "abilitato" a "disabilitato"
+					function inviaNotificaAttivazioneAgliAdmin($db, $oggetto, $email, $nomecognome) {
+						$aziende = $db->getAll( "SELECT prefix FROM _aziende " ); 
+						foreach ( $aziende as $azienda ) {
+							$sql_text = 
+								"SELECT descrizione, email FROM " . $azienda["prefix"] . "anagrafiche " .
+								" WHERE tipocfa = 'C' AND stato = 1 AND tipoutente = 'AS'";
+
+							$records = $db->getAll( $sql_text );
+							if ( !empty($records) ) {
+								foreach ( $records as $record ) {
+									e3g_invia_email( $oggetto, "Ciao " . $record["descrizione"] . "\n\nLa presente per informarti che l'account di $nomecognome (email $email) e' stato disabilitato", $record["email"], $nomecognome );
+									sleep( 0.5 );
+								}
+							}
+						}
+					}
+
+					$nome    = $this->fields->nome->getNewValue();
+					$cognome = $this->fields->cognome->getNewValue();
+					$email   = $this->fields->email->getNewValue();
+
+					inviaNotificaAttivazioneAgliAdmin($db, "$p4a->e3g_nome_sw: conferma disabilitazione", $email, "$nome $cognome");
+
 				}
 			}
             
